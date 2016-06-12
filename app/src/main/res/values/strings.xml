@@ -1,0 +1,64 @@
+<resources>
+    <string name="external_dir" translatable="false">GetSignature</string>
+
+    <string name="app_name">Colector</string>
+    <string name="common_internet_not_available">Requiere una conexión a internet para ejecutar esta acción</string>
+    <string name="common_cancel">Cancelar</string>
+
+    <string name="login_error_empty">Debe ingresar un nombre de usuario y contraseña</string>
+    <string name="login_offline_message">Desea Trabajar Sin Conexion?</string>
+    <string name="login_offline_ok">Continuar...</string>
+    <string name="login_offline_message_den">Debe tener internet, para poder validar inicialmente.</string>
+    <string name="login_unknown_user_dao">Colector sin Conexion, internet para validar usuario.</string>
+
+    <string name="generalProgressDialogMessage">Cargando...</string>
+
+    <string name="survey_back">Existen cambios no guardados en este formulario. ¿Quiere descartarlos?</string>
+    <string name="survey_back_discard">Descartar</string>
+
+    <string name="survey_delete_ok">Encuesta Eliminada, ID: \'%1$s\'</string>
+
+    <string name="survey_modify_ok">Encuesta Modificada ID: \'%1$s\'</string>
+
+    <string name="survey_save_error">Oops! Ocurrio un problema intente mas tarde</string>
+    <string name="survey_save_ok">Encuesta Guardada ID: \'%1$s\'</string>
+    <string name="survey_save_send_error">Error desconocido, contacte al administrados!</string>
+    <string name="survey_save_send_ok">Encuesta sincronizada!</string>
+    <string name="survey_save_error_field">Debe diligenciar todos los campos</string>
+    <string name="survey_save">Guardar</string>
+    <string name="survey_search">Buscar</string>
+
+    <string name="action_settings">Configuraciones</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_survey">SurveyActivity</string>
+
+    <string name="hello_world">Hola MUNDO!</string>
+    <string name="login_user">Usuario</string>
+    <string name="login_pwd">Contraseña</string>
+    <string name="login_sign_in">INGRESAR</string>
+    <string name="survey_surveys">FORMULARIOS DISPONIBLES</string>
+    <string name="survey_survyes_done">FORMULARIOS DILIGENCIADOS</string>
+    <string name="survey_delete_dialog_title">Desea Eliminar la Imagen?</string>
+    <string name="common_erase">Eliminar</string>
+    <string name="title_activity_maps">Mapa</string>
+    <string name="common_clear">Limpiar</string>
+    <string name="common_save">Guardar</string>
+    <string name="signature_sign">Por Favor Firmar...</string>
+    <string name="survey_reload">Descargar Nuevos Formularios?</string>
+    <string name="common_ok">Aceptar</string>
+    <string name="survey_allupload">Enviar Todos Los Formularios Diligenciados?</string>
+    <string name="message_surveydone_uplaoded">Formularios Enviados...</string>
+    <string name="message_surveydone_pending">Formualarios Pendientes por Enviar...</string>
+    <string name="survey_alldelete">Eliminar Registro de Enviados?</string>
+    <string name="survey_survyes_uploaded">FORMULARIOS ENVIADOS</string>
+    <string name="ans_message_delete_survey_done">Desea Eliminar del Todo el Formulario ya Enviado?</string>
+    <string name="ans_message_delete_survey_undone">Desea Eliminar Formulario sin Enviar?</string>
+    <string name="survey_save_alert_title">Guardar Formulario</string>
+    <string name="survey_save_alert_msg">Deseas Guardar Formulario?</string>
+    <string name="survey_saving">Guardando</string>
+    <string name="survey_saving_msg">Almacenando Formulario</string>
+    <string name="main_list_title">Cargando</string>
+    <string name="main_list_msg">Leyendo Listado</string>
+</resources>

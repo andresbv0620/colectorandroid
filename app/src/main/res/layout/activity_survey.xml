@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="colector.co.com.collector.SurveyActivity"
+    android:padding="20dp"
+    android:background="@color/background_color">
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:id="@+id/container_employee_information"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:id="@+id/survey_contaniner"
+                android:layout_height="match_parent">
+
+            </LinearLayout>
+        </ScrollView>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="1dp"
+            android:clickable="true"
+            android:src="@drawable/map_marker"
+            app:layout_anchor="@id/survey_contaniner"
+            app:layout_anchorGravity="top|right"
+            app:backgroundTint="#1C28AB"
+            app:rippleColor="#FFF" />
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabsave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="1dp"
+        android:clickable="true"
+        android:src="@drawable/ic_upload"
+        app:layout_anchor="@id/survey_contaniner"
+        app:layout_anchorGravity="bottom|right"
+        app:backgroundTint="#1C28AB"
+        app:rippleColor="#FFF" />
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</LinearLayout>
