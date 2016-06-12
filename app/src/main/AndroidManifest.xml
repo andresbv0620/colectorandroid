@@ -21,6 +21,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".ColectorApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
@@ -72,6 +73,9 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" >
         </activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="d4313a8130b1fc3a3c6e33d42528d471bcb7945d" />
     </application>
 
 </manifest>

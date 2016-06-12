@@ -11,6 +11,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import java.util.List;
 
 import colector.co.com.collector.http.AsyncResponse;
@@ -89,6 +91,7 @@ AIzaSyCmkE1o0S3r0V0JtQONo8P7Oz1L9nObAAE
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_login);
         UUID = Utilities.getUUID(this);
 
