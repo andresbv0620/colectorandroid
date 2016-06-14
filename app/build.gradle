@@ -21,6 +21,13 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
 
+    dexOptions {
+        incremental true
+        preDexLibraries true
+        maxProcessCount 2
+        javaMaxHeapSize "2g"
+    }
+
     defaultConfig {
         applicationId "colector.co.com.collector"
         minSdkVersion 15
