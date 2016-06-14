@@ -11,4 +11,18 @@
         <item name="colorAccent">@color/accent</item>
     </style>
 
+    <!--Circular ProgressView-->
+    <style name="CircularProgressView" parent="Material.Widget.ProgressView">
+        <item name="android:layout_height">@dimen/loading_size</item>
+        <item name="android:layout_width">@dimen/loading_size</item>
+        <item name="android:layout_centerInParent">true</item>
+        <item name="cpd_strokeColor">@color/loading</item>
+        <item name="pv_autostart">true</item>
+        <item name="pv_circular">true</item>
+        <item name="pv_progressMode">indeterminate</item>
+        <item name="pv_progressStyle">@style/Material.Drawable.CircularProgress</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+
 </resources>
