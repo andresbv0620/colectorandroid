@@ -83,6 +83,7 @@ import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
 import colector.co.com.collector.utils.ImageUtils;
+import colector.co.com.collector.views.SectionItemView;
 
 import static android.graphics.Color.parseColor;
 
@@ -121,6 +122,7 @@ public class SurveyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
         loading.setVisibility(View.VISIBLE);
+        setTitle(surveys.getForm_name());
         setupGPS();
         configureGPSButton();
         configureSaveButton();
@@ -549,15 +551,12 @@ public class SurveyActivity extends AppCompatActivity {
 
 
     private void buildSurvey() {
-        // Print survey name
-        setTitle(surveys.getForm_name());
+        container.removeAllViews();
         for (Section section : surveys.getSections()) {
-            LinearLayout linear = new LinearLayout(this);
-            linear.setOrientation(LinearLayout.VERTICAL);
-            setLayoutParams(linear);
-            linear.addView(buildSeparator());
-            linear.addView(buildTextViewSections(section.getName()));
-            buildSection(section, linear);
+            SectionItemView sectionItem = new SectionItemView(this);
+            sectionItem.bind(section.getName());
+            buildSection(section, sectionItem.sectionItemsContainer);
+            container.addView(sectionItem);
         }
         loading.setVisibility(View.GONE);
     }
