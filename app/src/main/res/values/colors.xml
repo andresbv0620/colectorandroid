@@ -6,4 +6,6 @@
     <color name="primary_dark">#159FAC</color>
     <color name="accent">#159FAC</color>
     <color name="loading">@color/accent</color>
+    <color name="section_title_background_color">#E6E6E6</color>
+    <color name="vertical_separator_color">#5B5B5B</color>
 </resources>
