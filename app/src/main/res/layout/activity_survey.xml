@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -54,6 +54,7 @@
 
     <com.rey.material.widget.ProgressView
         android:id="@+id/loading"
-        style="@style/CircularProgressView" />
+        style="@style/CircularProgressView"
+        tools:visibility="visible" />
 
-</FrameLayout>
+</RelativeLayout>

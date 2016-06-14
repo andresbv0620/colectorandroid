@@ -63,6 +63,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.OptionAdapter;
 import colector.co.com.collector.adapters.SurveyAdapterMultipleType;
 import colector.co.com.collector.adapters.SurveyAdapterOptionalType;
@@ -86,16 +88,21 @@ import static android.graphics.Color.parseColor;
 
 public class SurveyActivity extends AppCompatActivity {
     FindGPSLocation gps;
-    private ArrayList<LinearLayout> pictureLayouts;
-    private LinearLayout container;
+    private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
     private boolean isModify = false;
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int REQUEST_TAKE_MAPSGPS = 2;
     public static final int REQUEST_TAKE_SIGNATURE = 3;
 
+    @BindView(R.id.fab)
     FloatingActionButton FABGPS;
+    @BindView(R.id.fabsave)
     FloatingActionButton FABSAVE;
+    @BindView(R.id.survey_container)
+    LinearLayout container;
+    @BindView(R.id.loading)
+    View loading;
 
     ProgressDialog progress;
 
@@ -112,68 +119,53 @@ public class SurveyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
+        ButterKnife.bind(this);
+        loading.setVisibility(View.VISIBLE);
+        setupGPS();
+        configureGPSButton();
+        configureSaveButton();
+        configureInitTime();
+        buildSurvey();
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
 
 
-        container = (LinearLayout) findViewById(R.id.survey_contaniner);
-        pictureLayouts = new ArrayList<LinearLayout>();
-
-
-        String latitude = "0.0";
-        String longitude = "0.0";
+    private void setupGPS() {
         gps = new FindGPSLocation(this);
-        if (gps.canGetLocation()) {
-            latitude = "" + gps.getLatitude();
-            longitude = "" + gps.getLongitude();
-            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-        } else {
-            //gps.showSettingsAlert();
-        }
-
-        //Llamado a Maps
-        final String latitudeMaps = latitude;
-        final String longitudeMaps = longitude;
-
-        FABGPS = (FloatingActionButton) findViewById(R.id.fab);
         FABGPS.setVisibility(View.INVISIBLE);
+
+    }
+
+    private void configureGPSButton() {
         FABGPS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "MAPS WITH - \nLat: " + latitudeMaps + "\nLong: " + longitudeMaps, Toast.LENGTH_LONG).show();
-                mapGPSIntent(longitudeMaps, latitudeMaps);
+                if (gps != null && gps.canGetLocation()) {
+                    mapGPSIntent(String.valueOf(gps.getLongitude()), String.valueOf(gps.getLatitude()));
+                }
             }
         });
+        ;
+    }
 
-        FABSAVE = (FloatingActionButton) findViewById(R.id.fabsave);
+    private void configureSaveButton() {
         FABSAVE.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 threadSaveModulo();
             }
         });
-
-
-        //envia el timeStamp de inicio de survery
-        timeStandIni = System.currentTimeMillis() / 1000;
-
-        buildSurvey();
-
-
-        /* //BOTON DE ALMACENMIENTO EN SECCION.
-        container.addView(buildButton(getString(R.string.survey_save), new View.OnClickListener() {
-            @Override
-                public void onClick(View v) {
-                threadSaveModulo();
-            }
-        }));
-        */
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    private void threadSaveModulo(){
-        AlertDialog show = new AlertDialog.Builder(SurveyActivity.this)
+    /**
+     * Time stand to init survey
+     */
+    private void configureInitTime() {
+        timeStandIni = System.currentTimeMillis() / 1000;
+    }
+
+    private void threadSaveModulo() {
+        new AlertDialog.Builder(SurveyActivity.this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setMessage(R.string.survey_save_alert_msg)
                 .setPositiveButton(getString(R.string.survey_save), new DialogInterface.OnClickListener() {
@@ -184,18 +176,16 @@ public class SurveyActivity extends AppCompatActivity {
 
                         new Thread(new Runnable() {
                             @Override
-                            public void run()
-                            {
+                            public void run() {
                                 processSave();
 
                                 runOnUiThread(new Runnable() {
                                     @Override
-                                    public void run()
-                                    {
+                                    public void run() {
                                         try {
                                             progress.dismiss();
                                             Toast.makeText(getApplicationContext(), msgSaved, Toast.LENGTH_LONG).show();
-                                        }catch (Exception e){
+                                        } catch (Exception e) {
                                             Toast.makeText(getApplicationContext(), "Progress " + e.getMessage(), Toast.LENGTH_LONG).show();
                                         }
                                     }
@@ -211,10 +201,11 @@ public class SurveyActivity extends AppCompatActivity {
 
 
     String msgSaved;
-    private void processSave(){
+
+    private void processSave() {
         msgSaved = "Inicia proceos de guardado";
         boolean isValid = true;
-        boolean validationCases=true;
+        boolean validationCases = true;
         SurveySave toInsert = new SurveySave();
 
         for (int i = 0; i < container.getChildCount(); i++) {
@@ -253,7 +244,7 @@ public class SurveyActivity extends AppCompatActivity {
         msgSaved = "valida respuestas";
         for (int vv = 0; vv < toInsert.getResponses().size(); vv++) {
             try {
-                double sums=0;
+                double sums = 0;
                 boolean operaFlag = false;
                 if (!toInsert.getResponses().get(vv).getValidation().equalsIgnoreCase("")) {
                     if (toInsert.getResponses().get(vv).getValidation().contains("(")) {
@@ -308,7 +299,7 @@ public class SurveyActivity extends AppCompatActivity {
                                 ;
                             else {
                                 //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases=false;
+                                validationCases = false;
                                 isValid = false;
                             }
                             break;
@@ -317,7 +308,7 @@ public class SurveyActivity extends AppCompatActivity {
                                 ;
                             else {
                                 //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases=false;
+                                validationCases = false;
                                 isValid = false;
                             }
                             break;
@@ -326,7 +317,7 @@ public class SurveyActivity extends AppCompatActivity {
                                 ;
                             else {
                                 //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases=false;
+                                validationCases = false;
                                 isValid = false;
                             }
                             break;
@@ -335,7 +326,7 @@ public class SurveyActivity extends AppCompatActivity {
                                 ;
                             else {
                                 //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases=false;
+                                validationCases = false;
                                 isValid = false;
                             }
                             break;
@@ -344,24 +335,21 @@ public class SurveyActivity extends AppCompatActivity {
                                 ;
                             else {
                                 //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases=false;
+                                validationCases = false;
                                 isValid = false;
                             }
                             break;
                         default:
-                            validationCases=false;
+                            validationCases = false;
                             isValid = false;
                             break;
                     }
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 isValid = false;
                 //validacion o valores erroneos
             }
         }
-
-
-
 
 
         if (isValid) {
@@ -423,7 +411,7 @@ public class SurveyActivity extends AppCompatActivity {
                     msgSaved = getString(R.string.survey_save_ok, String.valueOf(result));
                 } else {
                     //Toast.makeText(SurveyActivity.this, getString(R.string.survey_modify_ok, String.valueOf(result)), Toast.LENGTH_LONG).show();
-                    msgSaved =getString(R.string.survey_modify_ok, String.valueOf(result));
+                    msgSaved = getString(R.string.survey_modify_ok, String.valueOf(result));
                 }
                 finish();
             } else {
@@ -434,7 +422,7 @@ public class SurveyActivity extends AppCompatActivity {
             //Toast.makeText(SurveyActivity.this, getString(R.string.survey_save_error_field), Toast.LENGTH_LONG).show();
             if (!validationCases)
                 msgSaved = "Validation Field Case Error - ";
-            msgSaved +=  getString(R.string.survey_save_error_field);
+            msgSaved += getString(R.string.survey_save_error_field);
         }
     }
 
@@ -454,13 +442,13 @@ public class SurveyActivity extends AppCompatActivity {
         Boolean defecto_previo;
         Boolean requerido = false;
         String validacion = "";
-        String defecto= "";
+        String defecto = "";
         String solo_lectura = "";
         String oculto = "";
         //String orden = "";
 
         //Se recuperan las caracteristicas del tipo de Entrada
-        if (id_Questions!=null) {
+        if (id_Questions != null) {
             for (Section section : surveys.getSections()) {
                 for (Question question : section.getInputs()) {
                     if (id_Questions == question.getId()) {
@@ -469,11 +457,11 @@ public class SurveyActivity extends AppCompatActivity {
                         max = question.getMax();
                         defecto_previo = question.getDefectoPrevio();
                         requerido = question.getRequerido();
-                        if (requerido==null)
-                            requerido=false;
+                        if (requerido == null)
+                            requerido = false;
                         validacion = question.getValidacion();
-                        if (validacion==null)
-                            validacion="";
+                        if (validacion == null)
+                            validacion = "";
                     }
                 }
             }
@@ -483,17 +471,17 @@ public class SurveyActivity extends AppCompatActivity {
 
         if (view instanceof EditText) {
             EditText toProcess = (EditText) view;
-            if (toProcess != null && !toProcess.getText().toString().isEmpty() && toProcess.getVisibility() == View.VISIBLE){
+            if (toProcess != null && !toProcess.getText().toString().isEmpty() && toProcess.getVisibility() == View.VISIBLE) {
                 mapValidation.put(toProcess.getTag().toString(), toProcess.getText().toString());
 
-                arrayResponse.add(new IdValue((Long) toProcess.getTag(), toProcess.getText().toString(),validacion));
+                arrayResponse.add(new IdValue((Long) toProcess.getTag(), toProcess.getText().toString(), validacion));
             } else {
                 if (requerido && toProcess.getVisibility() == View.VISIBLE)
                     return false;
-                else if (requerido && toProcess.getVisibility() == View.INVISIBLE){
+                else if (requerido && toProcess.getVisibility() == View.INVISIBLE) {
                     toProcess.setText("");
                     mapValidation.put(toProcess.getTag().toString(), toProcess.getText().toString());
-                    arrayResponse.add(new IdValue((Long) toProcess.getTag(), toProcess.getText().toString(),validacion));
+                    arrayResponse.add(new IdValue((Long) toProcess.getTag(), toProcess.getText().toString(), validacion));
                 }
             }
 
@@ -508,7 +496,7 @@ public class SurveyActivity extends AppCompatActivity {
                 if (lstSelectedValues.size() > 0) {
 
                     for (IdOptionValue item : lstSelectedValues) {
-                        arrayResponse.add(new IdValue((Long) toProcess.getTag(), String.valueOf(item.getId()),validacion));
+                        arrayResponse.add(new IdValue((Long) toProcess.getTag(), String.valueOf(item.getId()), validacion));
                     }
                 } else {
                     if (requerido)
@@ -524,7 +512,7 @@ public class SurveyActivity extends AppCompatActivity {
             if (toProcess != null && toProcess.getVisibility() == View.VISIBLE) {
                 try {
                     arrayResponse.add(new IdValue((Long) toProcess.getTag(), String.valueOf(((IdOptionValue) toProcess.getSelectedItem()).getId()), validacion));
-                }catch(Exception e){
+                } catch (Exception e) {
                     msgSaved += " Input empty - ID " + id_Questions;
                     if (requerido && toProcess.getVisibility() == View.VISIBLE)
                         return false;
@@ -532,8 +520,8 @@ public class SurveyActivity extends AppCompatActivity {
             } else {
                 if (requerido && toProcess.getVisibility() == View.VISIBLE)
                     return false;
-                else if (requerido && toProcess.getVisibility() == View.INVISIBLE){
-                    arrayResponse.add(new IdValue((Long) toProcess.getTag(), "",validacion));
+                else if (requerido && toProcess.getVisibility() == View.INVISIBLE) {
+                    arrayResponse.add(new IdValue((Long) toProcess.getTag(), "", validacion));
                 }
             }
 
@@ -548,7 +536,7 @@ public class SurveyActivity extends AppCompatActivity {
                     ImageView toProcess = (ImageView) toProcessLinear.getChildAt(k);
                     if (toProcess != null && toProcess.getDrawable() != null) {
                         String base64 = getEncoded64ImageStringFromBitmap(((BitmapDrawable) toProcess.getDrawable()).getBitmap());
-                        arrayResponse.add(new IdValue(idQuestion, base64,validacion));
+                        arrayResponse.add(new IdValue(idQuestion, base64, validacion));
                     } else {
                         if (requerido)
                             return false;
@@ -571,43 +559,44 @@ public class SurveyActivity extends AppCompatActivity {
             linear.addView(buildTextViewSections(section.getName()));
             buildSection(section, linear);
         }
+        loading.setVisibility(View.GONE);
     }
 
     private void buildSection(Section section, LinearLayout linear) {
         for (Question question : section.getInputs()) {
-            buildQuestion(  question.getName(), question.getId(), question.getType(),
-                    question.getMin(),question.getMax(),question.getDefectoPrevio(),
-                    question.getRequerido(),question.getValidacion(),question.getDefecto(),
+            buildQuestion(question.getName(), question.getId(), question.getType(),
+                    question.getMin(), question.getMax(), question.getDefectoPrevio(),
+                    question.getRequerido(), question.getValidacion(), question.getDefecto(),
                     question.getResponses(), question.getOptions(), question.getAtributos(),
-                    question.getValorVisibility(),question.getoculto(), linear);
+                    question.getValorVisibility(), question.getoculto(), linear);
         }
 
         try {
             container.addView(linear);
-        }catch(Exception e){
+        } catch (Exception e) {
             Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             Log.i(AppSettings.TAG, ">>>>>>>>>buildQuestion(): " + e);
         }
     }
 
     private void buildQuestion(String label, Long id, int type,
-                               String min,String max,Boolean defectoPrevio,
-                               Boolean  requerido,String Validacio, String defecto,
+                               String min, String max, Boolean defectoPrevio,
+                               Boolean requerido, String Validacio, String defecto,
                                List<IdOptionValue> response, List<ResponseComplex> options, List<ResponseAttribute> atributos,
                                List<QuestionVisibilityRules> ValorVisibility, Boolean oculto, LinearLayout linear) {
 
         //String hintInput = "Min:" + min + " Max:"+ max + "**:" + esRequerido + "Val:" + Validacion;
         if (requerido)
-            label+= "**";
+            label += "**";
 
-        String hintInput =defecto;
+        String hintInput = defecto;
 
         Log.i(AppSettings.TAG, ">>>>>>>>>item.getType(): " + type);
         switch (type) {
             // input text
             case 1:
                 linear.addView(buildTextView(label));
-                linear.addView(buildEditText(id, hintInput, oculto,defectoPrevio));
+                linear.addView(buildEditText(id, hintInput, oculto, defectoPrevio));
                 break;
             // input text multiline
             case 2:
@@ -617,12 +606,12 @@ public class SurveyActivity extends AppCompatActivity {
             // opcion o combobox
             case 3:
                 linear.addView(buildTextView(label));
-                linear.addView(buildSpinner(response, id, oculto,defectoPrevio));
+                linear.addView(buildSpinner(response, id, oculto, defectoPrevio));
                 break;
             // opcion o combobox
             case 4:
                 linear.addView(buildTextView(label));
-                linear.addView(buildSpinner(response, id, oculto,defectoPrevio));
+                linear.addView(buildSpinner(response, id, oculto, defectoPrevio));
                 break;
             //Multiple opcion
             case 5:
@@ -657,7 +646,7 @@ public class SurveyActivity extends AppCompatActivity {
             // numeric input text
             case 8:
                 linear.addView(buildTextView(label));
-                linear.addView(buildEditTextNumeric(id,hintInput, oculto, defectoPrevio));
+                linear.addView(buildEditTextNumeric(id, hintInput, oculto, defectoPrevio));
                 break;
 
             // dynamic form
@@ -678,8 +667,8 @@ public class SurveyActivity extends AppCompatActivity {
                     for (ResponseComplex item : options) {
                         String recordID = item.getRecord_id();
 
-                        if ((defectoPrevio  || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT) &&
-                             recordID.equals(surveys.getAnswer(id))) {
+                        if ((defectoPrevio || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT) &&
+                                recordID.equals(surveys.getAnswer(id))) {
                             toModify = item;
                             break;
                         }
@@ -690,7 +679,7 @@ public class SurveyActivity extends AppCompatActivity {
 
                 if (toModify == null) {
                     for (ResponseAttribute item : atributos) {
-                        buildQuestion(item.getLabel(), item.getInput_id(), item.getType(),null,null,null,null,null,null, item.getResponses(), null, null,null, oculto, toInsertQuestion);
+                        buildQuestion(item.getLabel(), item.getInput_id(), item.getType(), null, null, null, null, null, null, item.getResponses(), null, null, null, oculto, toInsertQuestion);
                     }
                 } else {
                     fillDynamicForm(toModify, toInsertQuestion, id);
@@ -799,15 +788,15 @@ public class SurveyActivity extends AppCompatActivity {
      *
      * @return
      */
-    private EditText buildEditTextNumeric(Long id,String itHint
-                                            , Boolean oculto, Boolean defectoPrevio) {
-        EditText toReturn = buildEditText(id, itHint, oculto,defectoPrevio);
+    private EditText buildEditTextNumeric(Long id, String itHint
+            , Boolean oculto, Boolean defectoPrevio) {
+        EditText toReturn = buildEditText(id, itHint, oculto, defectoPrevio);
         toReturn.setInputType(InputType.TYPE_CLASS_NUMBER);
         return toReturn;
     }
 
     private EditText buildEditTextNumericDecimal(Long id, String itHint
-                                                    , Boolean oculto, Boolean defectoPrevio) {
+            , Boolean oculto, Boolean defectoPrevio) {
         EditText toReturn = buildEditText(id, itHint, oculto, defectoPrevio);
         toReturn.setKeyListener(DigitsKeyListener.getInstance(true, true)); // decimals and positive/negative numbers.
         formatComplejo(toReturn);
@@ -815,7 +804,7 @@ public class SurveyActivity extends AppCompatActivity {
     }
 
 
-    protected void formatComplejo(final EditText et){
+    protected void formatComplejo(final EditText et) {
         et.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -889,7 +878,7 @@ public class SurveyActivity extends AppCompatActivity {
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 (10 * responses.size()));
-                //(50));
+        //(50));
         layoutParams.setMargins(30, 30, 30, 30);
 
         toReturn.setLayoutParams(layoutParams);
@@ -1023,7 +1012,7 @@ public class SurveyActivity extends AppCompatActivity {
     /**
      * VISIBILITY RULES EDITTEXT
      */
-    protected void visibilityRulesEditText(final EditText et){
+    protected void visibilityRulesEditText(final EditText et) {
         et.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -1044,7 +1033,7 @@ public class SurveyActivity extends AppCompatActivity {
     /**
      * VISIBILITY RULES SPINNER
      */
-    protected void visibilityRulesSpinner(final Spinner et, final Long tagSpin){
+    protected void visibilityRulesSpinner(final Spinner et, final Long tagSpin) {
         et.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView parent, View view, int position, long id) {
@@ -1108,7 +1097,7 @@ public class SurveyActivity extends AppCompatActivity {
         for (Section section : surveys.getSections()) {
             for (Question question : section.getInputs()) {
                 for (QuestionVisibilityRules questionVisibilityRules : question.getValorVisibility()) {
-                    if (questionVisibilityRules.getElemento()==evaTag) {
+                    if (questionVisibilityRules.getElemento() == evaTag) {
                         //Casos de comparacion numerica
                         if (questionVisibilityRules.getOperador().equalsIgnoreCase(("mayor_que")) &&
                                 questionVisibilityRules.getOperador().equalsIgnoreCase(("menor_que")) &&
@@ -1122,14 +1111,14 @@ public class SurveyActivity extends AppCompatActivity {
                             else
                                 visibilityRulesObjets(question.getId(), false);
 
-                        //Casos de comparacion Caracter
+                            //Casos de comparacion Caracter
                         } else if ((questionVisibilityRules.getOperador().equalsIgnoreCase(("igual_a")) &&
                                 evaInfo.trim().equalsIgnoreCase(questionVisibilityRules.getValor().toString().trim()))
                                 ||
                                 (questionVisibilityRules.getOperador().equalsIgnoreCase(("no_igual_a")) &&
                                         !evaInfo.trim().equalsIgnoreCase(questionVisibilityRules.getValor().toString().trim()))
                                 ||
-                                ((questionVisibilityRules.getOperador().equalsIgnoreCase(("contiene"))|| questionVisibilityRules.getOperador().equalsIgnoreCase(("empieza_con"))) &&
+                                ((questionVisibilityRules.getOperador().equalsIgnoreCase(("contiene")) || questionVisibilityRules.getOperador().equalsIgnoreCase(("empieza_con"))) &&
                                         evaInfo.trim().contains(questionVisibilityRules.getValor().toString().trim()))
                                 ||
                                 (questionVisibilityRules.getOperador().equalsIgnoreCase(("es_vacio")) &&
@@ -1147,6 +1136,7 @@ public class SurveyActivity extends AppCompatActivity {
         }
         return false;
     }
+
     private boolean visibilityRulesObjets(Long elemento, boolean isVisible) {
         for (int i = 0; i < container.getChildCount(); i++) {
             if (container.getChildAt(i) instanceof LinearLayout && container.getChildAt(i).getTag() == null) {
@@ -1162,30 +1152,29 @@ public class SurveyActivity extends AppCompatActivity {
         return false;
     }
 
-    private boolean visibilityRulesAction(LinearLayout toFindObjet,int child, Long elemento, boolean isVisible) {
+    private boolean visibilityRulesAction(LinearLayout toFindObjet, int child, Long elemento, boolean isVisible) {
 
         if (toFindObjet.getChildAt(child) instanceof EditText) {
-            TextView toEvalueVisibilityLabel = (TextView) toFindObjet.getChildAt(child-1);
+            TextView toEvalueVisibilityLabel = (TextView) toFindObjet.getChildAt(child - 1);
             EditText toEvalueVisibilityInput = (EditText) toFindObjet.getChildAt(child);
 
             if (elemento == toEvalueVisibilityInput.getTag()) {
-                if (isVisible){
+                if (isVisible) {
                     toEvalueVisibilityLabel.setVisibility(View.VISIBLE);
                     toEvalueVisibilityInput.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     toEvalueVisibilityLabel.setVisibility(View.GONE);
                     toEvalueVisibilityInput.setVisibility(View.GONE);
                 }
             }
-        }
-        else if (toFindObjet.getChildAt(child) instanceof Spinner) {
-            TextView toEvalueVisibilityLabel = (TextView) toFindObjet.getChildAt(child-1);
+        } else if (toFindObjet.getChildAt(child) instanceof Spinner) {
+            TextView toEvalueVisibilityLabel = (TextView) toFindObjet.getChildAt(child - 1);
             Spinner toEvalueVisibilityInput = (Spinner) toFindObjet.getChildAt(child);
             if (elemento == toEvalueVisibilityInput.getTag()) {
-                if (isVisible){
+                if (isVisible) {
                     toEvalueVisibilityLabel.setVisibility(View.VISIBLE);
                     toEvalueVisibilityInput.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     toEvalueVisibilityLabel.setVisibility(View.GONE);
                     toEvalueVisibilityInput.setVisibility(View.GONE);
                 }
@@ -1305,7 +1294,7 @@ public class SurveyActivity extends AppCompatActivity {
         setLayoutParams(toInsertQuestion);
 
 
-        linear.setTag(new IdValue(idQuestion, option.getRecord_id(),null));
+        linear.setTag(new IdValue(idQuestion, option.getRecord_id(), null));
         for (ResponseItem data : option.getResponses()) {
             TextView toInsert = new TextView(SurveyActivity.this);
             toInsert.setText(data.getLabel() + ": " + data.getValue());
@@ -1434,7 +1423,7 @@ public class SurveyActivity extends AppCompatActivity {
         intent.putExtra("Longitude", Longitude);
         intent.putExtra("Latitude", Latitude);
 
-        startActivityForResult(intent,REQUEST_TAKE_MAPSGPS);
+        startActivityForResult(intent, REQUEST_TAKE_MAPSGPS);
     }
 
 
@@ -1512,7 +1501,7 @@ public class SurveyActivity extends AppCompatActivity {
             if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
                 setPic(AppSession.getInstance().getCurrentPhotoPath());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "ConfigureCamera Err=" + e, Toast.LENGTH_LONG).show();
         }
 
@@ -1521,17 +1510,17 @@ public class SurveyActivity extends AppCompatActivity {
             if (requestCode == REQUEST_TAKE_MAPSGPS && resultCode == Activity.RESULT_OK) {
                 Toast.makeText(getApplicationContext(), "AQUI ACCION GPS", Toast.LENGTH_LONG).show();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "ConfigureGPS Err=" + e, Toast.LENGTH_LONG).show();
         }
 
         //ACTIVIDAD REGRESA SIGNATURE
         try {
-            if (requestCode == REQUEST_TAKE_SIGNATURE&& resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_TAKE_SIGNATURE && resultCode == Activity.RESULT_OK) {
                 setPic(AppSession.getInstance().getCurrentPhotoPath());
                 Toast.makeText(getApplicationContext(), "Firma OK", Toast.LENGTH_LONG).show();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "ConfigureSignature Err=" + e, Toast.LENGTH_LONG).show();
         }
     }
@@ -1540,7 +1529,7 @@ public class SurveyActivity extends AppCompatActivity {
      * Set the picture in image view
      */
     private void setPic(String mCurrentPhotoPath) {
-        final String mCurrentPhotoPathFinal= mCurrentPhotoPath;
+        final String mCurrentPhotoPathFinal = mCurrentPhotoPath;
         //Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
         Bitmap bitmap = ImageUtils.getInstant().getCompressedBitmap(mCurrentPhotoPath);
 
@@ -1576,14 +1565,14 @@ public class SurveyActivity extends AppCompatActivity {
         }
     }
 
-    private void showDialogPicture(final String mCurrentPhotoPath,final ImageView prevView,final LinearLayout item) {
+    private void showDialogPicture(final String mCurrentPhotoPath, final ImageView prevView, final LinearLayout item) {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         double widthPixels = metrics.widthPixels * 0.90;
         double heightPixels = metrics.heightPixels * 0.80;
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        LinearLayout layout       = new LinearLayout(this);
+        LinearLayout layout = new LinearLayout(this);
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
 
@@ -1620,12 +1609,9 @@ public class SurveyActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private static void DeleteRecursive(File fileOrDirectory)
-    {
-        if (fileOrDirectory.isDirectory())
-        {
-            for (File child : fileOrDirectory.listFiles())
-            {
+    private static void DeleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            for (File child : fileOrDirectory.listFiles()) {
                 DeleteRecursive(child);
             }
         }
