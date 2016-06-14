@@ -17,7 +17,7 @@
 
             <solid
                 android:background="@color/background_color"
-                android:color="@color/colorPrimary" />
+                android:color="@color/primary" />
         </shape>
     </item>
     <item
