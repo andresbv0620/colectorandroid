@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color"
-    android:padding="@dimen/medium_space"
     tools:context="colector.co.com.collector.SurveyActivity">
 
     <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -29,7 +29,8 @@
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="1dp"
+            android:layout_marginRight="@dimen/small_space"
+            android:layout_marginTop="@dimen/small_space"
             android:clickable="true"
             android:src="@drawable/map_marker"
             app:backgroundTint="#1C28AB"
@@ -42,7 +43,8 @@
             android:id="@+id/fabsave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="1dp"
+            android:layout_marginBottom="@dimen/small_space"
+            android:layout_marginRight="@dimen/small_space"
             android:clickable="true"
             android:src="@drawable/ic_upload"
             app:backgroundTint="#1C28AB"

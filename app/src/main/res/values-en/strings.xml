@@ -53,4 +53,5 @@
     <string name="main_list_msg">Reading Local DB</string>
     <string name="required_error">Required</string>
     <string name="type_default">Type Question %1$s</string>
+    <string name="check_required">Por favor valide los campos requeridos</string>
 </resources>

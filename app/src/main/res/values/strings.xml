@@ -63,4 +63,6 @@
     <string name="main_list_msg">Leyendo Listado</string>
     <string name="required_error">Requerido</string>
     <string name="type_default">Tipo de pregunta %1$s</string>
+    <string name="required_field" translatable="false">%1$s**</string>
+    <string name="check_required">Please check the required fields</string>
 </resources>

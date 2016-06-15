@@ -31,6 +31,7 @@ public class EditTextItemView extends FrameLayout {
     @BindView(R.id.input_edit_text)
     TextInputLayout input;
     Activity activity;
+    boolean required;
 
     public EditTextItemView(Context context) {
         super(context);
@@ -61,10 +62,14 @@ public class EditTextItemView extends FrameLayout {
      */
     public void bind(Question question, @Nullable String previewDefault, Activity activity) {
         this.activity = activity;
+        this.required = question.getRequerido();
         input.setHint(question.getName());
         if (previewDefault != null) label.setText(previewDefault);
         if (question.getoculto()) this.setVisibility(GONE);
-        if (question.getRequerido()) label.addTextChangedListener(new EditTextWatcher());
+        if (required) {
+            label.addTextChangedListener(new EditTextWatcher());
+            input.setHint(activity.getString(R.string.required_field, question.getName()));
+        }
         switch (question.getType()) {
             case 1:
                 break;
@@ -96,12 +101,20 @@ public class EditTextItemView extends FrameLayout {
         }
     }
 
-    public void validateField() {
+    /**
+     * Validate if the edit text on the View is filled
+     *
+     * @return true if the Filed is filled
+     */
+    public boolean validateField() {
+        if (!required) return true;
         if (label.getText().toString().trim().isEmpty()) {
             input.setError(activity.getString(R.string.required_error));
             requestFocus(label);
+            return false;
         } else {
             input.setErrorEnabled(false);
+            return true;
         }
     }
 

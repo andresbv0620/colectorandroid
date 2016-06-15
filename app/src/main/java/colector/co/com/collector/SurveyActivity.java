@@ -18,7 +18,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +34,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -102,6 +106,8 @@ public class SurveyActivity extends AppCompatActivity {
     LinearLayout container;
     @BindView(R.id.loading)
     View loading;
+    @BindView(R.id.coordinator)
+    CoordinatorLayout coordinatorLayout;
 
     ProgressDialog progress;
 
@@ -156,6 +162,7 @@ public class SurveyActivity extends AppCompatActivity {
         FABSAVE.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dismissKeyBoard();
                 threadSaveModulo();
             }
         });
@@ -175,32 +182,44 @@ public class SurveyActivity extends AppCompatActivity {
                 .setPositiveButton(getString(R.string.survey_save), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        progress = ProgressDialog.show(SurveyActivity.this, getResources().getString(R.string.survey_saving),
-                                getResources().getString(R.string.survey_saving_msg), true);
-
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                processSave();
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            progress.dismiss();
-                                            Toast.makeText(getApplicationContext(), msgSaved, Toast.LENGTH_LONG).show();
-                                        } catch (Exception e) {
-                                            Toast.makeText(getApplicationContext(), "Progress " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                        }
-                                    }
-                                });
-                            }
-                        }).start();
+                        loading.setVisibility(View.VISIBLE);
+                        if (validateFields()) {
+                           processSave();
+                        } else {
+                            showSnackNotification();
+                        }
+                        loading.setVisibility(View.GONE);
 
                     }
                 })
                 .setNegativeButton(getString(R.string.common_cancel), null)
                 .show();
+    }
+
+    private void dismissKeyBoard() {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
+
+    private void showSnackNotification() {
+        Snackbar snack = Snackbar.make(coordinatorLayout, R.string.check_required, Snackbar.LENGTH_LONG);
+        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
+        snack.show();
+    }
+
+    private boolean validateFields() {
+        boolean fieldsValid = true;
+        for (int child = 0; child < container.getChildCount(); child++) {
+            View sectionItem = container.getChildAt(child);
+            if (sectionItem instanceof SectionItemView) {
+                ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                    if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView) {
+                        fieldsValid = fieldsValid & ((EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex)).validateField();
+                    }
+                }
+            }
+        }
+        return fieldsValid;
     }
 
 
@@ -725,30 +744,6 @@ public class SurveyActivity extends AppCompatActivity {
     }
 
 
-    protected void formatComplejo(final EditText et) {
-        et.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                int dd = et.length();
-                if (et.length() <= 1 && editable.toString().equalsIgnoreCase(".")) {
-                    et.removeTextChangedListener(this);
-                    et.setText("-");
-                    et.setSelection(editable.length());
-                    et.addTextChangedListener(this);
-                }
-            }
-        });
-    }
-
     private EditText buildEditText(View.OnClickListener listener, Long id, Boolean defectoPrevio) {
         EditText toReturn = new EditText(this);
         toReturn.setOnClickListener(listener);
@@ -861,17 +856,6 @@ public class SurveyActivity extends AppCompatActivity {
         return toReturn;
     }
 
-    private TextView buildTextViewSections(String label) {
-        TextView toReturn = new TextView(this);
-        toReturn.setText(label);
-        toReturn.setTextColor(ContextCompat.getColor(this, R.color.text_color));
-        toReturn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
-        String myHexColor = "#e6e6e6";
-        toReturn.setBackgroundColor(Color.parseColor(myHexColor));
-        setLayoutParamsSec(toReturn);
-        return toReturn;
-    }
-
     /**
      * Create programtically a LinearLayout to print ImageView
      *
@@ -888,48 +872,6 @@ public class SurveyActivity extends AppCompatActivity {
         return toReturn;
     }
 
-    private LinearLayout GaleriaLayout(Long id) {
-        LinearLayout toReturn = new LinearLayout(this);
-        toReturn.setOrientation(LinearLayout.HORIZONTAL);
-        toReturn.setTag(id);
-        setLayoutParams(toReturn);
-        //TODO pintar la imagen que se puso durante la creación
-        pictureLayouts.add(toReturn);
-        return toReturn;
-    }
-
-    /**  VISIBILITY RULES
-     *
-     Iguala = 'igual_a'
-     Noiguala = 'no_igual_a'
-     Contiene = 'contiene'
-     Empiezacon = 'empieza_con' 'falta
-     Mayorque = 'mayor_que' 'falta
-     Menorque = 'menor_que' ' falta
-     Esvacio = 'es_vacio'
-     Noesvacio = 'no_es_vacio'
-     */
-
-    /**
-     * VISIBILITY RULES EDITTEXT
-     */
-    protected void visibilityRulesEditText(final EditText et) {
-        et.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                visibilityRulesEva(editable.toString(), (Long) et.getTag());
-            }
-        });
-    }
 
     /**
      * VISIBILITY RULES SPINNER

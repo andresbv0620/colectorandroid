@@ -14,6 +14,8 @@
         android:id="@+id/section_items_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/small_space"
+        android:paddingRight="@dimen/small_space" />
 
 </LinearLayout>
