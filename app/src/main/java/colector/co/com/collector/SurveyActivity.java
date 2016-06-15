@@ -28,7 +28,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -213,6 +212,8 @@ public class SurveyActivity extends AppCompatActivity {
                         fieldsValid = fieldsValid & ((EditTextItemView) sectionView).validateField();
                     } else if (sectionView instanceof SpinnerItemView) {
                         fieldsValid = fieldsValid & ((SpinnerItemView) sectionView).validateField();
+                    } else if (sectionView instanceof MultipleItemViewContainer) {
+                        fieldsValid = fieldsValid & ((MultipleItemViewContainer) sectionView).validateFields();
                     }
                 }
             }

@@ -71,7 +71,7 @@ public class SpinnerItemView extends LinearLayout {
             return true;
         } else {
             label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
-            return true;
+            return false;
         }
     }
 

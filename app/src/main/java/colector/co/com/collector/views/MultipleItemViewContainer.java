@@ -1,6 +1,7 @@
 package colector.co.com.collector.views;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -29,8 +30,7 @@ public class MultipleItemViewContainer extends LinearLayout {
     @BindView(R.id.collapse)
     TextView collapse;
 
-
-    ArrayList<String> options = new ArrayList<>();
+    ArrayList<IdOptionValue> options = new ArrayList<>();
     boolean required = false;
 
     public MultipleItemViewContainer(Context context) {
@@ -46,9 +46,9 @@ public class MultipleItemViewContainer extends LinearLayout {
     public void bind(ArrayList<IdOptionValue> response, Question question) {
         if (response.size() == 0) return;
         required = question.getRequerido();
+        this.options = response;
         // Bind the items
-        for (IdOptionValue option : response) options.add(option.getValue());
-        for (String option : options) {
+        for (IdOptionValue option : options) {
             MultipleItemView multipleItemView = new MultipleItemView(getContext());
             multipleItemView.bind(option);
             container.addView(multipleItemView);
@@ -59,7 +59,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         } else label.setText(question.getName());
         //Bind the show and hide buttons
         bindShowButton();
-        bindCollapseButton();
+        bindCollapseButton(collapse);
         if (question.getoculto()) this.setVisibility(GONE);
     }
 
@@ -67,21 +67,35 @@ public class MultipleItemViewContainer extends LinearLayout {
         show.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                show.setVisibility(GONE);
+                show.setText(getContext().getString(R.string.hide));
+                bindCollapseButton(show);
                 collapse.setVisibility(VISIBLE);
                 container.setVisibility(VISIBLE);
             }
         });
     }
 
-    private void bindCollapseButton() {
-        collapse.setOnClickListener(new OnClickListener() {
+    private void bindCollapseButton(View view) {
+        view.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                show.setVisibility(VISIBLE);
+                show.setText(getContext().getString(R.string.show));
+                bindShowButton();
                 collapse.setVisibility(GONE);
                 container.setVisibility(GONE);
             }
         });
+    }
+
+    public boolean validateFields() {
+        if (!required) return true;
+        for (IdOptionValue option : options) {
+            if (option.isStatus()) {
+                label.setTextColor(ContextCompat.getColor(getContext(), R.color.text_color));
+                return true;
+            }
+        }
+        label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
+        return false;
     }
 }

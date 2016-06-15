@@ -3,18 +3,16 @@ package colector.co.com.collector.views;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.rey.material.widget.CheckBox;
 
-import java.util.ArrayList;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
 import colector.co.com.collector.model.IdOptionValue;
-import colector.co.com.collector.model.Question;
 
 /**
  * @author Gabriel Rodriguez
@@ -27,6 +25,8 @@ public class MultipleItemView extends ScrollView {
     @BindView(R.id.toggle)
     CheckBox toggle;
 
+    public IdOptionValue option;
+
     public MultipleItemView(Context context) {
         super(context);
         init(context);
@@ -37,7 +37,16 @@ public class MultipleItemView extends ScrollView {
         ButterKnife.bind(this, view);
     }
 
-    public void bind(String name){
-        textView.setText(name);
+    public void bind(IdOptionValue optionValue) {
+        this.option = optionValue;
+        textView.setText(optionValue.getValue());
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) option.setStatus(true);
+                else option.setStatus(false);
+            }
+        });
     }
+
 }

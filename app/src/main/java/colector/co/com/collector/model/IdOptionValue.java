@@ -6,9 +6,9 @@ package colector.co.com.collector.model;
 public class IdOptionValue {
     private Long response_id;
     private String value;
-    private boolean status;
+    private boolean status = false;
 
-    public IdOptionValue(){
+    public IdOptionValue() {
         super();
     }
 
