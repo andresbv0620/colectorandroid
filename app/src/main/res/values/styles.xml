@@ -34,12 +34,21 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <!--Section Title Text View-->
     <style name="BaseTextView.SectionTitle">
         <item name="android:textSize">@dimen/title_text_size</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:maxLines">1</item>
         <item name="android:background">@color/section_title_background_color</item>
         <item name="android:padding">@dimen/small_space</item>
+    </style>
+
+    <style name="TextLabel" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@color/text_color</item>
+        <item name="android:textSize">20sp</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorControlNormal">@color/primary</item>
+        <item name="colorControlActivated">@color/primary_dark</item>
     </style>
 
 </resources>

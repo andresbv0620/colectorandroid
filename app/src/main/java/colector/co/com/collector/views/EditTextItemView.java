@@ -5,11 +5,13 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
@@ -62,9 +64,30 @@ public class EditTextItemView extends FrameLayout {
         input.setHint(question.getName());
         if (previewDefault != null) label.setText(previewDefault);
         if (question.getoculto()) this.setVisibility(GONE);
-        if (question.getRequerido()) {
-            label.addTextChangedListener(new EditTextWatcher());
+        if (question.getRequerido()) label.addTextChangedListener(new EditTextWatcher());
+        switch (question.getType()) {
+            case 1:
+                break;
+            case 2:
+                allowsMultilineEditText();
+                break;
+            case 8:
+                label.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+                break;
+            case 15:
+                label.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                break;
+            default:
+                input.setHint(activity.getString(R.string.type_default, question.getType()));
+                break;
         }
+    }
+
+    private void allowsMultilineEditText() {
+        label.setSingleLine(false);
+        label.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
+        label.setMaxLines(2);
+        label.setLines(2);
     }
 
     private void requestFocus(View view) {

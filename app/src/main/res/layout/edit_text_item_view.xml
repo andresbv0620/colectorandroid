@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:paddingLeft="@dimen/small_space"
-    android:paddingRight="@dimen/small_space">
+    android:animateLayoutChanges="true">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/input_edit_text"
@@ -19,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
+            android:textSize="@dimen/regular_text_size"
             tools:hint="Numero de documento"
             tools:text="12345678" />
 

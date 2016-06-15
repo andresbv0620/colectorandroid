@@ -23,9 +23,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -34,7 +32,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -128,10 +125,14 @@ public class SurveyActivity extends AppCompatActivity {
         configureGPSButton();
         configureSaveButton();
         configureInitTime();
+        isModifiedSurvey();
         buildSurvey();
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    private void isModifiedSurvey() {
+        if (surveys.getInstanceId() != null) isModify = true;
+    }
 
     private void setupGPS() {
         gps = new FindGPSLocation(this);
@@ -580,27 +581,19 @@ public class SurveyActivity extends AppCompatActivity {
         if (required)
             label += "**";
 
-        String hintInput = defecto;
-
         Log.i(AppSettings.TAG, ">>>>>>>>>item.getType(): " + type);
         switch (type) {
             // input text
             case 1:
+            case 2:
+            case 8:
+            default:
                 EditTextItemView editItemView = new EditTextItemView(this);
                 editItemView.bind(question, surveys.getAnswer(id), this);
                 linear.addView(editItemView);
                 break;
-            // input text multiline
-            case 2:
-                linear.addView(buildTextView(label));
-                linear.addView(buildEditTextMultiline(id, hintInput, oculto, defectoPrevio));
-                break;
             // opcion o combobox
             case 3:
-                linear.addView(buildTextView(label));
-                linear.addView(buildSpinner(response, id, oculto, defectoPrevio));
-                break;
-            // opcion o combobox
             case 4:
                 linear.addView(buildTextView(label));
                 linear.addView(buildSpinner(response, id, oculto, defectoPrevio));
@@ -634,11 +627,6 @@ public class SurveyActivity extends AppCompatActivity {
                         newFragment.show(SurveyActivity.this.getFragmentManager(), "timePicker");
                     }
                 }, id, defectoPrevio));
-                break;
-            // numeric input text
-            case 8:
-                linear.addView(buildTextView(label));
-                linear.addView(buildEditTextNumeric(id, hintInput, oculto, defectoPrevio));
                 break;
 
             // dynamic form
@@ -700,17 +688,6 @@ public class SurveyActivity extends AppCompatActivity {
                 }));
                 linear.addView(buildSeparator());
                 break;
-            // numeric decimal input text
-            case 15:
-                linear.addView(buildTextView(label));
-                linear.addView(buildEditTextNumericDecimal(id, hintInput, oculto, defectoPrevio));
-                break;
-
-            // input text
-            default:
-                linear.addView(buildTextView("TIPO SIN ENTRADA: " + type));
-                linear.addView(buildEditText(id, hintInput, oculto, defectoPrevio));
-                break;
         }
     }
 
@@ -747,54 +724,6 @@ public class SurveyActivity extends AppCompatActivity {
         return toReturn;
     }
 
-    /**
-     * Create programatically a input text
-     *
-     * @return
-     */
-    private EditText buildEditText(Long id, String itHint, Boolean oculto, Boolean defectoPrevio) {
-        EditText toReturn = new EditText(this);
-        toReturn.setTag(id);
-
-        // set value if is modified
-        if (surveys.getInstanceId() != null) {
-            isModify = true;
-            if (defectoPrevio || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT)
-                toReturn.setText(surveys.getAnswer(id));
-        }
-
-        //set value visibilityRules
-        if (oculto)
-            toReturn.setVisibility(View.INVISIBLE);
-        else
-            toReturn.setVisibility(View.VISIBLE);
-
-        visibilityRulesEditText(toReturn);
-        toReturn.setHint(itHint);
-        //toReturn.setText("1");
-        return toReturn;
-    }
-
-    /**
-     * Create programatically a input numeric
-     *
-     * @return
-     */
-    private EditText buildEditTextNumeric(Long id, String itHint
-            , Boolean oculto, Boolean defectoPrevio) {
-        EditText toReturn = buildEditText(id, itHint, oculto, defectoPrevio);
-        toReturn.setInputType(InputType.TYPE_CLASS_NUMBER);
-        return toReturn;
-    }
-
-    private EditText buildEditTextNumericDecimal(Long id, String itHint
-            , Boolean oculto, Boolean defectoPrevio) {
-        EditText toReturn = buildEditText(id, itHint, oculto, defectoPrevio);
-        toReturn.setKeyListener(DigitsKeyListener.getInstance(true, true)); // decimals and positive/negative numbers.
-        formatComplejo(toReturn);
-        return toReturn;
-    }
-
 
     protected void formatComplejo(final EditText et) {
         et.addTextChangedListener(new TextWatcher() {
@@ -818,26 +747,6 @@ public class SurveyActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    /**
-     * Create programatically a input multiline
-     *
-     * @return
-     */
-    private EditText buildEditTextMultiline(Long id, String itHint,
-                                            Boolean oculto, Boolean defectoPrevio) {
-        EditText toReturn = buildEditText(id, itHint, oculto, defectoPrevio);
-        toReturn.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT));
-        toReturn.setGravity(Gravity.TOP);
-        toReturn.setSingleLine(false);
-        toReturn.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
-        toReturn.setMaxLines(2);
-        toReturn.setLines(2);
-        toReturn.setHint(itHint);
-        return toReturn;
     }
 
     private EditText buildEditText(View.OnClickListener listener, Long id, Boolean defectoPrevio) {
