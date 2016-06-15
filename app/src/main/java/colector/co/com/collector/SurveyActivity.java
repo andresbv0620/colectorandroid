@@ -228,7 +228,6 @@ public class SurveyActivity extends AppCompatActivity {
             buildSection(section, sectionItem.sectionItemsContainer);
             container.addView(sectionItem);
         }
-        dismissKeyBoard();
         loading.setVisibility(View.GONE);
     }
 
@@ -433,7 +432,7 @@ public class SurveyActivity extends AppCompatActivity {
         SurveyAdapterMultipleType surveyAdapterMultipleType =
                 new SurveyAdapterMultipleType(this, new ArrayList<IdOptionValue>(responses));
 
-        if (surveys.getInstanceId() != null) {
+        if (surveys.getInstanceId() != null && surveys.getListAnswers(id) != null) {
             isModify = true;
             for (String value : surveys.getListAnswers(id)) {
                 surveyAdapterMultipleType.setStatusById(Long.parseLong(value), true);

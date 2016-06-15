@@ -163,8 +163,11 @@ public class Survey {
         return null;
     }
 
-    public List<String> getListAnswers(Long id) {
-        List<String> listAnswers = new ArrayList<String>();
+    public
+    @Nullable
+    List<String> getListAnswers(Long id) {
+        if (instanceAnswers == null) return null;
+        List<String> listAnswers = new ArrayList<>();
         for (IdValue item : instanceAnswers) {
             if (item.getId().equals(id)) {
                 listAnswers.add(item.getValue());
