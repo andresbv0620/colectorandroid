@@ -80,6 +80,7 @@ import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
 import colector.co.com.collector.utils.ImageUtils;
 import colector.co.com.collector.views.EditTextItemView;
+import colector.co.com.collector.views.MultipleItemViewContainer;
 import colector.co.com.collector.views.SectionItemView;
 import colector.co.com.collector.views.SpinnerItemView;
 
@@ -269,8 +270,9 @@ public class SurveyActivity extends AppCompatActivity {
                 break;
             //Multiple opcion
             case 5:
-                linear.addView(buildTextView(label));
-                linear.addView(buildMultiple(response, id));
+                MultipleItemViewContainer multipleItemViewContainer = new MultipleItemViewContainer(this);
+                multipleItemViewContainer.bind(new ArrayList<>(response), question);
+                linear.addView(multipleItemViewContainer);
                 break;
             // picture
             case 6:
@@ -405,61 +407,6 @@ public class SurveyActivity extends AppCompatActivity {
             if (defectoPrevio || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT)
                 toReturn.setText(surveys.getAnswer(id));
         }
-        return toReturn;
-    }
-
-    /**
-     * Create programatically a Multiple
-     *
-     * @return
-     */
-    private ListView buildMultiple(List<IdOptionValue> responses, Long id) {
-        ListView toReturn = new ListView(this);
-        toReturn.setTag(id);
-        setLayoutParams(toReturn);
-
-        final ScrollView scroll = (ScrollView) findViewById(R.id.container_employee_information);
-        scroll.setBackgroundColor(0xffffff);
-
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                (10 * responses.size()));
-        //(50));
-        layoutParams.setMargins(30, 30, 30, 30);
-
-        toReturn.setLayoutParams(layoutParams);
-
-        SurveyAdapterMultipleType surveyAdapterMultipleType =
-                new SurveyAdapterMultipleType(this, new ArrayList<IdOptionValue>(responses));
-
-        if (surveys.getInstanceId() != null && surveys.getListAnswers(id) != null) {
-            isModify = true;
-            for (String value : surveys.getListAnswers(id)) {
-                surveyAdapterMultipleType.setStatusById(Long.parseLong(value), true);
-            }
-        } else {
-            surveyAdapterMultipleType.setFalseItems();
-        }
-
-        toReturn.setAdapter(surveyAdapterMultipleType);
-        View.OnTouchListener listener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                scroll.requestDisallowInterceptTouchEvent(true);
-
-                int action = event.getActionMasked();
-
-                switch (action) {
-                    case MotionEvent.ACTION_UP:
-                        scroll.requestDisallowInterceptTouchEvent(false);
-                        break;
-                }
-                return false;
-            }
-        };
-
-        toReturn.setOnTouchListener(listener);
-
         return toReturn;
     }
 

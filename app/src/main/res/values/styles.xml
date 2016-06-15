@@ -43,12 +43,19 @@
         <item name="android:padding">@dimen/small_space</item>
     </style>
 
-    <style name="TextLabel" parent="TextAppearance.AppCompat">
-        <item name="android:textColorHint">@color/text_color</item>
-        <item name="android:textSize">20sp</item>
-        <item name="colorAccent">@color/accent</item>
-        <item name="colorControlNormal">@color/primary</item>
-        <item name="colorControlActivated">@color/primary_dark</item>
+    <!--Check Box Style-->
+    <style name="CheckBoxContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingRight">@dimen/small_space</item>
+        <item name="android:paddingLeft">@dimen/small_space</item>
+    </style>
+
+    <!--Base Show Hide TextView Style-->
+    <style name="BaseTextView.ShowHide">
+        <item name="android:layout_gravity">right</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textColor">@color/primary</item>
     </style>
 
 </resources>
