@@ -83,6 +83,7 @@ import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
 import colector.co.com.collector.utils.ImageUtils;
+import colector.co.com.collector.views.EditTextItemView;
 import colector.co.com.collector.views.SectionItemView;
 
 import static android.graphics.Color.parseColor;
@@ -563,29 +564,20 @@ public class SurveyActivity extends AppCompatActivity {
 
     private void buildSection(Section section, LinearLayout linear) {
         for (Question question : section.getInputs()) {
-            buildQuestion(question.getName(), question.getId(), question.getType(),
+            buildQuestion(question, question.getName(), question.getId(), question.getType(),
                     question.getMin(), question.getMax(), question.getDefectoPrevio(),
                     question.getRequerido(), question.getValidacion(), question.getDefecto(),
                     question.getResponses(), question.getOptions(), question.getAtributos(),
                     question.getValorVisibility(), question.getoculto(), linear);
         }
-
-        try {
-            container.addView(linear);
-        } catch (Exception e) {
-            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-            Log.i(AppSettings.TAG, ">>>>>>>>>buildQuestion(): " + e);
-        }
     }
 
-    private void buildQuestion(String label, Long id, int type,
+    private void buildQuestion(Question question, String label, Long id, int type,
                                String min, String max, Boolean defectoPrevio,
-                               Boolean requerido, String Validacio, String defecto,
+                               Boolean required, String Validacio, String defecto,
                                List<IdOptionValue> response, List<ResponseComplex> options, List<ResponseAttribute> atributos,
                                List<QuestionVisibilityRules> ValorVisibility, Boolean oculto, LinearLayout linear) {
-
-        //String hintInput = "Min:" + min + " Max:"+ max + "**:" + esRequerido + "Val:" + Validacion;
-        if (requerido)
+        if (required)
             label += "**";
 
         String hintInput = defecto;
@@ -594,8 +586,9 @@ public class SurveyActivity extends AppCompatActivity {
         switch (type) {
             // input text
             case 1:
-                linear.addView(buildTextView(label));
-                linear.addView(buildEditText(id, hintInput, oculto, defectoPrevio));
+                EditTextItemView editItemView = new EditTextItemView(this);
+                editItemView.bind(question, surveys.getAnswer(id), this);
+                linear.addView(editItemView);
                 break;
             // input text multiline
             case 2:
@@ -678,7 +671,7 @@ public class SurveyActivity extends AppCompatActivity {
 
                 if (toModify == null) {
                     for (ResponseAttribute item : atributos) {
-                        buildQuestion(item.getLabel(), item.getInput_id(), item.getType(), null, null, null, null, null, null, item.getResponses(), null, null, null, oculto, toInsertQuestion);
+                        buildQuestion(question, item.getLabel(), item.getInput_id(), item.getType(), null, null, null, null, null, null, item.getResponses(), null, null, null, oculto, toInsertQuestion);
                     }
                 } else {
                     fillDynamicForm(toModify, toInsertQuestion, id);
