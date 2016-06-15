@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         app:errorEnabled="true">
 
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/label_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

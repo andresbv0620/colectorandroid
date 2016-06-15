@@ -3,6 +3,7 @@ package colector.co.com.collector.views;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.InputType;
@@ -12,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import butterknife.BindView;
@@ -27,7 +27,7 @@ import colector.co.com.collector.model.Question;
 public class EditTextItemView extends FrameLayout {
 
     @BindView(R.id.label_edit_text)
-    EditText label;
+    TextInputEditText label;
     @BindView(R.id.input_edit_text)
     TextInputLayout input;
     Activity activity;
