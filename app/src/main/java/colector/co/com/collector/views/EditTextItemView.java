@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
+import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
 
 /**
@@ -30,8 +31,10 @@ public class EditTextItemView extends FrameLayout {
     TextInputEditText label;
     @BindView(R.id.input_edit_text)
     TextInputLayout input;
-    Activity activity;
-    boolean required;
+    private Activity activity;
+    private String validation;
+    private Long id;
+    private boolean required;
 
     public EditTextItemView(Context context) {
         super(context);
@@ -61,6 +64,8 @@ public class EditTextItemView extends FrameLayout {
      * @param activity       where the view is Inflated
      */
     public void bind(Question question, @Nullable String previewDefault, Activity activity) {
+        this.validation = question.getValidacion();
+        this.id = question.getId();
         this.activity = activity;
         this.required = question.getRequerido();
         input.setHint(question.getName());
@@ -83,7 +88,7 @@ public class EditTextItemView extends FrameLayout {
                 label.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 break;
             default:
-                input.setHint(activity.getString(R.string.type_default, question.getType()));
+                input.setHint(activity.getString(R.string.type_default, String.valueOf(question.getType())));
                 break;
         }
     }
@@ -116,6 +121,10 @@ public class EditTextItemView extends FrameLayout {
             input.setErrorEnabled(false);
             return true;
         }
+    }
+
+    public IdValue getResponse() {
+        return new IdValue(id, label.getText().toString(), validation);
     }
 
 

@@ -13,7 +13,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
 import colector.co.com.collector.model.IdOptionValue;
+import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
+import io.realm.RealmList;
 
 /**
  * @author Gabriel Rodriguez
@@ -22,16 +24,18 @@ import colector.co.com.collector.model.Question;
 public class MultipleItemViewContainer extends LinearLayout {
 
     @BindView(R.id.container)
-    public LinearLayout container;
+    LinearLayout container;
     @BindView(R.id.label)
     TextView label;
     @BindView(R.id.show)
     TextView show;
     @BindView(R.id.collapse)
     TextView collapse;
+    private Long id;
+    private String validation;
 
-    ArrayList<IdOptionValue> options = new ArrayList<>();
-    boolean required = false;
+    private ArrayList<IdOptionValue> options = new ArrayList<>();
+    private boolean required = false;
 
     public MultipleItemViewContainer(Context context) {
         super(context);
@@ -45,6 +49,8 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public void bind(ArrayList<IdOptionValue> response, Question question) {
         if (response.size() == 0) return;
+        this.id = question.getId();
+        this.validation = question.getValidacion();
         required = question.getRequerido();
         this.options = response;
         // Bind the items
@@ -97,5 +103,16 @@ public class MultipleItemViewContainer extends LinearLayout {
         }
         label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
         return false;
+    }
+
+    public RealmList<IdValue> getResponses() {
+        RealmList<IdValue> responses = new RealmList<>();
+        for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
+            MultipleItemView itemView = (MultipleItemView) container.getChildAt(itemViewIndex);
+            if (itemView.toggle.isSelected()) {
+                responses.add(new IdValue(id, itemView.textView.getText().toString(), validation));
+            }
+        }
+        return responses;
     }
 }
