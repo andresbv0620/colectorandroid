@@ -62,6 +62,7 @@ public class LoginActivity extends AppCompatActivity {
                         AppSession.getInstance().setSurveyAvailable(offlineSurvey);
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
+                        finish();
                     }
 
                 })
@@ -147,7 +148,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void getSurveys(){
-
         GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser().getColector_id());
         AsyncResponse callback = new AsyncResponse() {
             @Override
@@ -165,6 +165,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
+                        finish();
                     }else{
                         Toast.makeText(LoginActivity.this,response.getResponseDescription(),Toast.LENGTH_LONG).show();
                     }

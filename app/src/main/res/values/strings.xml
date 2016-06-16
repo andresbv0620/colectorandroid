@@ -61,4 +61,10 @@
     <string name="survey_saving_msg">Almacenando Formulario</string>
     <string name="main_list_title">Cargando</string>
     <string name="main_list_msg">Leyendo Listado</string>
+    <string name="required_error">Requerido</string>
+    <string name="type_default">Tipo de pregunta %1$s</string>
+    <string name="required_field" translatable="false">%1$s**</string>
+    <string name="check_required">Por favor valide los campos requeridos</string>
+    <string name="show">Mostar</string>
+    <string name="hide">Esconder</string>
 </resources>

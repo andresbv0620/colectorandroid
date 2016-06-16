@@ -2,6 +2,7 @@ package colector.co.com.collector.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,7 +89,8 @@ public class SurveyAdapterMultipleType extends ArrayAdapter<IdOptionValue> {
         }
     }
 
-    public void setStatusById(Long id, boolean status) {
+    public void setStatusById(@Nullable Long id, boolean status) {
+        if(id == null) return;
         for (IdOptionValue kvs : this.items) {
             if (kvs.getId().equals(id)) {
                 kvs.setStatus(status);

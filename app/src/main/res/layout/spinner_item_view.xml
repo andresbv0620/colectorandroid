@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/small_space"
+    android:paddingTop="@dimen/small_space">
+
+    <TextView
+        android:id="@+id/label"
+        style="@style/BaseTextView"
+        tools:text="Tipo de Capacitación**" />
+
+    <com.rey.material.widget.Spinner
+        android:id="@+id/spinner"
+        style="@style/Material.Widget.Spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        app:rd_style="@style/Material.Drawable.Ripple.Wave"
+        app:spn_arrowColor="@color/primary"
+        app:spn_dividerColor="@color/section_title_background_color" />
+
+</LinearLayout>

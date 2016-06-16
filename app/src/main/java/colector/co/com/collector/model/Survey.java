@@ -1,5 +1,7 @@
 package colector.co.com.collector.model;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class Survey {
         //this.precargado = precargado;
     }
 
-    public String getSurveyDoneDescription(){
+    public String getSurveyDoneDescription() {
         return instanceDate;
     }
 
@@ -72,8 +74,8 @@ public class Survey {
     }
 
     public List<Section> getSections() {
-        if(sections==null){
-            sections=new ArrayList<Section>();
+        if (sections == null) {
+            sections = new ArrayList<Section>();
             for (Section section : sections) {
                 for (Question question : section.getInputs()) {
                     this.precargado = question.getDefectoPrevio();
@@ -139,8 +141,8 @@ public class Survey {
     }
 
     public List<IdValue> getInstanceAnswers() {
-        if(instanceAnswers==null){
-            instanceAnswers=new ArrayList<IdValue>();
+        if (instanceAnswers == null) {
+            instanceAnswers = new ArrayList<IdValue>();
         }
         return instanceAnswers;
     }
@@ -149,19 +151,25 @@ public class Survey {
         this.instanceAnswers = instanceAnswers;
     }
 
-    public String getAnswer(Long id){
-        for(IdValue item : instanceAnswers){
-            if(item.getId().equals(id)){
+    public
+    @Nullable
+    String getAnswer(@Nullable Long id) {
+        if (id == null || instanceAnswers == null) return null;
+        for (IdValue item : instanceAnswers) {
+            if (item.getId().equals(id)) {
                 return item.getValue();
             }
         }
-        return "";
+        return null;
     }
 
-    public List<String> getListAnswers(Long id){
-        List<String> listAnswers = new ArrayList<String>();
-        for(IdValue item : instanceAnswers){
-            if(item.getId().equals(id)){
+    public
+    @Nullable
+    List<String> getListAnswers(Long id) {
+        if (instanceAnswers == null) return null;
+        List<String> listAnswers = new ArrayList<>();
+        for (IdValue item : instanceAnswers) {
+            if (item.getId().equals(id)) {
                 listAnswers.add(item.getValue());
             }
         }

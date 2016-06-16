@@ -2,13 +2,60 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Main theme colors -->
-        <!--   your app branding color for the app bar -->
-        <item name="colorPrimary">#02BBD2</item>
-        <!--   darker variant for the status bar and contextual app bars -->
-        <item name="colorPrimaryDark">#02BBD2</item>
-        <!--   theme UI controls like checkboxes and text fields -->
-        <item name="colorAccent">#02BBD2</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+
+    <!--Circular ProgressView-->
+    <style name="CircularProgressView" parent="Material.Widget.ProgressView">
+        <item name="android:layout_height">@dimen/loading_size</item>
+        <item name="android:layout_width">@dimen/loading_size</item>
+        <item name="android:layout_centerInParent">true</item>
+        <item name="cpd_strokeColor">@color/loading</item>
+        <item name="pv_autostart">true</item>
+        <item name="pv_circular">true</item>
+        <item name="pv_progressMode">indeterminate</item>
+        <item name="pv_progressStyle">@style/Material.Drawable.CircularProgress</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="VerticalSeparator">
+        <item name="android:layout_margin">@dimen/small_space</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/vertical_separator_color</item>
+    </style>
+
+    <!--Base TextView Formet-->
+    <style name="BaseTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!--Section Title Text View-->
+    <style name="BaseTextView.SectionTitle">
+        <item name="android:textSize">@dimen/title_text_size</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:background">@color/section_title_background_color</item>
+        <item name="android:padding">@dimen/small_space</item>
+    </style>
+
+    <!--Check Box Style-->
+    <style name="CheckBoxContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingRight">@dimen/small_space</item>
+        <item name="android:paddingLeft">@dimen/small_space</item>
+    </style>
+
+    <!--Base Show Hide TextView Style-->
+    <style name="BaseTextView.ShowHide">
+        <item name="android:layout_gravity">right</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textColor">@color/primary</item>
     </style>
 
 </resources>

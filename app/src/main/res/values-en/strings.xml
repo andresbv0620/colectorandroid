@@ -51,4 +51,9 @@
     <string name="survey_saving_msg">Local Storage</string>
     <string name="main_list_title">Loading</string>
     <string name="main_list_msg">Reading Local DB</string>
+    <string name="required_error">Required</string>
+    <string name="type_default">Type Question %1$s</string>
+    <string name="check_required">Please check the required fields</string>
+    <string name="show">Show</string>
+    <string name="hide">Hide</string>
 </resources>

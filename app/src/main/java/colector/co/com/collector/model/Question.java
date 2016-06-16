@@ -1,12 +1,13 @@
 package colector.co.com.collector.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by dherrera on 11/10/15.
  */
-public class Question {
+public class Question implements Serializable {
 
 
     private Long input_id;
