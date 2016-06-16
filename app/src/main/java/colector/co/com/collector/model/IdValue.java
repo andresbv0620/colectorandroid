@@ -1,14 +1,19 @@
 package colector.co.com.collector.model;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by dherrera on 11/10/15.
  */
-public class IdValue {
+public class IdValue extends RealmObject {
+
+    @PrimaryKey
     private Long id;
     private String value;
     private String validation;
 
-    public IdValue(){
+    public IdValue() {
         super();
     }
 
