@@ -1,18 +1,20 @@
 package colector.co.com.collector.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Attributes into the dynamic form
  * Created by dherrera on 13/11/15.
  */
-public class ResponseAttribute {
+public class ResponseAttribute extends RealmObject {
 
+    @PrimaryKey
     private Long input_id;
     private int type;
     private String label;
-    private List<IdOptionValue> responses;
+    private RealmList<IdOptionValue> responses;
 
     public ResponseAttribute(Long input_id, int type, String label) {
         super();
@@ -50,14 +52,14 @@ public class ResponseAttribute {
         this.label = label;
     }
 
-    public List<IdOptionValue> getResponses() {
-        if(responses == null){
-            responses=new ArrayList<IdOptionValue>();
+    public RealmList<IdOptionValue> getResponses() {
+        if (responses == null) {
+            responses = new RealmList<>();
         }
         return responses;
     }
 
-    public void setResponses(List<IdOptionValue> responses) {
+    public void setResponses(RealmList<IdOptionValue> responses) {
         this.responses = responses;
     }
 }

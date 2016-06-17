@@ -1,25 +1,26 @@
 package colector.co.com.collector.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by dherrera on 17/10/15.
  */
-public class SurveySave {
+public class SurveySave extends RealmObject {
 
-    private Long instanceId;
-    private Long id;
+    private Long instanceId; //Survey Id
+    @PrimaryKey
+    private Long id; // Id of saved survey
     private String latitude;
     private String longitude;
     private String HoraIni;
     private String HoraFin;
     private String Status;
 
+    private RealmList<IdValue> responses;
 
-    private List<IdValue> responses;
-
-    public SurveySave(){
+    public SurveySave() {
         super();
     }
 
@@ -69,18 +70,18 @@ public class SurveySave {
     }
 
     public void setHoraFin(String HoraFin) {
-        this.HoraFin= HoraFin;
+        this.HoraFin = HoraFin;
     }
 
 
-    public List<IdValue> getResponses() {
-        if(responses == null){
-            responses = new ArrayList<IdValue>();
+    public RealmList<IdValue> getResponses() {
+        if (responses == null) {
+            responses = new RealmList<>();
         }
         return responses;
     }
 
-    public void setResponses(List<IdValue> responses) {
+    public void setResponses(RealmList<IdValue> responses) {
         this.responses = responses;
     }
 

@@ -5,24 +5,30 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by dherrera on 11/10/15.
  */
-public class Survey {
+public class Survey extends RealmObject {
+
+    @PrimaryKey
     private Long form_id;
     private String form_name;
     private String form_description;
-    public Boolean precargado;
+    private Boolean precargado;
 
     private String longitud;
     private String latitud;
     private String horaini;
     private String horafin;
 
-    private List<Section> sections;
+    private RealmList<Section> sections;
     private Long instanceId;
     private String instanceDate;
-    private List<IdValue> instanceAnswers;
+    private RealmList<IdValue> instanceAnswers;
 
     public Survey() {
         super();
@@ -73,9 +79,9 @@ public class Survey {
         this.precargado = precargado;
     }
 
-    public List<Section> getSections() {
+    public RealmList<Section> getSections() {
         if (sections == null) {
-            sections = new ArrayList<Section>();
+            sections = new RealmList<>();
             for (Section section : sections) {
                 for (Question question : section.getInputs()) {
                     this.precargado = question.getDefectoPrevio();
@@ -87,7 +93,7 @@ public class Survey {
         return sections;
     }
 
-    public void setSections(List<Section> sections) {
+    public void setSections(RealmList<Section> sections) {
         this.sections = sections;
     }
 
@@ -140,14 +146,14 @@ public class Survey {
         this.horafin = form_horafin;
     }
 
-    public List<IdValue> getInstanceAnswers() {
+    public RealmList<IdValue> getInstanceAnswers() {
         if (instanceAnswers == null) {
-            instanceAnswers = new ArrayList<IdValue>();
+            instanceAnswers = new RealmList<>();
         }
         return instanceAnswers;
     }
 
-    public void setInstanceAnswer(List<IdValue> instanceAnswers) {
+    public void setInstanceAnswer(RealmList<IdValue> instanceAnswers) {
         this.instanceAnswers = instanceAnswers;
     }
 

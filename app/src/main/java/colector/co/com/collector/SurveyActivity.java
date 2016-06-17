@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,7 +22,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -40,7 +38,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,21 +45,19 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.OptionAdapter;
-import colector.co.com.collector.adapters.SurveyAdapterMultipleType;
+import colector.co.com.collector.database.DatabaseHelper;
+import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
@@ -73,7 +68,6 @@ import colector.co.com.collector.model.ResponseItem;
 import colector.co.com.collector.model.Section;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.SurveySave;
-import colector.co.com.collector.persistence.dao.SurveyDAO;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
@@ -85,14 +79,17 @@ import colector.co.com.collector.views.SpinnerItemView;
 
 import static android.graphics.Color.parseColor;
 
-public class SurveyActivity extends AppCompatActivity {
-    FindGPSLocation gps;
+public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave {
+    private FindGPSLocation gps;
+
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
-    private boolean isModify = false;
-    static final int REQUEST_TAKE_PHOTO = 1;
-    static final int REQUEST_TAKE_MAPSGPS = 2;
-    public static final int REQUEST_TAKE_SIGNATURE = 3;
+    private boolean isLoaded;
+
+    public static final String NEW_SURVEY_KEY = "new_survey";
+    private static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int REQUEST_TAKE_MAPSGPS = 2;
+    private static final int REQUEST_TAKE_SIGNATURE = 3;
 
     @BindView(R.id.fab)
     FloatingActionButton FABGPS;
@@ -105,9 +102,8 @@ public class SurveyActivity extends AppCompatActivity {
     @BindView(R.id.coordinator)
     CoordinatorLayout coordinatorLayout;
 
-    Long timeStandIni;
-
-    public PopupWindow popupWindow;
+    private Long timeStandIni;
+    private PopupWindow popupWindow;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -119,19 +115,18 @@ public class SurveyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
-        loading.setVisibility(View.VISIBLE);
+
+
+        showLoading();
         setTitle(surveys.getForm_name());
         setupGPS();
         configureGPSButton();
         configureSaveButton();
         configureInitTime();
-        isModifiedSurvey();
+        isLoaded = getIntent().getExtras().getBoolean(NEW_SURVEY_KEY);
+        //Ask For the Previous Data
         buildSurvey();
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-    }
-
-    private void isModifiedSurvey() {
-        if (surveys.getInstanceId() != null) isModify = true;
     }
 
     private void setupGPS() {
@@ -176,13 +171,12 @@ public class SurveyActivity extends AppCompatActivity {
                 .setPositiveButton(getString(R.string.survey_save), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        loading.setVisibility(View.VISIBLE);
+                        showLoading();
                         if (validateFields()) {
-                            processSave();
+                            saveSurvey();
                         } else {
                             showSnackNotification();
                         }
-                        loading.setVisibility(View.GONE);
 
                     }
                 })
@@ -198,6 +192,7 @@ public class SurveyActivity extends AppCompatActivity {
         Snackbar snack = Snackbar.make(coordinatorLayout, R.string.check_required, Snackbar.LENGTH_LONG);
         ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
         snack.show();
+        hideLoading();
     }
 
     private boolean validateFields() {
@@ -230,7 +225,7 @@ public class SurveyActivity extends AppCompatActivity {
             buildSection(section, sectionItem.sectionItemsContainer);
             container.addView(sectionItem);
         }
-        loading.setVisibility(View.GONE);
+        hideLoading();
     }
 
     private void buildSection(Section section, LinearLayout linear) {
@@ -308,13 +303,10 @@ public class SurveyActivity extends AppCompatActivity {
                 toInsertQuestion.setOrientation(LinearLayout.VERTICAL);
                 toInsertQuestion.addView(buildSeparator());
                 setLayoutParams(toInsertQuestion);
-
                 linear.addView(buildTextView(label));
-
                 linear.addView(buildButton(getString(R.string.survey_search), showPopupSearch(options, toInsertQuestion, id)));
 
                 if (surveys.getInstanceId() != null) {
-                    isModify = true;
 
                     for (ResponseComplex item : options) {
                         String recordID = item.getRecord_id();
@@ -404,7 +396,6 @@ public class SurveyActivity extends AppCompatActivity {
         toReturn.setTag(id);
         // set value if is modified
         if (surveys.getInstanceId() != null) {
-            isModify = true;
             if (defectoPrevio || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT)
                 toReturn.setText(surveys.getAnswer(id));
         }
@@ -650,22 +641,6 @@ public class SurveyActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Get position of the selected option
-     *
-     * @param id      of answer
-     * @param answers lsit of answer
-     * @return position of option selected
-     */
-    public int getIndexToSpinner(Long id, List<IdOptionValue> answers) {
-        for (int i = 0; i < answers.size(); i++) {
-            if (answers.get(i).getId().equals(id)) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
     private void mapGPSIntent(String Longitude, String Latitude) {
         Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
         intent.putExtra("Longitude", Longitude);
@@ -867,366 +842,55 @@ public class SurveyActivity extends AppCompatActivity {
         fileOrDirectory.delete();
     }
 
-    /**
-     * Convert Bitmap to String to save information in database
-     *
-     * @param bitmap
-     * @return
-     */
-    public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
-        byte[] byteFormat = stream.toByteArray();
-        // get the base 64 string
-        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
-        return imgString;
+    private void saveSurvey() {
+
+        SurveySave surveySave = new SurveySave();
+        surveySave.setInstanceId(surveys.getForm_id());
+        surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex(surveys.getForm_id())); // index on data base (Primary Key)
+        surveySave.setLatitude(String.valueOf(gps.getLatitude()));
+        surveySave.setLongitude(String.valueOf(gps.getLongitude()));
+        surveySave.setHoraIni(String.valueOf(timeStandIni));
+        surveySave.setHoraFin(String.valueOf(System.currentTimeMillis() / 1000));
+        // Difficult Task
+        for (int child = 0; child < container.getChildCount(); child++) {
+            View sectionItem = container.getChildAt(child);
+            if (sectionItem instanceof SectionItemView) {
+                ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                    View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
+
+                    if (sectionView instanceof EditTextItemView) {
+                        surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
+                    } else if (sectionView instanceof SpinnerItemView) {
+                        surveySave.getResponses().add(((SpinnerItemView) sectionView).getResponse());
+                    } else if (sectionView instanceof MultipleItemViewContainer)
+                        surveySave.getResponses().addAll(((MultipleItemViewContainer)
+                                sectionView).getResponses());
+
+                }
+            }
+        }
+        // Save on DataBase
+        Toast.makeText(this, "Index :: " + surveySave.getId(), Toast.LENGTH_LONG).show();
+        DatabaseHelper.getInstance().addSurvey(surveySave, this);
     }
 
-
-    String msgSaved;
-
-    private void processSave() {
-        msgSaved = "Inicia proceos de guardado";
-        boolean isValid = true;
-        boolean validationCases = true;
-        SurveySave toInsert = new SurveySave();
-
-        for (int i = 0; i < container.getChildCount(); i++) {
-
-            if (container.getChildAt(i) instanceof LinearLayout && container.getChildAt(i).getTag() == null) {
-                LinearLayout toFind = (LinearLayout) container.getChildAt(i);
-
-                for (int j = 0; j < toFind.getChildCount(); j++) {
-
-                    if (toFind.getChildAt(j) instanceof LinearLayout && toFind.getChildAt(j).getTag() != null && toFind.getChildAt(j).getTag() instanceof IdValue) {
-
-                        IdValue toInsertValue = (IdValue) toFind.getChildAt(j).getTag();
-                        toInsert.getResponses().add(toInsertValue);
-
-                    } else if (toFind.getChildAt(j) instanceof LinearLayout && toFind.getChildAt(j).getTag() != null && toFind.getChildAt(j).getTag() instanceof ResponseComplex) {
-
-                        LinearLayout toFindDynamic = (LinearLayout) toFind.getChildAt(j);
-                        for (int k = 0; k < toFindDynamic.getChildCount(); k++) {
-                            boolean isResponseOK = buildObjectToSave(toFindDynamic.getChildAt(k), toInsert.getResponses());
-                            if (!isResponseOK) {
-                                isValid = false;
-                            }
-                        }
-
-                    } else {
-
-                        boolean isResponseOK = buildObjectToSave(toFind.getChildAt(j), toInsert.getResponses());
-                        if (!isResponseOK) {
-                            isValid = false;
-                        }
-                    }
-                }
-            }
-        }//15664202
-
-        msgSaved = "valida respuestas";
-        for (int vv = 0; vv < toInsert.getResponses().size(); vv++) {
-            try {
-                double sums = 0;
-                boolean operaFlag = false;
-                if (!toInsert.getResponses().get(vv).getValidation().equalsIgnoreCase("")) {
-                    if (toInsert.getResponses().get(vv).getValidation().contains("(")) {
-                        String[] partsums = null;
-                        String sumatoria = toInsert.getResponses().get(vv).getValidation().substring(toInsert.getResponses().get(vv).getValidation().indexOf("(") + 1,
-                                toInsert.getResponses().get(vv).getValidation().indexOf(")"));
-
-                        partsums = sumatoria.split("\\+");
-                        sums = 0;
-                        for (int pp = 0; pp < partsums.length; pp++) {
-                            sums += Double.valueOf(mapValidation.get(partsums[0]));
-                        }
-                        operaFlag = true;
-                    }
-                    String[] parts = null;
-                    int casoValidation = -1;
-                    if (toInsert.getResponses().get(vv).getValidation().contains(">=")) {
-                        String temPart = toInsert.getResponses().get(vv).getValidation().replaceAll("=", "");
-                        temPart = temPart.replaceAll("\\(", "");
-                        temPart = temPart.replaceAll("\\)", "");
-                        parts = temPart.split(">");
-                        casoValidation = 3;
-                    } else if (toInsert.getResponses().get(vv).getValidation().contains("<=")) {
-                        String temPart = toInsert.getResponses().get(vv).getValidation().replaceAll("=", "");
-                        temPart = temPart.replaceAll("\\(", "");
-                        temPart = temPart.replaceAll("\\)", "");
-                        parts = temPart.split("<");
-                        casoValidation = 4;
-                    } else if (toInsert.getResponses().get(vv).getValidation().contains("<")) {
-                        parts = toInsert.getResponses().get(vv).getValidation().split("<");
-                        casoValidation = 1;
-                    } else if (toInsert.getResponses().get(vv).getValidation().contains(">")) {
-                        parts = toInsert.getResponses().get(vv).getValidation().split(">");
-                        casoValidation = 2;
-                    } else if (toInsert.getResponses().get(vv).getValidation().contains("=")) {
-                        parts = toInsert.getResponses().get(vv).getValidation().split("=");
-                        casoValidation = 0;
-                    }
-
-                    Double part1 = null;
-                    Double part2 = null;
-                    if (parts != null) {
-                        part1 = Double.valueOf(mapValidation.get(parts[0]));
-                        if (operaFlag == false)
-                            part2 = Double.valueOf(mapValidation.get(parts[1]));
-                        else
-                            part2 = sums;
-                    }
-                    switch (casoValidation) {
-                        case 0: //igual que
-                            if (part1 == part2)
-                                ;
-                            else {
-                                //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases = false;
-                                isValid = false;
-                            }
-                            break;
-                        case 1: //menor que
-                            if (part1 < part2)
-                                ;
-                            else {
-                                //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases = false;
-                                isValid = false;
-                            }
-                            break;
-                        case 2: //mayor que
-                            if (part1 > part2)
-                                ;
-                            else {
-                                //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases = false;
-                                isValid = false;
-                            }
-                            break;
-                        case 3: //mayor igual que
-                            if (part1 >= part2)
-                                ;
-                            else {
-                                //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases = false;
-                                isValid = false;
-                            }
-                            break;
-                        case 4: //menor igual que
-                            if (part1 <= part2)
-                                ;
-                            else {
-                                //Toast.makeText(getApplicationContext(), "Valores Invalidos " + toInsert.getResponses().get(vv).getValidation(), Toast.LENGTH_LONG).show();
-                                validationCases = false;
-                                isValid = false;
-                            }
-                            break;
-                        default:
-                            validationCases = false;
-                            isValid = false;
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                isValid = false;
-                //validacion o valores erroneos
-            }
-        }
-
-
-        if (isValid) {
-            toInsert.setId(surveys.getForm_id());
-            // TODO implemnetar el api geografica
-            /**
-             toInsert.setLatitude("-76.52566394999997");
-             toInsert.setLongitude("3.3950707201144508");
-
-             toInsert.setHoraIni("448698600");
-             toInsert.setHoraFin("448741800");
-
-             /************************************************/
-
-            String latitude = "0.0";
-            String longitude = "0.0";
-
-            toInsert.setId(surveys.getForm_id());
-
-            Long result;
-            if (isModify) {
-                toInsert.setStatus("FALSE");//Sin enviar
-                //Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-
-                toInsert.setInstanceId(surveys.getInstanceId());
-
-                result = new SurveyDAO(SurveyActivity.this).modifySurveyInstance(toInsert);
-            } else {
-                // TODO implemnetar el api geografica
-
-                //gps = new FindGPSLocation(getBaseContext());
-                if (gps.canGetLocation()) {
-                    latitude = "" + gps.getLatitude();
-                    longitude = "" + gps.getLongitude();
-
-                    //Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-
-                    toInsert.setLatitude(latitude);
-                    toInsert.setLongitude(longitude);
-
-                } else {
-                    toInsert.setLatitude(latitude);
-                    toInsert.setLongitude(longitude);
-                    //gps.showSettingsAlert();
-                }
-
-                //envia el timeStamp de inicio de survery
-                toInsert.setHoraIni("" + timeStandIni);
-
-                //envia el timeStamp de fin de survery
-                toInsert.setHoraFin("" + System.currentTimeMillis() / 1000);
-
-                result = new SurveyDAO(SurveyActivity.this).saveSurveyInstance(toInsert);
-            }
-            // Validate result to print message
-            if (result != -1) {
-                if (!isModify) {
-                    //Toast.makeText(SurveyActivity.this, getString(R.string.survey_save_ok, String.valueOf(result)), Toast.LENGTH_LONG).show();
-                    msgSaved = getString(R.string.survey_save_ok, String.valueOf(result));
-                } else {
-                    //Toast.makeText(SurveyActivity.this, getString(R.string.survey_modify_ok, String.valueOf(result)), Toast.LENGTH_LONG).show();
-                    msgSaved = getString(R.string.survey_modify_ok, String.valueOf(result));
-                }
-                finish();
-            } else {
-                //Toast.makeText(SurveyActivity.this, getString(R.string.survey_save_error), Toast.LENGTH_LONG).show();
-                msgSaved = getString(R.string.survey_save_error);
-            }
-        } else {
-            //Toast.makeText(SurveyActivity.this, getString(R.string.survey_save_error_field), Toast.LENGTH_LONG).show();
-            if (!validationCases)
-                msgSaved = "Validation Field Case Error - ";
-            msgSaved += getString(R.string.survey_save_error_field);
-        }
+    @Override
+    public void onSuccess() {
+        hideLoading();
+        finish();
     }
 
-    /**
-     * Validation an object to save survey
-     */
-    /**
-     * Build an object to save survey
-     */
-    Map<String, String> mapValidation = new HashMap<String, String>();
+    @Override
+    public void onError() {
+        hideLoading();
+    }
 
-    private boolean buildObjectToSave(View view, List<IdValue> arrayResponse) {
-        Long id_Questions = (Long) view.getTag();
-        int tipo = -1;
-        String min = "";
-        String max = "";
-        Boolean defecto_previo;
-        Boolean requerido = false;
-        String validacion = "";
-        String defecto = "";
-        String solo_lectura = "";
-        String oculto = "";
-        //String orden = "";
+    private void showLoading() {
+        loading.setVisibility(View.VISIBLE);
+    }
 
-        //Se recuperan las caracteristicas del tipo de Entrada
-        if (id_Questions != null) {
-            for (Section section : surveys.getSections()) {
-                for (Question question : section.getInputs()) {
-                    if (id_Questions == question.getId()) {
-                        tipo = question.getType();
-                        min = question.getMin();
-                        max = question.getMax();
-                        defecto_previo = question.getDefectoPrevio();
-                        requerido = question.getRequerido();
-                        if (requerido == null)
-                            requerido = false;
-                        validacion = question.getValidacion();
-                        if (validacion == null)
-                            validacion = "";
-                    }
-                }
-            }
-        }
-
-        //requerido =false;/**********************************////////////////////****************************/
-
-        if (view instanceof EditText) {
-            EditText toProcess = (EditText) view;
-            if (toProcess != null && !toProcess.getText().toString().isEmpty() && toProcess.getVisibility() == View.VISIBLE) {
-                mapValidation.put(toProcess.getTag().toString(), toProcess.getText().toString());
-
-                arrayResponse.add(new IdValue((Long) toProcess.getTag(), toProcess.getText().toString(), validacion));
-            } else {
-                if (requerido && toProcess.getVisibility() == View.VISIBLE)
-                    return false;
-                else if (requerido && toProcess.getVisibility() == View.INVISIBLE) {
-                    toProcess.setText("");
-                    mapValidation.put(toProcess.getTag().toString(), toProcess.getText().toString());
-                    arrayResponse.add(new IdValue((Long) toProcess.getTag(), toProcess.getText().toString(), validacion));
-                }
-            }
-
-        } else if (view instanceof ListView) {
-            ListView toProcess = (ListView) view;
-
-            if (toProcess != null) {
-
-                SurveyAdapterMultipleType keyValues = (SurveyAdapterMultipleType) toProcess.getAdapter();
-                List<IdOptionValue> lstSelectedValues = keyValues.getTrueStatusItems();
-
-                if (lstSelectedValues.size() > 0) {
-
-                    for (IdOptionValue item : lstSelectedValues) {
-                        arrayResponse.add(new IdValue((Long) toProcess.getTag(), String.valueOf(item.getId()), validacion));
-                    }
-                } else {
-                    if (requerido)
-                        return false;
-                }
-
-            } else {
-                return false;
-            }
-        } else if (view instanceof Spinner) {
-            Spinner toProcess = (Spinner) view;
-
-            if (toProcess != null && toProcess.getVisibility() == View.VISIBLE) {
-                try {
-                    arrayResponse.add(new IdValue((Long) toProcess.getTag(), String.valueOf(((IdOptionValue) toProcess.getSelectedItem()).getId()), validacion));
-                } catch (Exception e) {
-                    msgSaved += " Input empty - ID " + id_Questions;
-                    if (requerido && toProcess.getVisibility() == View.VISIBLE)
-                        return false;
-                }
-            } else {
-                if (requerido && toProcess.getVisibility() == View.VISIBLE)
-                    return false;
-                else if (requerido && toProcess.getVisibility() == View.INVISIBLE) {
-                    arrayResponse.add(new IdValue((Long) toProcess.getTag(), "", validacion));
-                }
-            }
-
-        } else if (view instanceof LinearLayout && view.getTag() != null) {
-            LinearLayout toProcessLinear = (LinearLayout) view;
-            Long idQuestion = (Long) toProcessLinear.getTag();
-
-            // Se recorren todos los elementos de linear layout buscando los imageview de las imagenes
-            for (int k = 0; k < toProcessLinear.getChildCount(); k++) {
-
-                if (toProcessLinear.getChildAt(k) instanceof ImageView) {
-                    ImageView toProcess = (ImageView) toProcessLinear.getChildAt(k);
-                    if (toProcess != null && toProcess.getDrawable() != null) {
-                        String base64 = getEncoded64ImageStringFromBitmap(((BitmapDrawable) toProcess.getDrawable()).getBitmap());
-                        arrayResponse.add(new IdValue(idQuestion, base64, validacion));
-                    } else {
-                        if (requerido)
-                            return false;
-                    }
-                }
-            }
-        }
-        return true;
+    private void hideLoading() {
+        loading.setVisibility(View.GONE);
     }
 }

@@ -1,15 +1,18 @@
 package colector.co.com.collector.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by dherrera on 11/10/15.
  */
-public class Question implements Serializable {
+public class Question extends RealmObject {
 
-
+    @PrimaryKey
     private Long input_id;
     /**
      * TEXTO = '1' OK
@@ -25,11 +28,11 @@ public class Question implements Serializable {
      */
     private int type;
 
-    private List<QuestionVisibilityRules> valorvisibility;
-    private List<QuestionAsociateForm> asociate_form;
-    private List<IdOptionValue> responses;
-    private List<ResponseComplex> options;
-    private List<ResponseAttribute> atributos;
+    private RealmList<QuestionVisibilityRules> valorvisibility;
+    private RealmList<QuestionAsociateForm> asociate_form;
+    private RealmList<IdOptionValue> responses;
+    private RealmList<ResponseComplex> options;
+    private RealmList<ResponseAttribute> atributos;
     private String name;
     private String description;
     private String minimo;
@@ -47,14 +50,14 @@ public class Question implements Serializable {
         super();
     }
 
-    public Question(Long id, int type, List<IdOptionValue> responses, List<QuestionVisibilityRules> valorvisibility,
-                    List<QuestionAsociateForm> asociate_form,
-                    List<ResponseComplex> options,List<ResponseAttribute> atributos,
+    public Question(Long id, int type, RealmList<IdOptionValue> responses, RealmList<QuestionVisibilityRules> valorvisibility,
+                    RealmList<QuestionAsociateForm> asociate_form,
+                    RealmList<ResponseComplex> options, RealmList<ResponseAttribute> atributos,
                     String name, String description,
                     String minimo, String maximo,
                     String defecto, Boolean requerido,
                     String validacion,
-                    Boolean defecto_previo,String solo_lectura,Boolean oculto,String orden) {
+                    Boolean defecto_previo, String solo_lectura, Boolean oculto, String orden) {
 
         this.input_id = id;
         this.type = type;
@@ -120,6 +123,7 @@ public class Question implements Serializable {
     public String getDefecto() {
         return defecto;
     }
+
     public void setMin(String min) {
         this.minimo = minimo;
     }
@@ -168,48 +172,48 @@ public class Question implements Serializable {
         this.type = type;
     }
 
-    public List<IdOptionValue> getResponses() {
-        if(responses == null){
-            responses = new ArrayList<IdOptionValue>();
+    public RealmList<IdOptionValue> getResponses() {
+        if (responses == null) {
+            responses = new RealmList<>();
         }
         return responses;
     }
 
-    public void setResponses(List<IdOptionValue> responses) {
+    public void setResponses(RealmList<IdOptionValue> responses) {
         this.responses = responses;
     }
 
-    public List<QuestionVisibilityRules> getValorVisibility() {
-        if(valorvisibility == null){
-            valorvisibility = new ArrayList<QuestionVisibilityRules>();
+    public RealmList<QuestionVisibilityRules> getValorVisibility() {
+        if (valorvisibility == null) {
+            valorvisibility = new RealmList<>();
         }
         return valorvisibility;
     }
 
-    public void setValorVisibility(List<QuestionVisibilityRules> valorvisibility) {
+    public void setValorVisibility(RealmList<QuestionVisibilityRules> valorvisibility) {
         this.valorvisibility = valorvisibility;
     }
 
-    public List<QuestionAsociateForm> getAsociate_form() {
-        if(asociate_form == null){
-            asociate_form = new ArrayList<QuestionAsociateForm>();
+    public RealmList<QuestionAsociateForm> getAsociate_form() {
+        if (asociate_form == null) {
+            asociate_form = new RealmList<>();
         }
         return asociate_form;
     }
 
-    public void setAsociate_form(List<QuestionAsociateForm> asociate_form) {
+    public void setAsociate_form(RealmList<QuestionAsociateForm> asociate_form) {
         this.asociate_form = asociate_form;
     }
 
-    public List<ResponseComplex> getOptions() {
+    public RealmList<ResponseComplex> getOptions() {
 
-        if( options == null){
-            options = new ArrayList<ResponseComplex>();
+        if (options == null) {
+            options = new RealmList<>();
         }
-            return options;
+        return options;
     }
 
-    public void setOptions(List<ResponseComplex> options) {
+    public void setOptions(RealmList<ResponseComplex> options) {
         this.options = options;
     }
 
@@ -229,14 +233,14 @@ public class Question implements Serializable {
         this.description = description;
     }
 
-    public List<ResponseAttribute> getAtributos() {
-        if(atributos == null){
-            atributos = new ArrayList<ResponseAttribute>();
+    public RealmList<ResponseAttribute> getAtributos() {
+        if (atributos == null) {
+            atributos = new RealmList<>();
         }
         return atributos;
     }
 
-    public void setAtributos(List<ResponseAttribute> atributos) {
+    public void setAtributos(RealmList<ResponseAttribute> atributos) {
         this.atributos = atributos;
     }
 }

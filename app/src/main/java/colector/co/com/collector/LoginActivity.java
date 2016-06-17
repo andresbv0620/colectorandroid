@@ -11,12 +11,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
+
 import java.util.List;
 
+import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.http.AsyncResponse;
 import colector.co.com.collector.http.BackgroundTask;
 import colector.co.com.collector.http.ResourceNetwork;
+import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.LoginRequest;
@@ -27,10 +29,11 @@ import colector.co.com.collector.persistence.dao.SurveyDAO;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.Utilities;
+import io.fabric.sdk.android.Fabric;
 
 import static colector.co.com.collector.settings.AppSettings.HTTP_OK;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
     private EditText etUsername;
     private EditText etPassword;
@@ -51,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.login_uuid)).setText(UUID);
     }
 
-    public void offlineWorkVal(final List<Survey> offlineSurvey ) {
+    public void offlineWorkVal(final List<Survey> offlineSurvey) {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setMessage(R.string.login_offline_message)
@@ -87,9 +90,9 @@ public class LoginActivity extends AppCompatActivity {
                 AppSettings.URL_BASE = ResourceNetwork.URL_BASE_DESA;
                 Toast.makeText(this, "Modo desarrollo", Toast.LENGTH_LONG).show();
             }
-        }else if(etUsername.getText().toString().trim().equals("") || etPassword.getText().toString().trim().equals("")){
-            Toast.makeText(this,getString(R.string.login_error_empty),Toast.LENGTH_LONG).show();
-        }else if(!Utilities.isNetworkConnected(this)) {
+        } else if (etUsername.getText().toString().trim().equals("") || etPassword.getText().toString().trim().equals("")) {
+            Toast.makeText(this, getString(R.string.login_error_empty), Toast.LENGTH_LONG).show();
+        } else if (!Utilities.isNetworkConnected(this)) {
             //INIDICAR SI PUEDE TRABAJARA EN MODO OFFFLINE Y SI QUIERE CONTINUAR
             Toast.makeText(this, getString(R.string.common_internet_not_available), Toast.LENGTH_LONG).show();
 
@@ -97,82 +100,81 @@ public class LoginActivity extends AppCompatActivity {
             List<Survey> offlineSurvey = new SurveyDAO(this).getSurveyAvailable();
 
             //VALIDAR SI USUARIO, CONTRASEÑA, TABLET ES VALIDA Y SET TOKEN JUNTO CON COD_ID AL PROYECTO.
-            boolean usuarioValido=false;
+            boolean usuarioValido = false;
 
-            if(usuarioValido){
-                if(offlineSurvey != null && offlineSurvey.size() > 0) {
+            if (usuarioValido) {
+                if (offlineSurvey != null && offlineSurvey.size() > 0) {
                     offlineWorkVal(offlineSurvey);
-                }else{
+                } else {
                     offlineWorkDen();
                 }
-            }else
+            } else
                 Toast.makeText(this, getString(R.string.login_unknown_user_dao), Toast.LENGTH_LONG).show();
 
 
-        }else {
+        } else {
             LoginRequest toSend = new LoginRequest(etUsername.getText().toString(), etPassword.getText().toString());
             toSend.setTabletId(UUID);
 
             AsyncResponse callback = new AsyncResponse() {
                 @Override
-                public void callback(Object output,String Sended) {
+                public void callback(Object output, String Sended) {
 
-                    if(output instanceof LoginResponse){
+                    if (output instanceof LoginResponse) {
                         LoginResponse response = (LoginResponse) output;
 
-                        if(response.getResponseCode().equals(HTTP_OK) ){
-                            if(response.getResponseData().get(0) != null) {
+                        if (response.getResponseCode().equals(HTTP_OK)) {
+                            if (response.getResponseData().get(0) != null) {
                                 AppSession.getInstance().setUser(response.getResponseData().get(0));
                                 // Invoke the survey synchronize
                                 getSurveys();
-                            }else if(output instanceof ErrorResponse){
+                            } else if (output instanceof ErrorResponse) {
                                 Toast.makeText(LoginActivity.this, ((ErrorResponse) output).getMessage(), Toast.LENGTH_LONG).show();
-                            }else{
+                            } else {
                                 Toast.makeText(LoginActivity.this, LoginActivity.this.getString(R.string.survey_save_send_error), Toast.LENGTH_LONG).show();
                             }
-                        }else{
-                            Toast.makeText(LoginActivity.this,response.getResponseDescription(),Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(LoginActivity.this, response.getResponseDescription(), Toast.LENGTH_LONG).show();
                         }
-                    }else if(output instanceof ErrorResponse){
-                        ErrorResponse response =(ErrorResponse) output;
-                        Toast.makeText(LoginActivity.this,response.getMessage() + "VER TOKEN",Toast.LENGTH_LONG).show();
+                    } else if (output instanceof ErrorResponse) {
+                        ErrorResponse response = (ErrorResponse) output;
+                        Toast.makeText(LoginActivity.this, response.getMessage() + "VER TOKEN", Toast.LENGTH_LONG).show();
                     }
                 }
             };
 
-                BackgroundTask bt = new BackgroundTask(this, toSend, new LoginResponse(), callback, null,false);
-                bt.execute(AppSettings.URL_BASE+ResourceNetwork.URL_LOGIN_DEF);
+            BackgroundTask bt = new BackgroundTask(this, toSend, new LoginResponse(), callback, null, false);
+            bt.execute(AppSettings.URL_BASE + ResourceNetwork.URL_LOGIN_DEF);
 
         }
 
     }
 
-    private void getSurveys(){
+    private void getSurveys() {
         GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser().getColector_id());
         AsyncResponse callback = new AsyncResponse() {
             @Override
-            public void callback(Object output,String Sended) {
+            public void callback(Object output, String Sended) {
 
-                if(output instanceof GetSurveysResponse){
+                if (output instanceof GetSurveysResponse) {
 
                     GetSurveysResponse response = (GetSurveysResponse) output;
 
-                    if(response.getResponseCode().equals(HTTP_OK)){
+                    if (response.getResponseCode().equals(HTTP_OK)) {
+                        // to be remove
                         SurveyDAO dao = new SurveyDAO(LoginActivity.this);
                         dao.synchronizeSurveys(response.getResponseData());
 
                         AppSession.getInstance().setSurveyAvailable(response.getResponseData());
+                        DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(), LoginActivity.this); //Save on Realm
 
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }else{
-                        Toast.makeText(LoginActivity.this,response.getResponseDescription(),Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, response.getResponseDescription(), Toast.LENGTH_LONG).show();
                     }
 
 
-                }else if(output instanceof ErrorResponse){
-                    ErrorResponse response =(ErrorResponse) output;
+                } else if (output instanceof ErrorResponse) {
+                    ErrorResponse response = (ErrorResponse) output;
                     Toast.makeText(LoginActivity.this, response.getMessage(), Toast.LENGTH_LONG).show();
 
                 }
@@ -180,7 +182,18 @@ public class LoginActivity extends AppCompatActivity {
         };
 
         BackgroundTask bt = new BackgroundTask(this, toSend, new GetSurveysResponse(), callback, null, false);
-        bt.execute(AppSettings.URL_BASE+ResourceNetwork.URL_SURVEY_DEF);
+        bt.execute(AppSettings.URL_BASE + ResourceNetwork.URL_SURVEY_DEF);
     }
 
+    @Override
+    public void onSuccess() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public void onError() {
+        Toast.makeText(LoginActivity.this, "Error", Toast.LENGTH_LONG).show();
+    }
 }

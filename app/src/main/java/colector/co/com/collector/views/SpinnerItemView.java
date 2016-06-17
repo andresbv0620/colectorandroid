@@ -17,6 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
 import colector.co.com.collector.model.IdOptionValue;
+import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
 
 /**
@@ -29,8 +30,10 @@ public class SpinnerItemView extends LinearLayout {
     TextView label;
     @BindView(R.id.spinner)
     Spinner spinner;
-    ArrayList<String> options = new ArrayList<>();
-    boolean required = false;
+    private Long id;
+    private String validation;
+    private ArrayList<String> options = new ArrayList<>();
+    private boolean required = false;
 
     public SpinnerItemView(Context context) {
         super(context);
@@ -53,6 +56,8 @@ public class SpinnerItemView extends LinearLayout {
     }
 
     public void bind(ArrayList<IdOptionValue> responses, Question question) {
+        this.id = question.getId();
+        this.validation = question.getValidacion();
         if (responses.size() == 0) return;
         required = question.getRequerido();
         for (IdOptionValue option : responses) options.add(option.getValue());
@@ -82,5 +87,9 @@ public class SpinnerItemView extends LinearLayout {
                 validateField();
             }
         });
+    }
+
+    public IdValue getResponse() {
+        return new IdValue(id, spinner.getSelectedItem().toString(), validation);
     }
 }
