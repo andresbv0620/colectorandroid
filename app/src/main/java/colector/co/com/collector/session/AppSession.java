@@ -1,5 +1,7 @@
 package colector.co.com.collector.session;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,8 @@ public class AppSession {
 
     /**
      * Singleton instance
-      * @return
+     *
+     * @return
      */
     public static synchronized AppSession getInstance() {
         if (singletonObject == null) {
@@ -40,7 +43,7 @@ public class AppSession {
 
 
     public List<Survey> getSurveyDone() {
-        if(surveyDone == null){
+        if (surveyDone == null) {
             surveyDone = new ArrayList<Survey>();
         }
         return surveyDone;
@@ -51,7 +54,7 @@ public class AppSession {
     }
 
     public List<Survey> getSurveyAvailable() {
-        if(surveyAvailable == null){
+        if (surveyAvailable == null) {
             surveyAvailable = new ArrayList<Survey>();
         }
         return surveyAvailable;
@@ -72,10 +75,13 @@ public class AppSession {
     public Survey getCurrentSurvey() {
         return currentSurvey;
     }
-    public static int getTypeSurveySelected() {return typeSurveySelected;}
+
+    public static int getTypeSurveySelected() {
+        return typeSurveySelected;
+    }
 
     public void setCurrentSurvey(Survey currentSurvey, int typeSurveySelected) {
-        this.typeSurveySelected =typeSurveySelected;
+        this.typeSurveySelected = typeSurveySelected;
         this.currentSurvey = currentSurvey;
     }
 
@@ -95,4 +101,16 @@ public class AppSession {
     public void setCurrentPhotoID(Long currentPhotoID) {
         this.currentPhotoID = currentPhotoID;
     }
+
+    public
+    @Nullable
+    ArrayList<Long> getSurveyAvailableIds() {
+        if (surveyAvailable == null || surveyAvailable.size() == 0) return null;
+        ArrayList<Long> indexes = new ArrayList<>();
+        for (Survey survey : surveyAvailable) {
+            indexes.add(survey.getForm_id());
+        }
+        return indexes;
+    }
+
 }

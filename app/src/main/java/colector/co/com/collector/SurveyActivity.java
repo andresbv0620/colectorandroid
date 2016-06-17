@@ -84,7 +84,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
 
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
-    private boolean isLoaded;
+
 
     public static final String NEW_SURVEY_KEY = "new_survey";
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -115,16 +115,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
-
-
         showLoading();
         setTitle(surveys.getForm_name());
         setupGPS();
         configureGPSButton();
         configureSaveButton();
         configureInitTime();
-        isLoaded = getIntent().getExtras().getBoolean(NEW_SURVEY_KEY);
-        //Ask For the Previous Data
         buildSurvey();
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
