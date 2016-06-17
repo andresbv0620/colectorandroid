@@ -3,17 +3,22 @@ package colector.co.com.collector.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by dherrera on 11/10/15.
  */
-public class ResponseComplex {
+public class ResponseComplex extends RealmObject {
 
+    @PrimaryKey
     private String record_id;
-    private List<ResponseItem> responses;
+    private RealmList<ResponseItem> responses;
 
 
 
-    public ResponseComplex(String record_id, List<ResponseItem> responses) {
+    public ResponseComplex(String record_id, RealmList<ResponseItem> responses) {
         this.record_id = record_id;
         this.responses = responses;
     }
@@ -30,14 +35,14 @@ public class ResponseComplex {
         this.record_id = record_id;
     }
 
-    public List<ResponseItem> getResponses() {
+    public RealmList<ResponseItem> getResponses() {
         if(responses == null){
-            responses = new ArrayList<ResponseItem>();
+            responses = new RealmList<>();
         }
         return responses;
     }
 
-    public void setResponses(List<ResponseItem> responses) {
+    public void setResponses(RealmList<ResponseItem> responses) {
         this.responses = responses;
     }
 

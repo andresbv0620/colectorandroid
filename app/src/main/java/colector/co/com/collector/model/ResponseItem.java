@@ -1,9 +1,13 @@
 package colector.co.com.collector.model;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by dherrera on 11/10/15.
  */
-public class ResponseItem {
+public class ResponseItem extends RealmObject {
+    @PrimaryKey
     private Long input_id;
     private String value;
     private Long tipo;

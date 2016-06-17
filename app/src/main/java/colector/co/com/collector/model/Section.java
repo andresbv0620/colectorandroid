@@ -3,21 +3,26 @@ package colector.co.com.collector.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by dherrera on 11/10/15.
  */
-public class Section {
+public class Section extends RealmObject {
 
+    @PrimaryKey
     private Long section_id;
     private String name;
     private String description;
-    private List<Question> inputs;
+    private RealmList<Question> inputs;
 
     public Section(){
         super();
     }
 
-    public Section(Long id,String name, String description, List<Question> inputs) {
+    public Section(Long id,String name, String description, RealmList<Question> inputs) {
         super();
         this.section_id=id;
         this.name = name;
@@ -49,14 +54,14 @@ public class Section {
         this.description = description;
     }
 
-    public List<Question> getInputs() {
+    public RealmList<Question> getInputs() {
         if(inputs==null){
-            inputs=new ArrayList<Question>();
+            inputs=new RealmList<>();
         }
         return inputs;
     }
 
-    public void setInputs(List<Question> inputs) {
+    public void setInputs(RealmList<Question> inputs) {
         this.inputs = inputs;
     }
 }

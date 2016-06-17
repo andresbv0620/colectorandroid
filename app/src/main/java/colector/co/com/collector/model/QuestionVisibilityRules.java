@@ -1,9 +1,11 @@
 package colector.co.com.collector.model;
 
+import io.realm.RealmObject;
+
 /**
  * Created by dherrera on 11/10/15.
  */
-public class QuestionVisibilityRules {
+public class QuestionVisibilityRules extends RealmObject{
     private Long elemento;
     private String operador;
     private String valor;

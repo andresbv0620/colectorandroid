@@ -1,9 +1,11 @@
 package colector.co.com.collector.model;
 
+import io.realm.RealmObject;
+
 /**
  * Created by dherrera on 11/10/15.
  */
-public class QuestionAsociateForm {
+public class QuestionAsociateForm extends RealmObject {
     private Boolean actualizar_existente;
     private String name;
     private Long associate_id;
