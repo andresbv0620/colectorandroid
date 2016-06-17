@@ -9,9 +9,9 @@ import io.realm.annotations.PrimaryKey;
  */
 public class SurveySave extends RealmObject {
 
-    private Long instanceId;
+    private Long instanceId; //Survey Id
     @PrimaryKey
-    private Long id;
+    private Long id; // Id of saved survey
     private String latitude;
     private String longitude;
     private String HoraIni;

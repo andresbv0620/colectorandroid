@@ -41,7 +41,7 @@ public class SurveyAvailable extends Fragment {
                     return true;
                 }
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             Toast.makeText(getContext(), "Service Err " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
         return false;
@@ -53,6 +53,7 @@ public class SurveyAvailable extends Fragment {
     }
 
     Boolean runingServiceFlag;
+
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
@@ -64,27 +65,25 @@ public class SurveyAvailable extends Fragment {
         idTabs = this.getTag();
 
 
-
         progress = ProgressDialog.show(getContext(), getResources().getString(R.string.main_list_title),
                 getResources().getString(R.string.main_list_msg), true);
 
         new Thread(new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 try {
-                    runingServiceFlag=false;
-                    if(idTabs.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY)){
+                    runingServiceFlag = false;
+                    if (idTabs.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY)) {
                         toPrint = AppSession.getInstance().getSurveyAvailable();
 
 
-                    }else if(idTabs.equals(AppSettings.TAB_ID_UPLOADED_SURVEY)){
+                    } else if (idTabs.equals(AppSettings.TAB_ID_UPLOADED_SURVEY)) {
                         AppSession.getInstance().setSurveyDone(new SurveyDAO(getContext()).getSurveyDone("ENVIADO"));
                         toPrint = AppSession.getInstance().getSurveyDone();
 
 
-                    }else if(idTabs.equals(AppSettings.TAB_ID_DONE_SURVEY)){
-                        runingServiceFlag=isServiceRunning();
+                    } else if (idTabs.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
+                        runingServiceFlag = isServiceRunning();
                         AppSession.getInstance().setSurveyDone(new SurveyDAO(getContext()).getSurveyDone("FALSE"));
                         toPrint = AppSession.getInstance().getSurveyDone();
                     }
@@ -99,9 +98,9 @@ public class SurveyAvailable extends Fragment {
                     public void run() {
                         try {
                             progress.dismiss();
-                            if (runingServiceFlag){
+                            if (runingServiceFlag) {
                                 Toast.makeText(getContext(), "Service Upload Running!", Toast.LENGTH_LONG).show();
-                            }else
+                            } else
                                 fillList();
 
                         } catch (Exception e) {
@@ -115,32 +114,39 @@ public class SurveyAvailable extends Fragment {
         return v;
     }
 
-    private void fillList(){
-        SurveyAdapter adapter = new SurveyAdapter(getActivity(),new ArrayList<>(toPrint),idTabs);
+    private void fillList() {
+        SurveyAdapter adapter = new SurveyAdapter(getActivity(), new ArrayList<>(toPrint), idTabs);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                List<Survey> WorkHoursRecSurvey=null;
+                List<Survey> WorkHoursRecSurvey = null;
                 if (toPrint.get(position).getForm_precargados()) {
                     AppSession.getInstance().setSurveyDone(new SurveyDAO(getContext()).
                             getSurveyDonePrecar(toPrint.get(position).getForm_name().toString()));
                     WorkHoursRecSurvey = AppSession.getInstance().getSurveyDone();
                 }
 
-                boolean flagPrecargado=false;
-                if (WorkHoursRecSurvey !=null)
-                    if (WorkHoursRecSurvey.get(0).getForm_id() !=null)
-                        flagPrecargado=true;
+                boolean flagPrecargado = false;
+                if (WorkHoursRecSurvey != null)
+                    if (WorkHoursRecSurvey.get(0).getForm_id() != null)
+                        flagPrecargado = true;
 
-                if (flagPrecargado==true){
-                        AppSession.getInstance().setCurrentSurvey(WorkHoursRecSurvey.get(0), AppSettings.SURVEY_SELECTED_NEW);
-                        Intent intentWH = new Intent(getContext(), SurveyActivity.class);
-                        startActivity(intentWH);
-                }else{
-                        AppSession.getInstance().setCurrentSurvey(toPrint.get(position), AppSettings.SURVEY_SELECTED_NEW);
-                        Intent intent = new Intent(getContext(), SurveyActivity.class);
-                        startActivity(intent);
+                if (flagPrecargado == true) {
+                    AppSession.getInstance().setCurrentSurvey(WorkHoursRecSurvey.get(0), AppSettings.SURVEY_SELECTED_NEW);
+                    Intent intentWH = new Intent(getContext(), SurveyActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(SurveyActivity.NEW_SURVEY_KEY, true);
+                    intentWH.putExtras(bundle);
+                    // Put Survey Answer Index
+                    startActivity(intentWH);
+                } else {
+                    AppSession.getInstance().setCurrentSurvey(toPrint.get(position), AppSettings.SURVEY_SELECTED_NEW);
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(SurveyActivity.NEW_SURVEY_KEY, true);
+                    Intent intent = new Intent(getContext(), SurveyActivity.class);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
                 }
             }
         });

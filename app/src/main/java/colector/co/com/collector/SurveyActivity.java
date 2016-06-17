@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,7 +22,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -40,7 +38,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,21 +45,17 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.OptionAdapter;
-import colector.co.com.collector.adapters.SurveyAdapterMultipleType;
 import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.IdOptionValue;
@@ -75,7 +68,6 @@ import colector.co.com.collector.model.ResponseItem;
 import colector.co.com.collector.model.Section;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.SurveySave;
-import colector.co.com.collector.persistence.dao.SurveyDAO;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
@@ -88,13 +80,16 @@ import colector.co.com.collector.views.SpinnerItemView;
 import static android.graphics.Color.parseColor;
 
 public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave {
-    FindGPSLocation gps;
+    private FindGPSLocation gps;
+
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
-    private boolean isModify = false;
-    static final int REQUEST_TAKE_PHOTO = 1;
-    static final int REQUEST_TAKE_MAPSGPS = 2;
-    public static final int REQUEST_TAKE_SIGNATURE = 3;
+    private boolean isLoaded;
+
+    public static final String NEW_SURVEY_KEY = "new_survey";
+    private static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int REQUEST_TAKE_MAPSGPS = 2;
+    private static final int REQUEST_TAKE_SIGNATURE = 3;
 
     @BindView(R.id.fab)
     FloatingActionButton FABGPS;
@@ -107,9 +102,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
     @BindView(R.id.coordinator)
     CoordinatorLayout coordinatorLayout;
 
-    Long timeStandIni;
-
-    public PopupWindow popupWindow;
+    private Long timeStandIni;
+    private PopupWindow popupWindow;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -121,19 +115,18 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
-        loading.setVisibility(View.VISIBLE);
+
+
+        showLoading();
         setTitle(surveys.getForm_name());
         setupGPS();
         configureGPSButton();
         configureSaveButton();
         configureInitTime();
-        isModifiedSurvey();
+        isLoaded = getIntent().getExtras().getBoolean(NEW_SURVEY_KEY);
+        //Ask For the Previous Data
         buildSurvey();
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-    }
-
-    private void isModifiedSurvey() {
-        if (surveys.getInstanceId() != null) isModify = true;
     }
 
     private void setupGPS() {
@@ -178,10 +171,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
                 .setPositiveButton(getString(R.string.survey_save), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        loading.setVisibility(View.VISIBLE);
+                        showLoading();
                         if (validateFields()) {
                             saveSurvey();
-//                            processSave();
                         } else {
                             showSnackNotification();
                         }
@@ -200,7 +192,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         Snackbar snack = Snackbar.make(coordinatorLayout, R.string.check_required, Snackbar.LENGTH_LONG);
         ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
         snack.show();
-        loading.setVisibility(View.GONE);
+        hideLoading();
     }
 
     private boolean validateFields() {
@@ -233,7 +225,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
             buildSection(section, sectionItem.sectionItemsContainer);
             container.addView(sectionItem);
         }
-        loading.setVisibility(View.GONE);
+        hideLoading();
     }
 
     private void buildSection(Section section, LinearLayout linear) {
@@ -315,7 +307,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
                 linear.addView(buildButton(getString(R.string.survey_search), showPopupSearch(options, toInsertQuestion, id)));
 
                 if (surveys.getInstanceId() != null) {
-                    isModify = true;
 
                     for (ResponseComplex item : options) {
                         String recordID = item.getRecord_id();
@@ -405,7 +396,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         toReturn.setTag(id);
         // set value if is modified
         if (surveys.getInstanceId() != null) {
-            isModify = true;
             if (defectoPrevio || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT)
                 toReturn.setText(surveys.getAnswer(id));
         }
@@ -852,26 +842,11 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         fileOrDirectory.delete();
     }
 
-    /**
-     * Convert Bitmap to String to save information in database
-     *
-     * @param bitmap
-     * @return
-     */
-    public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
-        byte[] byteFormat = stream.toByteArray();
-        // get the base 64 string
-        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
-        return imgString;
-    }
-
     private void saveSurvey() {
 
         SurveySave surveySave = new SurveySave();
-        if (isModify) surveySave.setInstanceId(surveys.getInstanceId());
-        surveySave.setId(surveys.getForm_id());
+        surveySave.setInstanceId(surveys.getForm_id());
+        surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex(surveys.getForm_id())); // index on data base (Primary Key)
         surveySave.setLatitude(String.valueOf(gps.getLatitude()));
         surveySave.setLongitude(String.valueOf(gps.getLongitude()));
         surveySave.setHoraIni(String.valueOf(timeStandIni));
@@ -896,18 +871,26 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
             }
         }
         // Save on DataBase
+        Toast.makeText(this, "Index :: " + surveySave.getId(), Toast.LENGTH_LONG).show();
         DatabaseHelper.getInstance().addSurvey(surveySave, this);
     }
 
     @Override
     public void onSuccess() {
-        loading.setVisibility(View.GONE);
+        hideLoading();
         finish();
     }
 
     @Override
     public void onError() {
+        hideLoading();
+    }
+
+    private void showLoading() {
+        loading.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
         loading.setVisibility(View.GONE);
-        //Show error
     }
 }
