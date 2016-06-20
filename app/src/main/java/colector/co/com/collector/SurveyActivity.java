@@ -85,8 +85,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
 
-
-    public static final String NEW_SURVEY_KEY = "new_survey";
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_TAKE_MAPSGPS = 2;
     private static final int REQUEST_TAKE_SIGNATURE = 3;
@@ -257,13 +255,13 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
             case 3:
             case 4:
                 SpinnerItemView spinnerItemView = new SpinnerItemView(this);
-                spinnerItemView.bind(new ArrayList<>(response), question);
+                spinnerItemView.bind(new ArrayList<>(response), question, surveys.getAnswer(id));
                 linear.addView(spinnerItemView);
                 break;
             //Multiple opcion
             case 5:
                 MultipleItemViewContainer multipleItemViewContainer = new MultipleItemViewContainer(this);
-                multipleItemViewContainer.bind(new ArrayList<>(response), question);
+                multipleItemViewContainer.bind(new ArrayList<>(response), question, surveys.getListAnswers(id));
                 linear.addView(multipleItemViewContainer);
                 break;
             // picture
@@ -842,7 +840,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
 
         SurveySave surveySave = new SurveySave();
         surveySave.setInstanceId(surveys.getForm_id());
-        surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex(surveys.getForm_id())); // index on data base (Primary Key)
+        if (surveys.getInstanceId() == null)
+            surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex(surveys.getForm_id()));
+        else
+            surveySave.setId(surveys.getInstanceId());
         surveySave.setLatitude(String.valueOf(gps.getLatitude()));
         surveySave.setLongitude(String.valueOf(gps.getLongitude()));
         surveySave.setHoraIni(String.valueOf(timeStandIni));
@@ -867,7 +868,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
             }
         }
         // Save on DataBase
-        Toast.makeText(this, "Index :: " + surveySave.getId(), Toast.LENGTH_LONG).show();
         DatabaseHelper.getInstance().addSurvey(surveySave, this);
     }
 

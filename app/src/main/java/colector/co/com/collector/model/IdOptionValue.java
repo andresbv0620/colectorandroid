@@ -1,13 +1,12 @@
 package colector.co.com.collector.model;
 
 import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by dherrera on 11/10/15.
  */
 public class IdOptionValue extends RealmObject {
-    @PrimaryKey
+
     private Long response_id;
     private String value;
     private boolean status = false;

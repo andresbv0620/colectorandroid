@@ -47,6 +47,7 @@ public class SurveyAvailable extends Fragment {
         progress = ProgressDialog.show(getContext(), getResources().getString(R.string.main_list_title),
                 getResources().getString(R.string.main_list_msg), true);
         if (idTabs.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY)) {
+            AppSession.getInstance().cleanSurveyAvailable();
             toPrint = new ArrayList<>(AppSession.getInstance().getSurveyAvailable());
 
 

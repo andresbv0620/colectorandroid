@@ -8,7 +8,6 @@ import io.realm.annotations.PrimaryKey;
  */
 public class IdValue extends RealmObject {
 
-    @PrimaryKey
     private Long id;
     private String value;
     private String validation;

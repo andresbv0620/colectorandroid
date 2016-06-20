@@ -26,9 +26,9 @@ public class Survey extends RealmObject {
     private String horafin;
 
     private RealmList<Section> sections;
-    private Long instanceId;
+    private @Nullable Long instanceId;
     private String instanceDate;
-    private RealmList<IdValue> instanceAnswers;
+    private @Nullable RealmList<IdValue> instanceAnswers;
 
     public Survey() {
         super();
@@ -97,7 +97,7 @@ public class Survey extends RealmObject {
         this.sections = sections;
     }
 
-    public Long getInstanceId() {
+    public @Nullable Long getInstanceId() {
         return instanceId;
     }
 

@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import colector.co.com.collector.fragments.SurveyAvailable;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.response.ResponseData;
 
@@ -111,6 +112,15 @@ public class AppSession {
             indexes.add(survey.getForm_id());
         }
         return indexes;
+    }
+
+    public void cleanSurveyAvailable() {
+        if (surveyAvailable != null && surveyAvailable.size() > 0) {
+            for (Survey survey : surveyAvailable) {
+                survey.setInstanceId(null);
+                survey.setInstanceAnswer(null);
+            }
+        }
     }
 
 }
