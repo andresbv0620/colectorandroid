@@ -3,12 +3,18 @@ package colector.co.com.collector.network;
 import android.content.Context;
 import com.squareup.otto.Bus;
 import java.io.IOException;
+
+import colector.co.com.collector.model.request.GetSurveysRequest;
+import colector.co.com.collector.model.request.LoginRequest;
+import colector.co.com.collector.model.response.GetSurveysResponse;
+import colector.co.com.collector.model.response.LoginResponse;
 import colector.co.com.collector.utils.PrefsUtils;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -81,5 +87,15 @@ public class ApiClient {
 
     public static void setRetrofitAdapter(Retrofit retrofitAdapter) {
         ApiClient.retrofitAdapter = retrofitAdapter;
+    }
+
+    public Call<LoginResponse> doLogin(LoginRequest loginRequest){
+        ApiService service = retrofitAdapter.create(ApiService.class);
+        return service.doLogin(loginRequest);
+    }
+
+    public Call<GetSurveysResponse> getSurveys(GetSurveysRequest surveysRequest, String token){
+        ApiService service = retrofitAdapter.create(ApiService.class);
+        return service.getSurveys(surveysRequest, token);
     }
 }

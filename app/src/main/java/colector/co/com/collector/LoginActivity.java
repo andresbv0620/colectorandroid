@@ -11,47 +11,63 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import colector.co.com.collector.database.DatabaseHelper;
-import colector.co.com.collector.http.AsyncResponse;
-import colector.co.com.collector.http.BackgroundTask;
 import colector.co.com.collector.http.ResourceNetwork;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.LoginRequest;
-import colector.co.com.collector.model.response.ErrorResponse;
 import colector.co.com.collector.model.response.GetSurveysResponse;
 import colector.co.com.collector.model.response.LoginResponse;
+import colector.co.com.collector.network.BusProvider;
 import colector.co.com.collector.persistence.dao.SurveyDAO;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.Utilities;
 import io.fabric.sdk.android.Fabric;
 
-import static colector.co.com.collector.settings.AppSettings.HTTP_OK;
-
 public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
-    private EditText etUsername;
-    private EditText etPassword;
+    @BindView(R.id.editTextEmail)
+    EditText etUsername;
+    @BindView(R.id.editTextPassword)
+    EditText etPassword;
+    @BindView(R.id.login_uuid)
+    TextView textViewLoginUiid;
     private String UUID;
+    private Bus mBus = BusProvider.getBus();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
         UUID = Utilities.getUUID(this);
 
         AppSettings.URL_BASE = ResourceNetwork.URL_BASE_PROD;
-        etUsername = (EditText) findViewById(R.id.editTextEmail);
-        etPassword = (EditText) findViewById(R.id.editTextPassword);
         etUsername.setText("");
         etPassword.setText("");
-        ((TextView) findViewById(R.id.login_uuid)).setText(UUID);
+        textViewLoginUiid.setText(UUID);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mBus.register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mBus.unregister(this);
     }
 
     public void offlineWorkVal(final List<Survey> offlineSurvey) {
@@ -115,74 +131,8 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
         } else {
             LoginRequest toSend = new LoginRequest(etUsername.getText().toString(), etPassword.getText().toString());
             toSend.setTabletId(UUID);
-
-            AsyncResponse callback = new AsyncResponse() {
-                @Override
-                public void callback(Object output, String Sended) {
-
-                    if (output instanceof LoginResponse) {
-                        LoginResponse response = (LoginResponse) output;
-
-                        if (response.getResponseCode().equals(HTTP_OK)) {
-                            if (response.getResponseData().get(0) != null) {
-                                AppSession.getInstance().setUser(response.getResponseData().get(0));
-                                // Invoke the survey synchronize
-                                getSurveys();
-                            } else if (output instanceof ErrorResponse) {
-                                Toast.makeText(LoginActivity.this, ((ErrorResponse) output).getMessage(), Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(LoginActivity.this, LoginActivity.this.getString(R.string.survey_save_send_error), Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Toast.makeText(LoginActivity.this, response.getResponseDescription(), Toast.LENGTH_LONG).show();
-                        }
-                    } else if (output instanceof ErrorResponse) {
-                        ErrorResponse response = (ErrorResponse) output;
-                        Toast.makeText(LoginActivity.this, response.getMessage() + "VER TOKEN", Toast.LENGTH_LONG).show();
-                    }
-                }
-            };
-
-            BackgroundTask bt = new BackgroundTask(this, toSend, new LoginResponse(), callback, null, false);
-            bt.execute(AppSettings.URL_BASE + ResourceNetwork.URL_LOGIN_DEF);
-
+            mBus.post(toSend);
         }
-
-    }
-
-    private void getSurveys() {
-        GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser().getColector_id());
-        AsyncResponse callback = new AsyncResponse() {
-            @Override
-            public void callback(Object output, String Sended) {
-
-                if (output instanceof GetSurveysResponse) {
-
-                    GetSurveysResponse response = (GetSurveysResponse) output;
-
-                    if (response.getResponseCode().equals(HTTP_OK)) {
-                        // to be remove
-                        SurveyDAO dao = new SurveyDAO(LoginActivity.this);
-                        dao.synchronizeSurveys(response.getResponseData());
-
-                        AppSession.getInstance().setSurveyAvailable(response.getResponseData());
-                        DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(), LoginActivity.this); //Save on Realm
-
-                    } else {
-                        Toast.makeText(LoginActivity.this, response.getResponseDescription(), Toast.LENGTH_LONG).show();
-                    }
-
-
-                } else if (output instanceof ErrorResponse) {
-                    ErrorResponse response = (ErrorResponse) output;
-                    Toast.makeText(LoginActivity.this, response.getMessage(), Toast.LENGTH_LONG).show();
-
-                }
-            }
-        };
-
-        BackgroundTask bt = new BackgroundTask(this, toSend, new GetSurveysResponse(), callback, null, false);
-        bt.execute(AppSettings.URL_BASE + ResourceNetwork.URL_SURVEY_DEF);
     }
 
     @Override
@@ -195,5 +145,29 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     @Override
     public void onError() {
         Toast.makeText(LoginActivity.this, "Error", Toast.LENGTH_LONG).show();
+    }
+
+    @Subscribe
+    public void onSuccessLoginResponse(LoginResponse response){
+        if (response.getResponseData().get(0) != null) {
+            AppSession.getInstance().setUser(response.getResponseData().get(0));
+            // Invoke the survey synchronize
+            GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser()
+                    .getColector_id());
+            mBus.post(toSend);
+        } else {
+            Toast.makeText(LoginActivity.this, LoginActivity.this.getString(R.string.survey_save_send_error), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Subscribe
+    public void onSuccessSurveysResponse(GetSurveysResponse response){
+        // to be remove
+        SurveyDAO dao = new SurveyDAO(LoginActivity.this);
+        dao.synchronizeSurveys(response.getResponseData());
+
+        AppSession.getInstance().setSurveyAvailable(response.getResponseData());
+        DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(),
+                LoginActivity.this); //Save on Realm
     }
 }
