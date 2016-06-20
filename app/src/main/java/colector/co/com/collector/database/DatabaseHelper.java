@@ -1,5 +1,7 @@
 package colector.co.com.collector.database;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,6 +88,19 @@ public class DatabaseHelper {
         }
 
         return surveyFilled;
+    }
+
+    public void deleteSurveysDone(@Nullable Long saveDataId) {
+        if (saveDataId == null) return;
+        final SurveySave result = realm.where(SurveySave.class).equalTo("id", saveDataId).findFirst();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                result.deleteFromRealm();
+            }
+        });
+
+
     }
 
 }

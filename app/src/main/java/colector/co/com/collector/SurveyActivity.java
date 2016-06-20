@@ -880,6 +880,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
     @Override
     public void onError() {
         hideLoading();
+        Toast.makeText(this, R.string.survey_save_error, Toast.LENGTH_SHORT).show();
     }
 
     private void showLoading() {

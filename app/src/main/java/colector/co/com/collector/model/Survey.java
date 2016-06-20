@@ -39,8 +39,6 @@ public class Survey extends RealmObject {
         this.form_id = form_id;
         this.form_name = form_name;
         this.form_description = form_description;
-        //this.sections = sections;
-        //this.precargado = precargado;
     }
 
     public String getSurveyDoneDescription() {
