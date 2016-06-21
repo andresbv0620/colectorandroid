@@ -106,7 +106,7 @@ public class AppSession {
     public
     @Nullable
     ArrayList<Long> getSurveyAvailableIds() {
-        if (surveyAvailable == null || surveyAvailable.size() == 0) return null;
+        if (surveyAvailable == null || surveyAvailable.isEmpty()) return null;
         ArrayList<Long> indexes = new ArrayList<>();
         for (Survey survey : surveyAvailable) {
             indexes.add(survey.getForm_id());
@@ -115,7 +115,7 @@ public class AppSession {
     }
 
     public void cleanSurveyAvailable() {
-        if (surveyAvailable != null && surveyAvailable.size() > 0) {
+        if (surveyAvailable != null && !surveyAvailable.isEmpty()) {
             for (Survey survey : surveyAvailable) {
                 survey.setInstanceId(null);
                 survey.setInstanceAnswer(null);

@@ -59,7 +59,7 @@ public class SpinnerItemView extends LinearLayout {
     public void bind(ArrayList<IdOptionValue> responses, Question question, @Nullable String previewDefault) {
         this.id = question.getId();
         this.validation = question.getValidacion();
-        if (responses.size() == 0) return;
+        if (responses.isEmpty()) return;
         required = question.getRequerido();
         for (IdOptionValue option : responses) options.add(option.getValue());
         spinner.setAdapter(new ArrayAdapter<>(getContext(), R.layout.row_spn, options));

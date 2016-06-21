@@ -51,7 +51,7 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public void bind(ArrayList<IdOptionValue> response, Question question,
                      @Nullable List<String> previewDefault) {
-        if (response.size() == 0) return;
+        if (response.isEmpty()) return;
         this.id = question.getId();
         this.validation = question.getValidacion();
         required = question.getRequerido();
