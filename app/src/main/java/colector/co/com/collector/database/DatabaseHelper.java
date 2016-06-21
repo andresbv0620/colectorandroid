@@ -90,8 +90,7 @@ public class DatabaseHelper {
         return surveyFilled;
     }
 
-    public void deleteSurveysDone(@Nullable Long saveDataId) {
-        if (saveDataId == null) return;
+    public void deleteSurveysDone(Long saveDataId) {
         final SurveySave result = realm.where(SurveySave.class).equalTo("id", saveDataId).findFirst();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
