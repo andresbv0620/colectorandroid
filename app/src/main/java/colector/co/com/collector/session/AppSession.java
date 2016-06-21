@@ -44,10 +44,7 @@ public class AppSession {
 
 
     public List<Survey> getSurveyDone() {
-        if (surveyDone == null) {
-            surveyDone = new ArrayList<Survey>();
-        }
-        return surveyDone;
+        return surveyDone == null ? new ArrayList<Survey>() : surveyDone;
     }
 
     public void setSurveyDone(List<Survey> surveyDone) {
@@ -55,10 +52,7 @@ public class AppSession {
     }
 
     public List<Survey> getSurveyAvailable() {
-        if (surveyAvailable == null) {
-            surveyAvailable = new ArrayList<Survey>();
-        }
-        return surveyAvailable;
+        return surveyAvailable == null ? new ArrayList<Survey>() : surveyAvailable;
     }
 
     public void setSurveyAvailable(List<Survey> surveyAvailable) {
@@ -101,17 +95,6 @@ public class AppSession {
 
     public void setCurrentPhotoID(Long currentPhotoID) {
         this.currentPhotoID = currentPhotoID;
-    }
-
-    public
-    @Nullable
-    ArrayList<Long> getSurveyAvailableIds() {
-        if (surveyAvailable == null || surveyAvailable.isEmpty()) return null;
-        ArrayList<Long> indexes = new ArrayList<>();
-        for (Survey survey : surveyAvailable) {
-            indexes.add(survey.getForm_id());
-        }
-        return indexes;
     }
 
     public void cleanSurveyAvailable() {
