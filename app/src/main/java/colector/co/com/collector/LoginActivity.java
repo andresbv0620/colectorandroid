@@ -1,5 +1,6 @@
 package colector.co.com.collector;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     TextView textViewLoginUiid;
     private String UUID;
     private Bus mBus = BusProvider.getBus();
+    private ProgressDialog progressDialogLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,9 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
         etUsername.setText("");
         etPassword.setText("");
         textViewLoginUiid.setText(UUID);
+        progressDialogLogin = new ProgressDialog(this);
+        progressDialogLogin.setCancelable(false);
+        progressDialogLogin.setMessage(getString(R.string.generalProgressDialogMessageLogin));
     }
 
     @Override
@@ -98,45 +103,19 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     }
 
     public void doLogin(View view) {
-        if (etUsername.getText().toString().trim().equals("") && etPassword.getText().toString().trim().equals("test")) {
-            if (AppSettings.URL_BASE.equalsIgnoreCase(ResourceNetwork.URL_BASE_DESA)) {
-                Toast.makeText(this, "Modo Produccion", Toast.LENGTH_LONG).show();
-                AppSettings.URL_BASE = ResourceNetwork.URL_BASE_PROD;
-            } else {
-                AppSettings.URL_BASE = ResourceNetwork.URL_BASE_DESA;
-                Toast.makeText(this, "Modo desarrollo", Toast.LENGTH_LONG).show();
-            }
-        } else if (etUsername.getText().toString().trim().equals("") || etPassword.getText().toString().trim().equals("")) {
-            Toast.makeText(this, getString(R.string.login_error_empty), Toast.LENGTH_LONG).show();
-        } else if (!Utilities.isNetworkConnected(this)) {
-            //INIDICAR SI PUEDE TRABAJARA EN MODO OFFFLINE Y SI QUIERE CONTINUAR
-            Toast.makeText(this, getString(R.string.common_internet_not_available), Toast.LENGTH_LONG).show();
-
-            //VALIDAR TRABAJO OFFLINE Y CONTINUAR
-            List<Survey> offlineSurvey = new SurveyDAO(this).getSurveyAvailable();
-
-            //VALIDAR SI USUARIO, CONTRASEÑA, TABLET ES VALIDA Y SET TOKEN JUNTO CON COD_ID AL PROYECTO.
-            boolean usuarioValido = false;
-
-            if (usuarioValido) {
-                if (offlineSurvey != null && !offlineSurvey.isEmpty()) {
-                    offlineWorkVal(offlineSurvey);
-                } else {
-                    offlineWorkDen();
-                }
-            } else
-                Toast.makeText(this, getString(R.string.login_unknown_user_dao), Toast.LENGTH_LONG).show();
-
-
-        } else {
+        if (!etUsername.getText().toString().isEmpty() && !etPassword.getText().toString().isEmpty()) {
             LoginRequest toSend = new LoginRequest(etUsername.getText().toString(), etPassword.getText().toString());
             toSend.setTabletId(UUID);
+            progressDialogLogin.show();
             mBus.post(toSend);
+        } else {
+            Toast.makeText(this, getString(R.string.login_error_empty), Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onSuccess() {
+        progressDialogLogin.dismiss();
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();
@@ -162,10 +141,6 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
     @Subscribe
     public void onSuccessSurveysResponse(GetSurveysResponse response){
-        // to be remove
-        SurveyDAO dao = new SurveyDAO(LoginActivity.this);
-        dao.synchronizeSurveys(response.getResponseData());
-
         AppSession.getInstance().setSurveyAvailable(response.getResponseData());
         DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(),
                 LoginActivity.this); //Save on Realm

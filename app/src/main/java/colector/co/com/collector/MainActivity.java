@@ -88,13 +88,13 @@ public class MainActivity extends FragmentActivity {
                         .setPositiveButton(getString(R.string.common_ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if (!isServiceRunning()) {
+                                //if (!isServiceRunning()) {
                                     Toast.makeText(getBaseContext(), "Tranquilo, el sistema enviara todos los formularios automaticamente", Toast.LENGTH_LONG).show();
                                     Intent intent = new Intent(getBaseContext(), syncService.class);
                                     intent.setFlags(AppSettings.SERVICE_FLAG_DELETE);
                                     startService(intent);
-                                }else
-                                    Toast.makeText(getBaseContext(), "El sistema esta trabajando. Por favor intentar en un momento.", Toast.LENGTH_LONG).show();
+                                //}else
+                                  //  Toast.makeText(getBaseContext(), "El sistema esta trabajando. Por favor intentar en un momento.", Toast.LENGTH_LONG).show();
 
                             }
 
@@ -109,7 +109,7 @@ public class MainActivity extends FragmentActivity {
         buildTabs();
     }
     private boolean isServiceRunning() {
-        try {
+        /*try {
             ActivityManager manager = (ActivityManager) getBaseContext().getSystemService(getBaseContext().ACTIVITY_SERVICE);
             for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
                 if ("colector.co.com.collector.utils.syncService".equals(service.service.getClassName())) {
@@ -119,7 +119,8 @@ public class MainActivity extends FragmentActivity {
         }catch(Exception e){
             Toast.makeText(getBaseContext(), "Service Err " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
-        return false;
+        return false;*/
+        return true;
     }
 
 
