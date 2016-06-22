@@ -1,5 +1,8 @@
 package colector.co.com.collector.database;
 
+import android.support.annotation.Nullable;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import colector.co.com.collector.listeners.OnDataBaseSave;
@@ -48,10 +51,10 @@ public class DatabaseHelper {
 
     public Long getNewSurveyIndex(final long saveDataId) {
         RealmResults<SurveySave> results = realm.where(SurveySave.class).equalTo("instanceId", saveDataId).findAll();
-        return results.size() + 1l ;
+        return results.size() + 1l;
     }
 
-    public void addSurveyAvailable(final List<Survey> surveys, final OnDataBaseSave callback){
+    public void addSurveyAvailable(final List<Survey> surveys, final OnDataBaseSave callback) {
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -68,6 +71,35 @@ public class DatabaseHelper {
                 callback.onError();
             }
         });
+    }
+
+    public ArrayList<Survey> getSurveysDone(ArrayList<Survey> surveys) {
+
+        ArrayList<Survey> surveyFilled = new ArrayList<>();
+        for (Survey survey : surveys) {
+            RealmResults<SurveySave> results = realm.where(SurveySave.class).equalTo("instanceId", survey.getForm_id()).findAll();
+            for (SurveySave surveySave : results) {
+                survey.setInstanceId(surveySave.getId());
+                survey.setInstanceAnswer(surveySave.getResponses());
+                survey.setInstanceLongitude(surveySave.getLongitude());
+                survey.setInstanceLatitude(surveySave.getLatitude());
+                surveyFilled.add(survey);
+            }
+        }
+
+        return surveyFilled;
+    }
+
+    public void deleteSurveysDone(Long saveDataId) {
+        final SurveySave result = realm.where(SurveySave.class).equalTo("id", saveDataId).findFirst();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                result.deleteFromRealm();
+            }
+        });
+
+
     }
 
 }

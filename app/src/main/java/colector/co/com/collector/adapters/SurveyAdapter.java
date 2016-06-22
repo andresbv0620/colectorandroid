@@ -17,6 +17,7 @@ import java.util.List;
 
 import colector.co.com.collector.R;
 import colector.co.com.collector.SurveyActivity;
+import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.http.AsyncResponse;
 import colector.co.com.collector.http.BackgroundTask;
 import colector.co.com.collector.http.ResourceNetwork;
@@ -48,7 +49,7 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        final Survey item = (Survey) this.items.get(position);
+        final Survey item =  this.items.get(position);
 
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -76,8 +77,7 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
                             .setPositiveButton(getContext().getString(R.string.common_erase), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    Toast.makeText(getContext(), getContext().getString(R.string.survey_delete_ok, view.getTag().toString()), Toast.LENGTH_LONG).show();
-                                    new SurveyDAO(getContext()).deleteSurveysInstance(Long.parseLong(view.getTag().toString()));
+                                    DatabaseHelper.getInstance().deleteSurveysDone(item.getInstanceId());
                                     items.remove(item);
                                     SurveyAdapter.this.notifyDataSetChanged();
                                 }

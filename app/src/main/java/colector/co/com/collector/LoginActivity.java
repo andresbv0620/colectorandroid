@@ -119,7 +119,7 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
             boolean usuarioValido = false;
 
             if (usuarioValido) {
-                if (offlineSurvey != null && offlineSurvey.size() > 0) {
+                if (offlineSurvey != null && !offlineSurvey.isEmpty()) {
                     offlineWorkVal(offlineSurvey);
                 } else {
                     offlineWorkDen();

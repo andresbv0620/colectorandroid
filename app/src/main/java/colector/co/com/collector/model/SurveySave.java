@@ -17,7 +17,6 @@ public class SurveySave extends RealmObject {
     private String HoraIni;
     private String HoraFin;
     private String Status;
-
     private RealmList<IdValue> responses;
 
     public SurveySave() {

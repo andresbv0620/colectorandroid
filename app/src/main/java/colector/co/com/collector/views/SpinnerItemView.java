@@ -1,6 +1,7 @@
 package colector.co.com.collector.views;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -55,13 +56,14 @@ public class SpinnerItemView extends LinearLayout {
         ButterKnife.bind(this, view);
     }
 
-    public void bind(ArrayList<IdOptionValue> responses, Question question) {
+    public void bind(ArrayList<IdOptionValue> responses, Question question, @Nullable String previewDefault) {
         this.id = question.getId();
         this.validation = question.getValidacion();
-        if (responses.size() == 0) return;
+        if (responses.isEmpty()) return;
         required = question.getRequerido();
         for (IdOptionValue option : responses) options.add(option.getValue());
         spinner.setAdapter(new ArrayAdapter<>(getContext(), R.layout.row_spn, options));
+        spinner.setSelection(options.indexOf(previewDefault));
         if (required) {
             label.setText(getContext().getString(R.string.required_field, question.getName()));
             setSpinnerListener();
