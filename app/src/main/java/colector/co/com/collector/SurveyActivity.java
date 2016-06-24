@@ -650,11 +650,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     /**
      * Event to button in question type picture
-     *
-     * @param id
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void dispatchTakePictureIntent(Long id) {
+    private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -669,9 +667,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             if (photoFile != null) {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
-                Bundle extras = getIntent().putExtra("idImageView", id).getExtras();
-
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO, extras);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
     }
@@ -693,7 +689,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         }
         File image = new File(storageDir + "/" + imageFileName + ".jpg");
         AppSession.getInstance().setCurrentPhotoPath(image.getAbsolutePath());
-
         return image;
     }
 
@@ -706,7 +701,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      */
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //Take photo Request
+        // Photo Request
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
             activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
             return;
@@ -772,7 +767,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         }
     }
 
-    private void showDialogPicture(final String mCurrentPhotoPath, final ImageView prevView, final LinearLayout item) {
+    private void showDialogPicture(final String mCurrentPhotoPath, final ImageView prevView,
+                                   final LinearLayout item) {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         double widthPixels = metrics.widthPixels * 0.90;
@@ -866,7 +862,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     public void onAddPhotoClicked(PhotoItemViewContainer container) {
         activePhotoContainer = container;
         AppSession.getInstance().setCurrentPhotoID(container.id);
-        dispatchTakePictureIntent(container.id);
+        dispatchTakePictureIntent();
     }
 
     @Override

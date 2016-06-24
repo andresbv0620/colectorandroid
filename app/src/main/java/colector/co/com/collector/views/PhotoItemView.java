@@ -1,10 +1,13 @@
 package colector.co.com.collector.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,6 +37,13 @@ public class PhotoItemView extends FrameLayout {
 
     public void bind(String url) {
         this.url = url;
-        ColectorApplication.getInstance().getGlideInstance().load(url).centerCrop().into(photo);
+        ColectorApplication.getInstance().getGlideInstance().load(url).asBitmap().centerCrop().into(
+                new BitmapImageViewTarget(photo) {
+                    @Override
+                    protected void setResource(Bitmap resource) {
+                        super.setResource(resource);
+                        photo.setImageBitmap(resource);
+                    }
+                });
     }
 }
