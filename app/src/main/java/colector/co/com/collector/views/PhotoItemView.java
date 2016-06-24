@@ -20,6 +20,7 @@ public class PhotoItemView extends FrameLayout {
 
     @BindView(R.id.photo)
     ImageView photo;
+    private String url;
 
     public PhotoItemView(Context context) {
         super(context);
@@ -32,6 +33,7 @@ public class PhotoItemView extends FrameLayout {
     }
 
     public void bind(String url) {
+        this.url = url;
         ColectorApplication.getInstance().getGlideInstance().load(url).centerCrop().into(photo);
     }
 }

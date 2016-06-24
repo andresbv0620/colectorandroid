@@ -57,6 +57,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.OptionAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
+import colector.co.com.collector.listeners.OnAddPhotoListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
@@ -80,11 +81,12 @@ import colector.co.com.collector.views.SpinnerItemView;
 
 import static android.graphics.Color.parseColor;
 
-public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave {
+public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener {
     private FindGPSLocation gps;
 
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
+    private PhotoItemViewContainer activePhotoContainer;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_TAKE_MAPSGPS = 2;
@@ -268,19 +270,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
             // picture
             case 6:
                 PhotoItemViewContainer photoItemViewContainer = new PhotoItemViewContainer(this);
-                photoItemViewContainer.bind(question.getName());
+                photoItemViewContainer.bind(question, this);
                 linear.addView(photoItemViewContainer);
-//                linear.addView(buildTextView(label));
-//                linear.addView(buildImageLinear(id));
-//                final Long _id = id;
-//                linear.addView(buildButton(label, new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        AppSession.getInstance().setCurrentPhotoID(_id);
-//                        dispatchTakePictureIntent(_id);
-//                    }
-//                }));
-//                linear.addView(buildSeparator());
                 break;
             // date
             case 7:
@@ -609,7 +600,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         client.disconnect();
     }
 
-
     @SuppressLint("ValidFragment")
     public static class TimePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
@@ -701,7 +691,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         if (!dir.exists()) {
             dir.mkdir();
         }
-
         File image = new File(storageDir + "/" + imageFileName + ".jpg");
         AppSession.getInstance().setCurrentPhotoPath(image.getAbsolutePath());
 
@@ -717,13 +706,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
      */
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //ACTIVIDAD REGRESA FOTOGRAFIA
-        try {
-            if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-                setPic(AppSession.getInstance().getCurrentPhotoPath());
-            }
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "ConfigureCamera Err=" + e, Toast.LENGTH_LONG).show();
+        //Take photo Request
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
+            activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
+            return;
         }
 
         //ACTIVIDAD REGRESA GPS
@@ -873,6 +859,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         }
         // Save on DataBase
         DatabaseHelper.getInstance().addSurvey(surveySave, this);
+    }
+
+
+    @Override
+    public void onAddPhotoClicked(PhotoItemViewContainer container) {
+        activePhotoContainer = container;
+        AppSession.getInstance().setCurrentPhotoID(container.id);
+        dispatchTakePictureIntent(container.id);
     }
 
     @Override

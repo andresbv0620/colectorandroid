@@ -10,6 +10,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
+import colector.co.com.collector.listeners.OnAddPhotoListener;
+import colector.co.com.collector.model.Question;
 
 /**
  * @author Gabriel Rodriguez
@@ -24,6 +26,7 @@ public class PhotoItemViewContainer extends LinearLayout {
     Button button;
     @BindView(R.id.photo_container)
     LinearLayout photoContainer;
+    public Long id;
 
     public PhotoItemViewContainer(Context context) {
         super(context);
@@ -35,8 +38,21 @@ public class PhotoItemViewContainer extends LinearLayout {
         ButterKnife.bind(this, view);
     }
 
-    public void bind(String label) {
-        this.label.setText(label);
-        this.button.setText(label);
+    public void bind(Question question, final OnAddPhotoListener callback) {
+        id = question.getId();
+        label.setText(question.getName());
+        button.setText(question.getName());
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callback.onAddPhotoClicked(PhotoItemViewContainer.this);
+            }
+        });
+    }
+
+    public void addImages(String url) {
+        PhotoItemView photoItemView = new PhotoItemView(getContext());
+        photoItemView.bind(url);
+        photoContainer.addView(photoItemView);
     }
 }
