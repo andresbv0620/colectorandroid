@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.crashlytics.android.Crashlytics;
 import com.squareup.otto.Bus;
 
@@ -21,7 +23,7 @@ public class ColectorApplication extends Application {
 
     private static ColectorApplication mContext;
     private Bus bus = BusProvider.getBus();
-    private ApiCallsManager apiCallsManager;
+    private RequestManager glide;
 
     @Override
     public void onCreate() {
@@ -29,10 +31,13 @@ public class ColectorApplication extends Application {
         Fabric.with(this, new Crashlytics());
         mContext = this;
 
-        apiCallsManager = new ApiCallsManager(this, bus);
+        ApiCallsManager apiCallsManager = new ApiCallsManager(this, bus);
         bus.register(apiCallsManager);
         bus.register(this);
         PrefsUtils.initializeInstance(this);
+
+        // Init Glide
+        glide = Glide.with(this);
 
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
         Realm.setDefaultConfiguration(realmConfiguration);
@@ -45,5 +50,9 @@ public class ColectorApplication extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
+    }
+
+    public RequestManager getGlideInstance() {
+        return glide;
     }
 }
