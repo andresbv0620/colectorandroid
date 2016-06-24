@@ -74,6 +74,7 @@ import colector.co.com.collector.utils.FindGPSLocation;
 import colector.co.com.collector.utils.ImageUtils;
 import colector.co.com.collector.views.EditTextItemView;
 import colector.co.com.collector.views.MultipleItemViewContainer;
+import colector.co.com.collector.views.PhotoItemViewContainer;
 import colector.co.com.collector.views.SectionItemView;
 import colector.co.com.collector.views.SpinnerItemView;
 
@@ -266,17 +267,20 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
                 break;
             // picture
             case 6:
-                linear.addView(buildTextView(label));
-                linear.addView(buildImageLinear(id));
-                final Long _id = id;
-                linear.addView(buildButton(label, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AppSession.getInstance().setCurrentPhotoID(_id);
-                        dispatchTakePictureIntent(_id);
-                    }
-                }));
-                linear.addView(buildSeparator());
+                PhotoItemViewContainer photoItemViewContainer = new PhotoItemViewContainer(this);
+                photoItemViewContainer.bind(question.getName());
+                linear.addView(photoItemViewContainer);
+//                linear.addView(buildTextView(label));
+//                linear.addView(buildImageLinear(id));
+//                final Long _id = id;
+//                linear.addView(buildButton(label, new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        AppSession.getInstance().setCurrentPhotoID(_id);
+//                        dispatchTakePictureIntent(_id);
+//                    }
+//                }));
+//                linear.addView(buildSeparator());
                 break;
             // date
             case 7:
