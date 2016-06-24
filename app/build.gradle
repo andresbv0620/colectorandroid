@@ -24,8 +24,8 @@ android {
     dexOptions {
         incremental true
         preDexLibraries true
-        maxProcessCount 2
-        javaMaxHeapSize "2g"
+        maxProcessCount 5
+        javaMaxHeapSize "5g"
     }
 
     defaultConfig {
@@ -67,6 +67,8 @@ dependencies {
     //View Biding
     compile 'com.jakewharton:butterknife:8.0.1'
     apt 'com.jakewharton:butterknife-compiler:8.0.1'
+
+    compile 'com.android.support:multidex:1.0.1'
 
     compile('com.crashlytics.sdk.android:crashlytics:2.5.6@aar') {
         transitive = true;

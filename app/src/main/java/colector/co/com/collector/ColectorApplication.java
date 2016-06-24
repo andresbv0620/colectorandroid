@@ -1,6 +1,8 @@
 package colector.co.com.collector;
 
 import android.app.Application;
+import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import com.crashlytics.android.Crashlytics;
 import com.squareup.otto.Bus;
@@ -38,5 +40,10 @@ public class ColectorApplication extends Application {
 
     public static ColectorApplication getInstance() {
         return mContext;
+    }
+
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 }
