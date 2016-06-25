@@ -15,4 +15,6 @@
     <dimen name="huge_space">48dp</dimen>
     <!--Loading Dimensions-->
     <dimen name="loading_size">48dp</dimen>
+    <!--Photo Dimensions-->
+    <dimen name="photo_dimensions">64dp</dimen>
 </resources>

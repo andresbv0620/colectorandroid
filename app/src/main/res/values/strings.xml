@@ -67,4 +67,6 @@
     <string name="check_required">Por favor valide los campos requeridos</string>
     <string name="show">Mostar</string>
     <string name="hide">Esconder</string>
+    <string name="generalProgressDialogMessageLogin">Procesando información, por favor espere</string>
+
 </resources>

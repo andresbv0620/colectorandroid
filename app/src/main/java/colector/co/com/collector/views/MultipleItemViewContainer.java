@@ -1,6 +1,7 @@
 package colector.co.com.collector.views;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,8 +49,9 @@ public class MultipleItemViewContainer extends LinearLayout {
         ButterKnife.bind(this, view);
     }
 
-    public void bind(ArrayList<IdOptionValue> response, Question question) {
-        if (response.size() == 0) return;
+    public void bind(ArrayList<IdOptionValue> response, Question question,
+                     @Nullable List<String> previewDefault) {
+        if (response.isEmpty()) return;
         this.id = question.getId();
         this.validation = question.getValidacion();
         required = question.getRequerido();
@@ -66,6 +69,9 @@ public class MultipleItemViewContainer extends LinearLayout {
         //Bind the show and hide buttons
         bindShowButton();
         bindCollapseButton(collapse);
+        if (previewDefault != null) {
+            bindDefaultSelected(previewDefault);
+        }
         if (question.getoculto()) this.setVisibility(GONE);
     }
 
@@ -109,10 +115,22 @@ public class MultipleItemViewContainer extends LinearLayout {
         RealmList<IdValue> responses = new RealmList<>();
         for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
             MultipleItemView itemView = (MultipleItemView) container.getChildAt(itemViewIndex);
-            if (itemView.toggle.isSelected()) {
+            if (itemView.toggle.isChecked()) {
                 responses.add(new IdValue(id, itemView.textView.getText().toString(), validation));
             }
         }
         return responses;
+    }
+
+    private void bindDefaultSelected(List<String> previewDefault) {
+        for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
+            MultipleItemView itemView = (MultipleItemView) container.getChildAt(itemViewIndex);
+            for (String defaultValue : previewDefault) {
+                if (itemView.textView.getText().toString().equals(defaultValue)) {
+                    options.get(itemViewIndex).setStatus(true);
+                    itemView.toggle.setChecked(true);
+                }
+            }
+        }
     }
 }

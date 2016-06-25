@@ -22,7 +22,6 @@
     </style>
 
     <style name="VerticalSeparator">
-        <item name="android:layout_margin">@dimen/small_space</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:background">@color/vertical_separator_color</item>
@@ -56,6 +55,23 @@
         <item name="android:layout_gravity">right</item>
         <item name="android:clickable">true</item>
         <item name="android:textColor">@color/primary</item>
+    </style>
+
+    <!--Base Button Style-->
+    <style name="ButtonStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_marginBottom">@dimen/small_space</item>
+        <item name="android:layout_marginTop">@dimen/small_space</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:paddingLeft">@dimen/big_space</item>
+        <item name="android:paddingRight">@dimen/big_space</item>
+        <item name="android:textColor">@color/text_light</item>
+    </style>
+
+    <!--Survey Button Style-->
+    <style name="ButtonStyle.Survey">
+        <item name="android:background">@drawable/rounded_shape</item>
     </style>
 
 </resources>
