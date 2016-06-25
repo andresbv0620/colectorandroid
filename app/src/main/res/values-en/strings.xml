@@ -56,4 +56,11 @@
     <string name="check_required">Please check the required fields</string>
     <string name="show">Show</string>
     <string name="hide">Hide</string>
+
+    <string name="permission_gps_notice">GPS permission allows us to access location data.
+        Please allow in App Settings for additional functionality.</string>
+    <string name="permission_granted">Permission Granted, Now you can access %1$s.</string>
+    <string name="permission_not_granted">Permission Denied, You cannot access %1$s.</string>
+    <string name="storage">storage</string>
+    <string name="camara">camera</string>
 </resources>

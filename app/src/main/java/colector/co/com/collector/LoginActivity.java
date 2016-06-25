@@ -1,9 +1,14 @@
 package colector.co.com.collector;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -28,7 +33,6 @@ import colector.co.com.collector.model.request.LoginRequest;
 import colector.co.com.collector.model.response.GetSurveysResponse;
 import colector.co.com.collector.model.response.LoginResponse;
 import colector.co.com.collector.network.BusProvider;
-import colector.co.com.collector.persistence.dao.SurveyDAO;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.Utilities;
@@ -46,6 +50,9 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     private Bus mBus = BusProvider.getBus();
     private ProgressDialog progressDialogLogin;
 
+    private static final int PERMISSION_EXTERNAL_STORAGE = 0;
+    private static final int PERMISSION_CAMERA = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +60,9 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         UUID = Utilities.getUUID(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            checkPermissions();
 
         AppSettings.URL_BASE = ResourceNetwork.URL_BASE_PROD;
         etUsername.setText("");
@@ -123,19 +133,21 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
     @Override
     public void onError() {
+        progressDialogLogin.dismiss();
         Toast.makeText(LoginActivity.this, "Error", Toast.LENGTH_LONG).show();
     }
 
     @Subscribe
     public void onSuccessLoginResponse(LoginResponse response){
-        if (response.getResponseData().get(0) != null) {
-            AppSession.getInstance().setUser(response.getResponseData().get(0));
-            // Invoke the survey synchronize
-            GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser()
-                    .getColector_id());
-            mBus.post(toSend);
+        progressDialogLogin.dismiss();
+        if (!response.getResponseData().isEmpty()){
+                AppSession.getInstance().setUser(response.getResponseData().get(0));
+                // Invoke the survey synchronize
+                GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser()
+                        .getColector_id());
+                mBus.post(toSend);
         } else {
-            Toast.makeText(LoginActivity.this, LoginActivity.this.getString(R.string.survey_save_send_error), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, response.getResponseDescription(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -144,5 +156,53 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
         AppSession.getInstance().setSurveyAvailable(response.getResponseData());
         DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(),
                 LoginActivity.this); //Save on Realm
+    }
+
+    private void checkPermissions(){
+        if (!checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_EXTERNAL_STORAGE);
+    }
+
+    private boolean checkPermission(String permission){
+        int result = ContextCompat.checkSelfPermission(this, permission);
+        if (result == PackageManager.PERMISSION_GRANTED){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void requestPermission(String permission, int request_code){
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)){
+            Toast.makeText(this,getString(R.string.permission_gps_notice),Toast.LENGTH_LONG).show();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{permission}, request_code);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this,String.format(getString(R.string.permission_granted),
+                            getString(R.string.storage)), Toast.LENGTH_LONG).show();
+
+                } else {
+                    Toast.makeText(this,String.format(getString(R.string.permission_not_granted),
+                            getString(R.string.storage)), Toast.LENGTH_LONG).show();
+                }
+                break;
+            case PERMISSION_CAMERA:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this,String.format(getString(R.string.permission_granted),
+                            getString(R.string.camara)), Toast.LENGTH_LONG).show();
+
+                } else {
+                    Toast.makeText(this, String.format(getString(R.string.permission_not_granted),
+                            getString(R.string.camara)), Toast.LENGTH_LONG).show();
+                }
+                break;
+        }
     }
 }
