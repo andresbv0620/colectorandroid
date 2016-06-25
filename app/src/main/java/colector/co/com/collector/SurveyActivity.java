@@ -8,8 +8,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -22,7 +20,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -37,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,7 +68,6 @@ import colector.co.com.collector.model.SurveySave;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
-import colector.co.com.collector.utils.ImageUtils;
 import colector.co.com.collector.views.EditTextItemView;
 import colector.co.com.collector.views.MultipleItemViewContainer;
 import colector.co.com.collector.views.PhotoItemViewContainer;
@@ -110,6 +105,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private static final String TAG = "Survey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -701,119 +697,61 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      */
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Photo Request
-        try {
-            if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-                activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
-                return;
+        if (resultCode == Activity.RESULT_OK){
+            switch (requestCode){
+                case REQUEST_TAKE_PHOTO:
+                    // Photo Request
+                    try {
+                        activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case REQUEST_TAKE_MAPSGPS:
+                    //TODO: ACTIVIDAD REGRESA GPS
+                    Log.d(TAG, "AQUI ACCION GPS");
+                    break;
+                case REQUEST_TAKE_SIGNATURE:
+                    //ACTIVIDAD REGRESA SIGNATURE
+                    try {
+                        setPic(AppSession.getInstance().getCurrentPhotoPath());
+                        Log.d(TAG, "Firma Ok");
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
-        } catch (Exception e) {
-            return;
-        }
 
-        //ACTIVIDAD REGRESA GPS
-        try {
-            if (requestCode == REQUEST_TAKE_MAPSGPS && resultCode == Activity.RESULT_OK) {
-                Toast.makeText(getApplicationContext(), "AQUI ACCION GPS", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "ConfigureGPS Err=" + e, Toast.LENGTH_LONG).show();
-        }
-
-        //ACTIVIDAD REGRESA SIGNATURE
-        try {
-            if (requestCode == REQUEST_TAKE_SIGNATURE && resultCode == Activity.RESULT_OK) {
-                setPic(AppSession.getInstance().getCurrentPhotoPath());
-                Toast.makeText(getApplicationContext(), "Firma OK", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "ConfigureSignature Err=" + e, Toast.LENGTH_LONG).show();
         }
     }
 
     /**
      * Set the picture in image view
      */
-    private void setPic(String mCurrentPhotoPath) {
-        final String mCurrentPhotoPathFinal = mCurrentPhotoPath;
-        //Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
-        Bitmap bitmap = ImageUtils.getInstant().getCompressedBitmap(mCurrentPhotoPath);
+    private void setPic(final String mCurrentPhotoPath) {
 
-        final ImageView imageView = buildImageView();
+        final ImageView imageView = new ImageView(this);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+        layoutParams.weight = 1.0f;
+        imageView.setLayoutParams(layoutParams);
+        ColectorApplication.getInstance().getGlideInstance().load(mCurrentPhotoPath)
+                .override(600, 600).into(imageView);
+
         Long idImageView = getIntent().getExtras().getLong("idImageView", -1);
         if (idImageView > -1) {
-            imageView.setImageBitmap(bitmap);
-            imageView.getLayoutParams().height = 100;
-            imageView.getLayoutParams().width = 100;
-
-
             for (final LinearLayout item : pictureLayouts)
                 if (item.getTag() != null && AppSession.getInstance().getCurrentPhotoID() != null) {
                     Long tagID = (Long) item.getTag();
-                    if (tagID.equals(AppSession.getInstance().getCurrentPhotoID())) {
+                    if (tagID.equals(AppSession.getInstance().getCurrentPhotoID()))
+                        item.removeAllViews();
                         item.addView(imageView);
-                        ScrollView scroll = new ScrollView(this);
-                        scroll.addView(item);
-                        imageView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Toast.makeText(getBaseContext(),
-                                        "mCurrentPhotoPath=" + mCurrentPhotoPathFinal,
-                                        Toast.LENGTH_LONG).show();
-                                showDialogPicture(mCurrentPhotoPathFinal, imageView, item);
-                            }
-                        });
-
-                    }
-
                 }
-
         }
-    }
-
-    private void showDialogPicture(final String mCurrentPhotoPath, final ImageView prevView,
-                                   final LinearLayout item) {
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        double widthPixels = metrics.widthPixels * 0.90;
-        double heightPixels = metrics.heightPixels * 0.80;
-
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        LinearLayout layout = new LinearLayout(this);
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
-
-
-        final ImageView imageView = buildImageView();
-        imageView.setImageBitmap(bitmap);
-        imageView.getLayoutParams().height = (int) widthPixels;
-        imageView.getLayoutParams().width = (int) heightPixels;
-
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setGravity(Gravity.CENTER);
-
-        layout.addView(imageView);
-        alert.setTitle(getString(R.string.survey_delete_dialog_title));
-        alert.setView(layout);
-
-        alert.setNegativeButton(getString(R.string.common_cancel), new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        alert.setPositiveButton(getString(R.string.common_erase), new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                item.removeView(prevView);
-                File filePicture = new File(mCurrentPhotoPath);
-                DeleteRecursive(filePicture);
-            }
-        });
-        alert.show();
     }
 
     private static void DeleteRecursive(File fileOrDirectory) {
