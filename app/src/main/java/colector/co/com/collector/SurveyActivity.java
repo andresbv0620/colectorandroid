@@ -270,7 +270,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             // picture
             case 6:
                 PhotoItemViewContainer photoItemViewContainer = new PhotoItemViewContainer(this);
-                photoItemViewContainer.bind(question, this);
+                photoItemViewContainer.bind(question, this, surveys.getListAnswers(id));
                 linear.addView(photoItemViewContainer);
                 break;
             // date
@@ -702,8 +702,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Photo Request
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-            activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
+        try {
+            if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
+                activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
+                return;
+            }
+        } catch (Exception e) {
             return;
         }
 
@@ -846,10 +850,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
                     } else if (sectionView instanceof SpinnerItemView) {
                         surveySave.getResponses().add(((SpinnerItemView) sectionView).getResponse());
-                    } else if (sectionView instanceof MultipleItemViewContainer)
+                    } else if (sectionView instanceof MultipleItemViewContainer) {
                         surveySave.getResponses().addAll(((MultipleItemViewContainer)
                                 sectionView).getResponses());
-
+                    } else if (sectionView instanceof PhotoItemViewContainer)
+                        surveySave.getResponses().addAll(((PhotoItemViewContainer)
+                                sectionView).getResponses());
                 }
             }
         }

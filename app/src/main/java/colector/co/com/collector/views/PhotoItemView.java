@@ -23,7 +23,7 @@ public class PhotoItemView extends FrameLayout {
 
     @BindView(R.id.photo)
     ImageView photo;
-    private String url;
+    public String url;
 
     public PhotoItemView(Context context) {
         super(context);
