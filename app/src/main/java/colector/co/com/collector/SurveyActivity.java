@@ -57,6 +57,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.OptionAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
+import colector.co.com.collector.listeners.OnAddPhotoListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
@@ -74,16 +75,18 @@ import colector.co.com.collector.utils.FindGPSLocation;
 import colector.co.com.collector.utils.ImageUtils;
 import colector.co.com.collector.views.EditTextItemView;
 import colector.co.com.collector.views.MultipleItemViewContainer;
+import colector.co.com.collector.views.PhotoItemViewContainer;
 import colector.co.com.collector.views.SectionItemView;
 import colector.co.com.collector.views.SpinnerItemView;
 
 import static android.graphics.Color.parseColor;
 
-public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave {
+public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener {
     private FindGPSLocation gps;
 
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
+    private PhotoItemViewContainer activePhotoContainer;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_TAKE_MAPSGPS = 2;
@@ -266,17 +269,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
                 break;
             // picture
             case 6:
-                linear.addView(buildTextView(label));
-                linear.addView(buildImageLinear(id));
-                final Long _id = id;
-                linear.addView(buildButton(label, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AppSession.getInstance().setCurrentPhotoID(_id);
-                        dispatchTakePictureIntent(_id);
-                    }
-                }));
-                linear.addView(buildSeparator());
+                PhotoItemViewContainer photoItemViewContainer = new PhotoItemViewContainer(this);
+                photoItemViewContainer.bind(question, this, surveys.getListAnswers(id));
+                linear.addView(photoItemViewContainer);
                 break;
             // date
             case 7:
@@ -605,7 +600,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         client.disconnect();
     }
 
-
     @SuppressLint("ValidFragment")
     public static class TimePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
@@ -656,11 +650,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
 
     /**
      * Event to button in question type picture
-     *
-     * @param id
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void dispatchTakePictureIntent(Long id) {
+    private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -675,9 +667,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
             if (photoFile != null) {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
-                Bundle extras = getIntent().putExtra("idImageView", id).getExtras();
-
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO, extras);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
     }
@@ -697,10 +687,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         if (!dir.exists()) {
             dir.mkdir();
         }
-
         File image = new File(storageDir + "/" + imageFileName + ".jpg");
         AppSession.getInstance().setCurrentPhotoPath(image.getAbsolutePath());
-
         return image;
     }
 
@@ -713,13 +701,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
      */
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //ACTIVIDAD REGRESA FOTOGRAFIA
+        // Photo Request
         try {
             if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-                setPic(AppSession.getInstance().getCurrentPhotoPath());
+                activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
+                return;
             }
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "ConfigureCamera Err=" + e, Toast.LENGTH_LONG).show();
+            return;
         }
 
         //ACTIVIDAD REGRESA GPS
@@ -782,7 +771,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
         }
     }
 
-    private void showDialogPicture(final String mCurrentPhotoPath, final ImageView prevView, final LinearLayout item) {
+    private void showDialogPicture(final String mCurrentPhotoPath, final ImageView prevView,
+                                   final LinearLayout item) {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         double widthPixels = metrics.widthPixels * 0.90;
@@ -860,15 +850,25 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave 
                         surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
                     } else if (sectionView instanceof SpinnerItemView) {
                         surveySave.getResponses().add(((SpinnerItemView) sectionView).getResponse());
-                    } else if (sectionView instanceof MultipleItemViewContainer)
+                    } else if (sectionView instanceof MultipleItemViewContainer) {
                         surveySave.getResponses().addAll(((MultipleItemViewContainer)
                                 sectionView).getResponses());
-
+                    } else if (sectionView instanceof PhotoItemViewContainer)
+                        surveySave.getResponses().addAll(((PhotoItemViewContainer)
+                                sectionView).getResponses());
                 }
             }
         }
         // Save on DataBase
         DatabaseHelper.getInstance().addSurvey(surveySave, this);
+    }
+
+
+    @Override
+    public void onAddPhotoClicked(PhotoItemViewContainer container) {
+        activePhotoContainer = container;
+        AppSession.getInstance().setCurrentPhotoID(container.id);
+        dispatchTakePictureIntent();
     }
 
     @Override
