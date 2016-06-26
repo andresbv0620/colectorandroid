@@ -49,8 +49,8 @@ public class DatabaseHelper {
         });
     }
 
-    public Long getNewSurveyIndex(final long saveDataId) {
-        RealmResults<SurveySave> results = realm.where(SurveySave.class).equalTo("instanceId", saveDataId).findAll();
+    public Long getNewSurveyIndex() {
+        RealmResults<SurveySave> results = realm.where(SurveySave.class).findAll();
         return results.size() + 1l;
     }
 
