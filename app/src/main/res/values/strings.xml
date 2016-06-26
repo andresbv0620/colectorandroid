@@ -69,4 +69,11 @@
     <string name="hide">Esconder</string>
     <string name="generalProgressDialogMessageLogin">Procesando información, por favor espere</string>
 
+    <string name="permission_gps_notice">El permiso GPS nos permite acceder a los datos de ubicación.
+        Por favor permita mediante la configuración de App para funcionalidades adicionales.</string>
+    <string name="permission_granted">Permiso concedido, ahora puede acceder %1$s.</string>
+    <string name="permission_not_granted">Permiso denegado, no puede acceder %1$s.</string>
+    <string name="storage">almacenamiento</string>
+    <string name="camara">camara</string>
+
 </resources>
