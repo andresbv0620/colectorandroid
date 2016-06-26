@@ -17,6 +17,7 @@ import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -53,6 +54,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.OptionAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
+import colector.co.com.collector.fragments.DialogList;
 import colector.co.com.collector.listeners.OnAddPhotoListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.IdOptionValue;
@@ -73,11 +75,11 @@ import colector.co.com.collector.views.MultipleItemViewContainer;
 import colector.co.com.collector.views.PhotoItemView;
 import colector.co.com.collector.views.PhotoItemViewContainer;
 import colector.co.com.collector.views.SectionItemView;
-import colector.co.com.collector.views.SpinnerItemView;
 
 import static android.graphics.Color.parseColor;
 
-public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener {
+public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener,
+        EditTextItemView.CallDialogListener {
     private FindGPSLocation gps;
 
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
@@ -199,8 +201,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
                     if (sectionView instanceof EditTextItemView) {
                         fieldsValid = fieldsValid & ((EditTextItemView) sectionView).validateField();
-                    } else if (sectionView instanceof SpinnerItemView) {
-                        fieldsValid = fieldsValid & ((SpinnerItemView) sectionView).validateField();
                     } else if (sectionView instanceof MultipleItemViewContainer) {
                         fieldsValid = fieldsValid & ((MultipleItemViewContainer) sectionView).validateFields();
                     }
@@ -248,15 +248,15 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             case 8:
             default:
                 EditTextItemView editItemView = new EditTextItemView(this);
-                editItemView.bind(question, surveys.getAnswer(id), this);
+                editItemView.bind(question, surveys.getAnswer(id));
                 linear.addView(editItemView);
                 break;
             // Option Spinner
             case 3:
             case 4:
-                SpinnerItemView spinnerItemView = new SpinnerItemView(this);
-                spinnerItemView.bind(new ArrayList<>(response), question, surveys.getAnswer(id));
-                linear.addView(spinnerItemView);
+                EditTextItemView editTextItemView = new EditTextItemView(this);
+                editTextItemView.bind(question, response, surveys.getAnswer(id));
+                linear.addView(editTextItemView);
                 break;
             //Multiple opcion
             case 5:
@@ -597,6 +597,20 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         client.disconnect();
     }
 
+    @Override
+    public void callDialog(String title, List<IdOptionValue> response, final TextInputEditText input) {
+        DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
+                new ArrayList<>(response));
+        dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
+        dialog.setListDialogListener(new DialogList.ListSelectorDialogListener() {
+            @Override
+            public void setItemSelected(String item) {
+                input.setText(item);
+            }
+        });
+        dialog.show(getFragmentManager(), title);
+    }
+
     @SuppressLint("ValidFragment")
     public static class TimePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
@@ -774,8 +788,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
                     if (sectionView instanceof EditTextItemView) {
                         surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
-                    } else if (sectionView instanceof SpinnerItemView) {
-                        surveySave.getResponses().add(((SpinnerItemView) sectionView).getResponse());
                     } else if (sectionView instanceof MultipleItemViewContainer) {
                         surveySave.getResponses().addAll(((MultipleItemViewContainer)
                                 sectionView).getResponses());

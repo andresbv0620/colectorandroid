@@ -76,4 +76,6 @@
     <string name="storage">almacenamiento</string>
     <string name="camara">camara</string>
 
+    <string name="buscar">Buscar..</string>
+
 </resources>

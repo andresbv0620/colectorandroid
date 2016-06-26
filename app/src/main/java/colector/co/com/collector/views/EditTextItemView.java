@@ -15,9 +15,11 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 
+import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
+import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
 
@@ -54,8 +56,20 @@ public class EditTextItemView extends FrameLayout {
     private void init(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.edit_text_item_view, this, true);
         ButterKnife.bind(this, view);
+        this.activity = (Activity) context;
     }
 
+    private void initValues(Question question){
+        this.validation = question.getValidacion();
+        this.id = question.getId();
+        this.required = question.getRequerido();
+        input.setHint(question.getName());
+        if (question.getoculto()) this.setVisibility(GONE);
+        if (required) {
+            label.addTextChangedListener(new EditTextWatcher());
+            input.setHint(activity.getString(R.string.required_field, question.getName()));
+        }
+    }
     /**
      * Bind the question info to the view
      *
@@ -63,18 +77,9 @@ public class EditTextItemView extends FrameLayout {
      * @param previewDefault information
      * @param activity       where the view is Inflated
      */
-    public void bind(Question question, @Nullable String previewDefault, Activity activity) {
-        this.validation = question.getValidacion();
-        this.id = question.getId();
-        this.activity = activity;
-        this.required = question.getRequerido();
-        input.setHint(question.getName());
+    public void bind(Question question, @Nullable String previewDefault) {
+        initValues(question);
         if (previewDefault != null) label.setText(previewDefault);
-        if (question.getoculto()) this.setVisibility(GONE);
-        if (required) {
-            label.addTextChangedListener(new EditTextWatcher());
-            input.setHint(activity.getString(R.string.required_field, question.getName()));
-        }
         switch (question.getType()) {
             case 1:
                 break;
@@ -91,6 +96,25 @@ public class EditTextItemView extends FrameLayout {
                 input.setHint(activity.getString(R.string.type_default, String.valueOf(question.getType())));
                 break;
         }
+    }
+
+    public void bind(final Question question, final List<IdOptionValue> response,
+                     @Nullable String previewDefault){
+        initValues(question);
+        if (previewDefault != null) label.setText(previewDefault);
+        final CallDialogListener listener = (CallDialogListener) activity;
+        label.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.callDialog(question.getName(), response, label);
+            }
+        });
+        label.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) listener.callDialog(question.getName(), response, label);
+            }
+        });
     }
 
     private void allowsMultilineEditText() {
@@ -139,6 +163,10 @@ public class EditTextItemView extends FrameLayout {
         public void afterTextChanged(Editable editable) {
             validateField();
         }
+    }
+
+    public interface CallDialogListener {
+        public void callDialog(String title, List<IdOptionValue> response, TextInputEditText input);
     }
 }
 
