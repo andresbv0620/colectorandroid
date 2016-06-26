@@ -70,6 +70,7 @@ import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
 import colector.co.com.collector.views.EditTextItemView;
 import colector.co.com.collector.views.MultipleItemViewContainer;
+import colector.co.com.collector.views.PhotoItemView;
 import colector.co.com.collector.views.PhotoItemViewContainer;
 import colector.co.com.collector.views.SectionItemView;
 import colector.co.com.collector.views.SpinnerItemView;
@@ -697,14 +698,13 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      */
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK){
-            switch (requestCode){
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
                 case REQUEST_TAKE_PHOTO:
                     // Photo Request
                     try {
                         activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     break;
@@ -717,8 +717,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     try {
                         setPic(AppSession.getInstance().getCurrentPhotoPath());
                         Log.d(TAG, "Firma Ok");
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     break;
@@ -749,23 +748,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     Long tagID = (Long) item.getTag();
                     if (tagID.equals(AppSession.getInstance().getCurrentPhotoID()))
                         item.removeAllViews();
-                        item.addView(imageView);
+                    item.addView(imageView);
                 }
         }
     }
 
-    private static void DeleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory()) {
-            for (File child : fileOrDirectory.listFiles()) {
-                DeleteRecursive(child);
-            }
-        }
-
-        fileOrDirectory.delete();
-    }
-
     private void saveSurvey() {
-
         SurveySave surveySave = new SurveySave();
         surveySave.setInstanceId(surveys.getForm_id());
         if (surveys.getInstanceId() == null)
@@ -807,6 +795,35 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         activePhotoContainer = container;
         AppSession.getInstance().setCurrentPhotoID(container.id);
         dispatchTakePictureIntent();
+    }
+
+    @Override
+    public void onPhotoClicked(LinearLayout container, PhotoItemView view) {
+        showAlertDialog(container, view);
+    }
+
+    /**
+     * Show Alert diaglog to confirm if the picture will be remove
+     *
+     * @param container of the image
+     * @param view      image to be remove
+     */
+    private void showAlertDialog(final LinearLayout container, final PhotoItemView view) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle(getString(R.string.survey_delete_dialog_title));
+        alert.setNegativeButton(getString(R.string.common_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        alert.setPositiveButton(getString(R.string.common_erase), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                container.removeView(view);
+            }
+        });
+        alert.show();
     }
 
     @Override

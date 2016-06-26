@@ -1,5 +1,8 @@
 package colector.co.com.collector.listeners;
 
+import android.widget.LinearLayout;
+
+import colector.co.com.collector.views.PhotoItemView;
 import colector.co.com.collector.views.PhotoItemViewContainer;
 
 /**
@@ -10,4 +13,6 @@ import colector.co.com.collector.views.PhotoItemViewContainer;
 public interface OnAddPhotoListener {
 
     void onAddPhotoClicked(PhotoItemViewContainer container);
+
+    void onPhotoClicked(LinearLayout container, PhotoItemView view);
 }
