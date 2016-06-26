@@ -139,7 +139,6 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
     @Subscribe
     public void onSuccessLoginResponse(LoginResponse response){
-        progressDialogLogin.dismiss();
         if (!response.getResponseData().isEmpty()){
                 AppSession.getInstance().setUser(response.getResponseData().get(0));
                 // Invoke the survey synchronize
@@ -147,6 +146,7 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
                         .getColector_id());
                 mBus.post(toSend);
         } else {
+            progressDialogLogin.dismiss();
             Toast.makeText(this, response.getResponseDescription(), Toast.LENGTH_SHORT).show();
         }
     }
