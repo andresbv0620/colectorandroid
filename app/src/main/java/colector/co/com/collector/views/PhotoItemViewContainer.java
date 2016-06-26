@@ -32,7 +32,8 @@ public class PhotoItemViewContainer extends LinearLayout {
     @BindView(R.id.photo_container)
     LinearLayout photoContainer;
     public Long id;
-    public String validation;
+    private String validation;
+    private OnAddPhotoListener callback;
 
     public PhotoItemViewContainer(Context context) {
         super(context);
@@ -44,7 +45,8 @@ public class PhotoItemViewContainer extends LinearLayout {
         ButterKnife.bind(this, view);
     }
 
-    public void bind(Question question, final OnAddPhotoListener callback, @Nullable List<String> previewDefault) {
+    public void bind(Question question, OnAddPhotoListener callback, @Nullable List<String> previewDefault) {
+        this.callback = callback;
         id = question.getId();
         validation = question.getValidacion();
         label.setText(question.getName());
@@ -52,7 +54,7 @@ public class PhotoItemViewContainer extends LinearLayout {
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                callback.onAddPhotoClicked(PhotoItemViewContainer.this);
+                PhotoItemViewContainer.this.callback.onAddPhotoClicked(PhotoItemViewContainer.this);
             }
         });
         if (previewDefault != null) for (String url : previewDefault) {
@@ -61,8 +63,14 @@ public class PhotoItemViewContainer extends LinearLayout {
     }
 
     public void addImages(String url) {
-        PhotoItemView photoItemView = new PhotoItemView(getContext());
+        final PhotoItemView photoItemView = new PhotoItemView(getContext());
         photoItemView.bind(url);
+        photoItemView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callback.onPhotoClicked(photoContainer, (PhotoItemView) v);
+            }
+        });
         photoContainer.addView(photoItemView);
     }
 
