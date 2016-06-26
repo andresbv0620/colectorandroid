@@ -21,6 +21,7 @@ import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.http.AsyncResponse;
 import colector.co.com.collector.http.BackgroundTask;
 import colector.co.com.collector.http.ResourceNetwork;
+import colector.co.com.collector.listeners.OnUploadSurvey;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.request.SendSurveyRequest;
 import colector.co.com.collector.model.response.ErrorResponse;
@@ -37,19 +38,24 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
     private Context context;
     private List<Survey> items;
     private String idTab;
+    OnUploadSurvey callback;
 
-    public SurveyAdapter(Context context, ArrayList<Survey> items, String idTab) {
+    public SurveyAdapter(Context context, ArrayList<Survey> items, String idTab, OnUploadSurvey callback) {
         super(context, R.layout.adapter_survey, items);
         this.context = context;
         this.items = items;
         this.idTab = idTab;
+        this.callback = callback;
     }
 
+    public List<Survey> getItems() {
+        return items;
+    }
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        final Survey item =  this.items.get(position);
+        final Survey item = this.items.get(position);
 
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -93,40 +99,7 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
             uploadUpload.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
-
-                    SendSurveyRequest toSend = new SendSurveyRequest();
-                    toSend.setForm_id(String.valueOf(item.getForm_id()));
-                    toSend.setColector_id(String.valueOf(AppSession.getInstance().getUser().getColector_id()));
-                    toSend.setForm_longitude(item.getInstanceLongitude());
-                    toSend.setForm_latitude(item.getInstanceLatitude());
-                    toSend.setForm_horaini(item.getInstanceHoraIni());
-                    toSend.setForm_horafin(item.getInstanceHoraFin());
-
-                    toSend.setResponsesData(item.getInstanceAnswers());
-                    AsyncResponse callback = new AsyncResponse() {
-                        @Override
-                        public void callback(Object output, String Sended) {
-
-                            if (output instanceof SendSurveyResponse) {
-                                SendSurveyResponse response = (SendSurveyResponse) output;
-
-                                if (response.getResponseCode().equals(AppSettings.HTTP_OK)) {
-                                    new SurveyDAO(getContext()).statusSurveyInstance(Long.parseLong(view.getTag().toString()), item.getForm_precargados());
-                                    items.remove(item);
-                                    SurveyAdapter.this.notifyDataSetChanged();
-                                    Toast.makeText(getContext(), getContext().getString(R.string.survey_save_send_ok), Toast.LENGTH_LONG).show();
-                                } else {
-                                    Toast.makeText(getContext(), response.getResponseDescription(), Toast.LENGTH_LONG).show();
-                                }
-                            } else if (output instanceof ErrorResponse) {
-                                Toast.makeText(getContext(), ((ErrorResponse) output).getMessage(), Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getContext(), getContext().getString(R.string.survey_save_send_error), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    };
-                    BackgroundTask bt = new BackgroundTask(getContext(), toSend, new SendSurveyResponse(), callback, null, false);
-                    bt.execute(AppSettings.URL_BASE + ResourceNetwork.URL_SEND_SURVEY_DEF);
+                    callback.onUploadClicked(item);
                 }
             });
 
@@ -177,15 +150,7 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
                 @Override
                 public void onClick(final View view) {
 
-                    SendSurveyRequest toSend = new SendSurveyRequest();
-                    toSend.setForm_id(String.valueOf(item.getForm_id()));
-                    toSend.setColector_id(String.valueOf(AppSession.getInstance().getUser().getColector_id()));
-                    toSend.setForm_longitude(item.getInstanceLongitude());
-                    toSend.setForm_latitude(item.getInstanceLatitude());
-                    toSend.setForm_horaini(item.getInstanceHoraIni());
-                    toSend.setForm_horafin(item.getInstanceHoraFin());
-
-                    toSend.setResponsesData(item.getInstanceAnswers());
+                    SendSurveyRequest toSend = new SendSurveyRequest(item);
                     AsyncResponse callback = new AsyncResponse() {
                         @Override
                         public void callback(Object output, String Sended) {
