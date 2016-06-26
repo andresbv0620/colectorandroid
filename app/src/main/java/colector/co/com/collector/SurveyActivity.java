@@ -757,7 +757,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         SurveySave surveySave = new SurveySave();
         surveySave.setInstanceId(surveys.getForm_id());
         if (surveys.getInstanceId() == null)
-            surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex(surveys.getForm_id()));
+            surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex());
         else
             surveySave.setId(surveys.getInstanceId());
         surveySave.setLatitude(String.valueOf(gps.getLatitude()));
