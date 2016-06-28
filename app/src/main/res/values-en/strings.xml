@@ -63,4 +63,6 @@
     <string name="permission_not_granted">Permission Denied, You cannot access %1$s.</string>
     <string name="storage">storage</string>
     <string name="camara">camera</string>
+
+    <string name="buscar">Search..</string>
 </resources>
