@@ -1,7 +1,5 @@
 package colector.co.com.collector.database;
 
-import android.support.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,6 +81,8 @@ public class DatabaseHelper {
                 survey.setInstanceAnswer(surveySave.getResponses());
                 survey.setInstanceLongitude(surveySave.getLongitude());
                 survey.setInstanceLatitude(surveySave.getLatitude());
+                survey.setInstanceHoraIni(surveySave.getHoraIni());
+                survey.setInstanceHoraFin(surveySave.getHoraFin());
                 surveyFilled.add(survey);
             }
         }
