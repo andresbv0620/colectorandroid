@@ -1,6 +1,5 @@
 package colector.co.com.collector.fragments;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -26,6 +26,7 @@ import colector.co.com.collector.R;
 import colector.co.com.collector.SurveyActivity;
 import colector.co.com.collector.adapters.SurveyAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
+import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.listeners.OnUploadSurvey;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.request.SendSurveyRequest;
@@ -36,7 +37,7 @@ import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 
 
-public class SurveyAvailable extends Fragment implements OnUploadSurvey {
+public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataBaseSave {
 
     @BindView(R.id.list_items)
     ListView list;
@@ -45,7 +46,6 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey {
     @BindView(R.id.coordinator)
     CoordinatorLayout coordinatorLayout;
 
-    ProgressDialog progress;
     private String idTabs;
     private ArrayList<Survey> toPrint;
     private Bus mBus = BusProvider.getBus();
@@ -77,8 +77,14 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey {
         View v = inflater.inflate(R.layout.fragment_survey_available, container, false);
         ButterKnife.bind(this, v);
         idTabs = this.getTag();
-        progress = ProgressDialog.show(getContext(), getResources().getString(R.string.main_list_title),
-                getResources().getString(R.string.main_list_msg), true);
+        loading.setVisibility(View.VISIBLE);
+        setupTabs();
+        fillList();
+        loading.setVisibility(View.GONE);
+        return v;
+    }
+
+    private void setupTabs() {
         if (idTabs.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY)) {
             AppSession.getInstance().cleanSurveyAvailable();
             toPrint = new ArrayList<>(AppSession.getInstance().getSurveyAvailable());
@@ -93,10 +99,8 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey {
             toPrint = DatabaseHelper.getInstance().getSurveysDone(
                     new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
         }
-        progress.dismiss();
-        fillList();
-        return v;
     }
+
 
     private void fillList() {
         adapter = new SurveyAdapter(getActivity(), toPrint, idTabs, this);
@@ -139,19 +143,28 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey {
 
     @Subscribe
     public void onSuccessUploadSurvey(SendSurveyResponse response) {
-        loading.setVisibility(View.GONE);
-        Snackbar snack = Snackbar.make(coordinatorLayout, R.string.survey_save_send_ok, Snackbar.LENGTH_LONG);
+        Snackbar snack = Snackbar.make(coordinatorLayout, response.getResponseDescription(), Snackbar.LENGTH_LONG);
         ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
         snack.show();
-        deleteFromDoneDataBase();
+        uploadSurveySave();
     }
 
     /**
-     * After uploaod the survey delete the item from dataBase and update the adapter
+     * After upload the survey to remote update local database
      */
-    private void deleteFromDoneDataBase() {
-        DatabaseHelper.getInstance().deleteSurveysDone(surveyToUpload.getInstanceId());
-        adapter.getItems().remove(surveyToUpload);
+    private void uploadSurveySave() {
+        DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
+        adapter.getItems().remove(this.surveyToUpload);
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onSuccess() {
+        loading.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onError() {
+        loading.setVisibility(View.GONE);
     }
 }

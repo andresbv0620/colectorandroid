@@ -75,7 +75,9 @@ public class DatabaseHelper {
 
         ArrayList<Survey> surveyFilled = new ArrayList<>();
         for (Survey survey : surveys) {
-            RealmResults<SurveySave> results = realm.where(SurveySave.class).equalTo("instanceId", survey.getForm_id()).findAll();
+            RealmResults<SurveySave> results = realm.where(SurveySave.class)
+                    .equalTo("instanceId", survey.getForm_id()).findAll().where()
+                    .equalTo("uploaded", false).findAll();
             for (SurveySave surveySave : results) {
                 survey.setInstanceId(surveySave.getId());
                 survey.setInstanceAnswer(surveySave.getResponses());
@@ -86,7 +88,6 @@ public class DatabaseHelper {
                 surveyFilled.add(survey);
             }
         }
-
         return surveyFilled;
     }
 
@@ -98,6 +99,27 @@ public class DatabaseHelper {
                 result.deleteFromRealm();
             }
         });
+    }
+
+    public void updateRealmSurveySave(final Long id, final OnDataBaseSave callback) {
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                SurveySave result = realm.where(SurveySave.class).equalTo("id", id).findFirst();
+                result.setUploaded(true);
+            }
+        }, new Realm.Transaction.OnSuccess() {
+            @Override
+            public void onSuccess() {
+                callback.onSuccess();
+            }
+        }, new Realm.Transaction.OnError() {
+            @Override
+            public void onError(Throwable error) {
+                callback.onError();
+            }
+        });
+
 
     }
 
