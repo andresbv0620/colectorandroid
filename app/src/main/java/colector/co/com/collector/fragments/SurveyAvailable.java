@@ -12,13 +12,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,7 +30,6 @@ import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.request.SendSurveyRequest;
 import colector.co.com.collector.model.response.SendSurveyResponse;
 import colector.co.com.collector.network.BusProvider;
-import colector.co.com.collector.persistence.dao.SurveyDAO;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 
@@ -91,8 +88,8 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
 
 
         } else if (idTabs.equals(AppSettings.TAB_ID_UPLOADED_SURVEY)) {
-            AppSession.getInstance().setSurveyDone(new SurveyDAO(getContext()).getSurveyDone("ENVIADO"));
-            toPrint = new ArrayList<>(AppSession.getInstance().getSurveyDone());
+            toPrint = DatabaseHelper.getInstance().getSurveysUploaded(
+                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
 
 
         } else if (idTabs.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
@@ -108,27 +105,9 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                List<Survey> WorkHoursRecSurvey = null;
-                if (toPrint.get(position).getForm_precargados()) {
-                    AppSession.getInstance().setSurveyDone(new SurveyDAO(getContext()).
-                            getSurveyDonePrecar(toPrint.get(position).getForm_name().toString()));
-                    WorkHoursRecSurvey = AppSession.getInstance().getSurveyDone();
-                }
-
-                boolean flagPrecargado = false;
-                if (WorkHoursRecSurvey != null)
-                    if (WorkHoursRecSurvey.get(0).getForm_id() != null)
-                        flagPrecargado = true;
-
-                if (flagPrecargado == true) {
-                    AppSession.getInstance().setCurrentSurvey(WorkHoursRecSurvey.get(0), AppSettings.SURVEY_SELECTED_NEW);
-                    Intent intentWH = new Intent(getContext(), SurveyActivity.class);
-                    startActivity(intentWH);
-                } else {
-                    AppSession.getInstance().setCurrentSurvey(toPrint.get(position), AppSettings.SURVEY_SELECTED_NEW);
-                    Intent intent = new Intent(getContext(), SurveyActivity.class);
-                    startActivity(intent);
-                }
+                AppSession.getInstance().setCurrentSurvey(toPrint.get(position), AppSettings.SURVEY_SELECTED_NEW);
+                Intent intent = new Intent(getContext(), SurveyActivity.class);
+                startActivity(intent);
             }
         });
     }

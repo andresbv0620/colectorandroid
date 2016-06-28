@@ -72,7 +72,6 @@ public class DatabaseHelper {
     }
 
     public ArrayList<Survey> getSurveysDone(ArrayList<Survey> surveys) {
-
         ArrayList<Survey> surveyFilled = new ArrayList<>();
         for (Survey survey : surveys) {
             RealmResults<SurveySave> results = realm.where(SurveySave.class)
@@ -119,8 +118,24 @@ public class DatabaseHelper {
                 callback.onError();
             }
         });
-
-
     }
 
+    public ArrayList<Survey> getSurveysUploaded(ArrayList<Survey> surveys) {
+        ArrayList<Survey> surveyFilled = new ArrayList<>();
+        for (Survey survey : surveys) {
+            RealmResults<SurveySave> results = realm.where(SurveySave.class)
+                    .equalTo("instanceId", survey.getForm_id()).findAll().where()
+                    .equalTo("uploaded", true).findAll();
+            for (SurveySave surveySave : results) {
+                survey.setInstanceId(surveySave.getId());
+                survey.setInstanceAnswer(surveySave.getResponses());
+                survey.setInstanceLongitude(surveySave.getLongitude());
+                survey.setInstanceLatitude(surveySave.getLatitude());
+                survey.setInstanceHoraIni(surveySave.getHoraIni());
+                survey.setInstanceHoraFin(surveySave.getHoraFin());
+                surveyFilled.add(survey);
+            }
+        }
+        return surveyFilled;
+    }
 }
