@@ -38,7 +38,7 @@ public interface ApiService {
             "Accept: application/json",
             "Content-Type: application/json"
     })
-    @POST("service/form/all/")
+    @POST("service/fill/responses/")
     Call<SendSurveyResponse> uploadSurveys(@Body SendSurveyRequest surveysRequest,
                                            @Header("token") String token);
 
