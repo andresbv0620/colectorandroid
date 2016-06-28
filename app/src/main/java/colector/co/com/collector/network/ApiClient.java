@@ -1,13 +1,17 @@
 package colector.co.com.collector.network;
 
 import android.content.Context;
+
 import com.squareup.otto.Bus;
+
 import java.io.IOException;
 
 import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.LoginRequest;
+import colector.co.com.collector.model.request.SendSurveyRequest;
 import colector.co.com.collector.model.response.GetSurveysResponse;
 import colector.co.com.collector.model.response.LoginResponse;
+import colector.co.com.collector.model.response.SendSurveyResponse;
 import colector.co.com.collector.utils.PrefsUtils;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -76,7 +80,7 @@ public class ApiClient {
                 tokenSB.append(token);
                 return tokenSB.toString();
             } else return null;
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return null;
         }
     }
@@ -89,13 +93,18 @@ public class ApiClient {
         ApiClient.retrofitAdapter = retrofitAdapter;
     }
 
-    public Call<LoginResponse> doLogin(LoginRequest loginRequest){
+    public Call<LoginResponse> doLogin(LoginRequest loginRequest) {
         ApiService service = retrofitAdapter.create(ApiService.class);
         return service.doLogin(loginRequest);
     }
 
-    public Call<GetSurveysResponse> getSurveys(GetSurveysRequest surveysRequest, String token){
+    public Call<GetSurveysResponse> getSurveys(GetSurveysRequest surveysRequest, String token) {
         ApiService service = retrofitAdapter.create(ApiService.class);
         return service.getSurveys(surveysRequest, token);
+    }
+
+    public Call<SendSurveyResponse> uploadSurveys(SendSurveyRequest uploadSurvey, String token) {
+        ApiService service = retrofitAdapter.create(ApiService.class);
+        return service.uploadSurveys(uploadSurvey, token);
     }
 }

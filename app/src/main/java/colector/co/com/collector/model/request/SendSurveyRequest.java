@@ -5,6 +5,8 @@ import java.util.List;
 
 import colector.co.com.collector.model.IdInputValue;
 import colector.co.com.collector.model.IdValue;
+import colector.co.com.collector.model.Survey;
+import colector.co.com.collector.session.AppSession;
 
 /**
  * Created by dherrera on 11/10/15.
@@ -18,6 +20,18 @@ public class SendSurveyRequest {
     private String horaini;
     private String horafin;
     private List<IdInputValue> responses;
+
+
+
+    public SendSurveyRequest(Survey survey) {
+        this.colector_id = String.valueOf(AppSession.getInstance().getUser().getColector_id());
+        this.form_id = String.valueOf(survey.getForm_id());
+        this.longitud = survey.getInstanceLongitude();
+        this.latitud = survey.getInstanceLatitude();
+        this.horaini  = survey.getInstanceHoraIni();
+        this.horafin = survey.getInstanceHoraFin();
+        this.setResponsesData(survey.getInstanceAnswers());
+    }
 
     public String getColector_id() {
         return colector_id;
@@ -76,7 +90,7 @@ public class SendSurveyRequest {
     }
 
     public void setResponsesData(List<IdValue> responsesData) {
-        responses = new ArrayList<IdInputValue>();
+        responses = new ArrayList<>();
         for (IdValue item: responsesData) {
             responses.add(new IdInputValue(String.valueOf(item.getId()),item.getValue()));
         }

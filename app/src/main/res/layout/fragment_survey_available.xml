@@ -1,19 +1,31 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_color"
     android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:background="@color/background_color">
+    android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/list_items"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical|center_horizontal"
-        android:focusable="true"
-        android:divider="#02BBD2"
-        android:dividerHeight="2px"
-        android:layout_margin="10dp" />
+        android:layout_height="match_parent">
 
-</LinearLayout>
+        <ListView
+            android:id="@+id/list_items"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:divider="#02BBD2"
+            android:dividerHeight="2px"
+            android:focusable="true"
+            android:gravity="center_vertical|center_horizontal" />
+
+        <com.rey.material.widget.ProgressView
+            android:id="@+id/loading"
+            style="@style/CircularProgressView"
+            tools:visibility="visible" />
+
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

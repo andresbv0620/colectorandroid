@@ -2,8 +2,10 @@ package colector.co.com.collector.network;
 
 import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.LoginRequest;
+import colector.co.com.collector.model.request.SendSurveyRequest;
 import colector.co.com.collector.model.response.GetSurveysResponse;
 import colector.co.com.collector.model.response.LoginResponse;
+import colector.co.com.collector.model.response.SendSurveyResponse;
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -31,6 +33,14 @@ public interface ApiService {
     @POST("service/form/all/")
     Call<GetSurveysResponse> getSurveys(@Body GetSurveysRequest surveysRequest,
                                         @Header("token") String token);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @POST("service/fill/responses/")
+    Call<SendSurveyResponse> uploadSurveys(@Body SendSurveyRequest surveysRequest,
+                                           @Header("token") String token);
 
     //Waiting for url and type of response.
     @Multipart

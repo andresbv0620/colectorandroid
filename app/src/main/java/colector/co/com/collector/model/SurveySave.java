@@ -18,6 +18,7 @@ public class SurveySave extends RealmObject {
     private String HoraFin;
     private String Status;
     private RealmList<IdValue> responses;
+    private boolean uploaded = false;
 
     public SurveySave() {
         super();
@@ -72,6 +73,13 @@ public class SurveySave extends RealmObject {
         this.HoraFin = HoraFin;
     }
 
+    public boolean isUploaded() {
+        return uploaded;
+    }
+
+    public void setUploaded(boolean uploaded) {
+        this.uploaded = uploaded;
+    }
 
     public RealmList<IdValue> getResponses() {
         if (responses == null) {
