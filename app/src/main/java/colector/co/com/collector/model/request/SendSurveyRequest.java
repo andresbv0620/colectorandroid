@@ -1,12 +1,17 @@
 package colector.co.com.collector.model.request;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import colector.co.com.collector.ColectorApplication;
+import colector.co.com.collector.R;
 import colector.co.com.collector.model.IdInputValue;
 import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.session.AppSession;
+import colector.co.com.collector.utils.NetworkUtils;
 
 /**
  * Created by dherrera on 11/10/15.
@@ -20,6 +25,7 @@ public class SendSurveyRequest {
     private String horaini;
     private String horafin;
     private List<IdInputValue> responses;
+    private Context context = ColectorApplication.getInstance();
 
 
     public SendSurveyRequest(Survey survey) {
@@ -45,6 +51,14 @@ public class SendSurveyRequest {
         for (IdValue item : responsesData) {
             if (item.getmType() != 6)
                 responses.add(new IdInputValue(String.valueOf(item.getId()), item.getValue()));
+            else {
+                int lastIndex = item.getValue().length();
+                int slashIndex = item.getValue().lastIndexOf("/");
+                responses.add(new IdInputValue(String.valueOf(item.getId()), context.getString(R.string.image_name_format,
+                        NetworkUtils.getAndroidID(context),
+                        item.getValue().substring((slashIndex + 1), lastIndex))));
+            }
+
         }
     }
 }
