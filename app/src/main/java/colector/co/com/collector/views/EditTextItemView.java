@@ -47,16 +47,6 @@ public class EditTextItemView extends FrameLayout {
         init(context);
     }
 
-    public EditTextItemView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
-    }
-
-    public EditTextItemView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context);
-    }
-
     public TextInputEditText getLabel() {
         return label;
     }
@@ -115,7 +105,9 @@ public class EditTextItemView extends FrameLayout {
                      @Nullable String previewDefault) {
         initValues(question);
         this.response = response;
-        if (previewDefault != null) label.setText(previewDefault);
+        if (previewDefault != null)
+            if (mType != 4) label.setText(previewDefault);
+            else label.setText(getResponseValue(previewDefault));
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setOnClickListener(new OnClickListener() {
             @Override
@@ -178,6 +170,16 @@ public class EditTextItemView extends FrameLayout {
             }
         }
         return null;
+    }
+
+
+    private String getResponseValue(String value) {
+        for (IdOptionValue item : response) {
+            if (String.valueOf(item.getId()).equals(value)) {
+                return String.valueOf(item.getValue());
+            }
+        }
+        return value;
     }
 
 
