@@ -55,6 +55,7 @@ import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.OptionAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.fragments.DialogList;
+import colector.co.com.collector.listeners.CallDialogListener;
 import colector.co.com.collector.listeners.OnAddPhotoListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.IdOptionValue;
@@ -79,7 +80,7 @@ import colector.co.com.collector.views.SectionItemView;
 import static android.graphics.Color.parseColor;
 
 public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener,
-        EditTextItemView.CallDialogListener {
+        CallDialogListener {
     private FindGPSLocation gps;
 
     private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
@@ -598,16 +599,28 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     @Override
-    public void callDialog(String title, List<IdOptionValue> response, final TextInputEditText input) {
+    public void callDialog(String title, List<IdOptionValue> response, Object parent, int type) {
         DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
-                new ArrayList<>(response));
+                new ArrayList<>(response), type);
         dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
-        dialog.setListDialogListener(new DialogList.ListSelectorDialogListener() {
-            @Override
-            public void setItemSelected(String item) {
-                input.setText(item);
-            }
-        });
+        if (parent instanceof EditTextItemView){
+            final TextInputEditText input = ((EditTextItemView) parent).getLabel();
+            dialog.setListDialogListener(new DialogList.ListSelectorDialogListener() {
+                @Override
+                public void setItemSelected(String item) {
+                    input.setText(item);
+                }
+            });
+        } else if (parent instanceof MultipleItemViewContainer){
+//            final LinearLayout container = ((MultipleItemViewContainer) parent).getContainer();
+            final MultipleItemViewContainer view = ((MultipleItemViewContainer) parent);
+            dialog.setListener_multiple(new DialogList.ListMultipleSelectorListener() {
+                @Override
+                public void setItemsSelected(List<String> items, Question question) {
+                    view.fillData(items);
+                }
+            });
+        }
         dialog.show(getFragmentManager(), title);
     }
 
