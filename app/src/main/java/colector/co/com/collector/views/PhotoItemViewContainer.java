@@ -2,6 +2,7 @@ package colector.co.com.collector.views;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +35,7 @@ public class PhotoItemViewContainer extends LinearLayout {
     public Long id;
     private String validation;
     private OnAddPhotoListener callback;
+    private boolean required;
     private int mType;
 
     public PhotoItemViewContainer(Context context) {
@@ -49,6 +51,7 @@ public class PhotoItemViewContainer extends LinearLayout {
     public void bind(Question question, OnAddPhotoListener callback, @Nullable List<String> previewDefault) {
         this.callback = callback;
         id = question.getId();
+        required = question.getRequerido();
         mType = question.getType();
         validation = question.getValidacion();
         label.setText(question.getName());
@@ -83,6 +86,16 @@ public class PhotoItemViewContainer extends LinearLayout {
             responses.add(new IdValue(id, itemView.url, validation, mType));
         }
         return responses;
+    }
+
+    public boolean validateFields() {
+        if (!required) return true;
+        if (photoContainer.getChildCount() > 0) {
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.text_color));
+            return true;
+        }
+        label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
+        return false;
     }
 
 }

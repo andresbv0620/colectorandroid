@@ -58,6 +58,7 @@ import colector.co.com.collector.fragments.DialogList;
 import colector.co.com.collector.listeners.CallDialogListener;
 import colector.co.com.collector.listeners.OnAddPhotoListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
+import colector.co.com.collector.listeners.OnEditTextClickedOrFocused;
 import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
@@ -71,6 +72,7 @@ import colector.co.com.collector.model.SurveySave;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
+import colector.co.com.collector.views.EditTextDatePickerItemView;
 import colector.co.com.collector.views.EditTextItemView;
 import colector.co.com.collector.views.MultipleItemViewContainer;
 import colector.co.com.collector.views.PhotoItemView;
@@ -204,6 +206,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         fieldsValid = fieldsValid & ((EditTextItemView) sectionView).validateField();
                     } else if (sectionView instanceof MultipleItemViewContainer) {
                         fieldsValid = fieldsValid & ((MultipleItemViewContainer) sectionView).validateFields();
+                    } else if (sectionView instanceof PhotoItemViewContainer) {
+                        fieldsValid = fieldsValid & ((PhotoItemViewContainer) sectionView).validateFields();
+                    } else if (sectionView instanceof EditTextDatePickerItemView) {
+                        fieldsValid = fieldsValid & ((EditTextDatePickerItemView) sectionView).validateField();
                     }
                 }
             }
@@ -273,14 +279,15 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 break;
             // date
             case 7:
-                final TextView tv = buildTextView(label);
-                linear.addView(tv);
-                linear.addView(buildEditText(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        DialogFragment newFragment = new TimePickerFragment((EditText) v);
+                EditTextDatePickerItemView editTextDatePickerItemView = new EditTextDatePickerItemView(this);
+                editTextDatePickerItemView.bind(question, surveys.getAnswer(id), new OnEditTextClickedOrFocused() {
+                    @Override
+                    public void onEditTextAction(EditTextDatePickerItemView view) {
+                        DialogFragment newFragment = new TimePickerFragment(view.getLabel());
                         newFragment.show(SurveyActivity.this.getFragmentManager(), "timePicker");
                     }
-                }, id, defectoPrevio));
+                });
+                linear.addView(editTextDatePickerItemView);
                 break;
 
             // dynamic form
@@ -603,7 +610,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
                 new ArrayList<>(response), type);
         dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
-        if (parent instanceof EditTextItemView){
+        if (parent instanceof EditTextItemView) {
             final TextInputEditText input = ((EditTextItemView) parent).getLabel();
             dialog.setListDialogListener(new DialogList.ListSelectorDialogListener() {
                 @Override
@@ -611,7 +618,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     input.setText(item);
                 }
             });
-        } else if (parent instanceof MultipleItemViewContainer){
+        } else if (parent instanceof MultipleItemViewContainer) {
 //            final LinearLayout container = ((MultipleItemViewContainer) parent).getContainer();
             final MultipleItemViewContainer view = ((MultipleItemViewContainer) parent);
             dialog.setListener_multiple(new DialogList.ListMultipleSelectorListener() {
@@ -736,7 +743,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     }
                     break;
                 case REQUEST_TAKE_MAPSGPS:
-                    //TODO: ACTIVIDAD REGRESA GPS
                     Log.d(TAG, "AQUI ACCION GPS");
                     break;
                 case REQUEST_TAKE_SIGNATURE:
