@@ -61,7 +61,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         this.id = question.getId();
         this.validation = question.getValidacion();
         required = question.getRequerido();
-//        this.options = response;
+        this.options = response;
         setOnClickListeners(question.getName(), response);
         //Bind the title
         if (required) {
@@ -140,12 +140,31 @@ public class MultipleItemViewContainer extends LinearLayout {
         RealmList<IdValue> responses = new RealmList<>();
         for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
             TextView itemView = (TextView) container.getChildAt(itemViewIndex);
-            responses.add(new IdValue(id, itemView.getText().toString(), validation, mType));
+            responses.add(new IdValue(id, getSelectedId(itemView.getText().toString()), validation, mType));
         }
         return responses;
     }
 
+    private String getSelectedId(String selectedValue) {
+        for (IdOptionValue option : options) {
+            if (option.getValue().equals(selectedValue)) {
+                return String.valueOf(option.getId());
+            }
+        }
+        return selectedValue;
+    }
+
     private void bindDefaultSelected(List<String> previewDefault) {
-        fillData(previewDefault);
+        getSelectedValues(previewDefault);
+    }
+
+    private void getSelectedValues(List<String> previewDefault) {
+        ArrayList<String> values = new ArrayList<>();
+        for (String value : previewDefault) {
+            for (IdOptionValue option : options) {
+                if (String.valueOf(option.getId()).equals(value)) values.add(option.getValue());
+            }
+        }
+        fillData(values);
     }
 }
