@@ -146,13 +146,6 @@ public class MultipleItemViewContainer extends LinearLayout {
     }
 
     private void bindDefaultSelected(List<String> previewDefault) {
-        for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
-            TextView itemView = (TextView) container.getChildAt(itemViewIndex);
-            for (String defaultValue : previewDefault) {
-                if (itemView.getText().toString().equals(defaultValue)) {
-                    options.get(itemViewIndex).setStatus(true);
-                }
-            }
-        }
+        fillData(previewDefault);
     }
 }
