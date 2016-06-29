@@ -44,7 +44,7 @@ public interface ApiService {
 
     //Waiting for url and type of response.
     @Multipart
-    @POST("<waiting for url>")
+    @POST("service/fill/img/")
     Call<Object> doStoreImage(@Part MultipartBody.Part image,
                               @Part("extension") String extension,
                               @Part("question_id") long question_id,
