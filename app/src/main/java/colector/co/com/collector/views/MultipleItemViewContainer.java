@@ -76,7 +76,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         if (question.getoculto()) this.setVisibility(GONE);
     }
 
-    public void fillData(List<String> results){
+    public void fillData(List<String> results) {
         // Bind the items
         for (String result : results) {
             TextView textView = new TextView(getContext());
@@ -85,7 +85,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         }
     }
 
-    private void setOnClickListeners(final String title, final List<IdOptionValue> response){
+    private void setOnClickListeners(final String title, final List<IdOptionValue> response) {
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setOnClickListener(new OnClickListener() {
             @Override
@@ -128,11 +128,9 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public boolean validateFields() {
         if (!required) return true;
-        for (IdOptionValue option : options) {
-            if (option.isStatus()) {
-                label.setTextColor(ContextCompat.getColor(getContext(), R.color.text_color));
-                return true;
-            }
+        if (container.getChildCount() > 0) {
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.text_color));
+            return true;
         }
         label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
         return false;
