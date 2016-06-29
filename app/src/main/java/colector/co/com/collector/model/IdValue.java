@@ -1,5 +1,7 @@
 package colector.co.com.collector.model;
 
+import android.support.annotation.Nullable;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -11,6 +13,7 @@ public class IdValue extends RealmObject {
     private Long id;
     private String value;
     private String validation;
+    private int mType;
 
     public IdValue() {
         super();
@@ -21,6 +24,22 @@ public class IdValue extends RealmObject {
         this.id = id;
         this.value = value;
         this.validation = validation;
+    }
+
+    public IdValue(Long id, String value, String validation, int type) {
+        super();
+        this.id = id;
+        this.value = value;
+        this.validation = validation;
+        this.mType = type;
+    }
+
+    public int getmType() {
+        return mType;
+    }
+
+    public void setmType(int mType) {
+        this.mType = mType;
     }
 
     public Long getId() {

@@ -37,6 +37,7 @@ public class MultipleItemViewContainer extends LinearLayout {
     TextView collapse;
     private Long id;
     private String validation;
+    private int mType;
     private Activity activity;
 
     private ArrayList<IdOptionValue> options = new ArrayList<>();
@@ -56,10 +57,11 @@ public class MultipleItemViewContainer extends LinearLayout {
     public void bind(ArrayList<IdOptionValue> response, Question question,
                      @Nullable List<String> previewDefault) {
         if (response.isEmpty()) return;
+        this.mType = question.getType();
         this.id = question.getId();
         this.validation = question.getValidacion();
         required = question.getRequerido();
-//        this.options = response;
+        this.options = response;
         setOnClickListeners(question.getName(), response);
         //Bind the title
         if (required) {
@@ -74,7 +76,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         if (question.getoculto()) this.setVisibility(GONE);
     }
 
-    public void fillData(List<String> results){
+    public void fillData(List<String> results) {
         // Bind the items
         for (String result : results) {
             TextView textView = new TextView(getContext());
@@ -83,7 +85,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         }
     }
 
-    private void setOnClickListeners(final String title, final List<IdOptionValue> response){
+    private void setOnClickListeners(final String title, final List<IdOptionValue> response) {
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setOnClickListener(new OnClickListener() {
             @Override
@@ -126,11 +128,9 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public boolean validateFields() {
         if (!required) return true;
-        for (IdOptionValue option : options) {
-            if (option.isStatus()) {
-                label.setTextColor(ContextCompat.getColor(getContext(), R.color.text_color));
-                return true;
-            }
+        if (container.getChildCount() > 0) {
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.text_color));
+            return true;
         }
         label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
         return false;
@@ -140,19 +140,31 @@ public class MultipleItemViewContainer extends LinearLayout {
         RealmList<IdValue> responses = new RealmList<>();
         for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
             TextView itemView = (TextView) container.getChildAt(itemViewIndex);
-            responses.add(new IdValue(id, itemView.getText().toString(), validation));
+            responses.add(new IdValue(id, getSelectedId(itemView.getText().toString()), validation, mType));
         }
         return responses;
     }
 
-    private void bindDefaultSelected(List<String> previewDefault) {
-        for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
-            TextView itemView = (TextView) container.getChildAt(itemViewIndex);
-            for (String defaultValue : previewDefault) {
-                if (itemView.getText().toString().equals(defaultValue)) {
-                    options.get(itemViewIndex).setStatus(true);
-                }
+    private String getSelectedId(String selectedValue) {
+        for (IdOptionValue option : options) {
+            if (option.getValue().equals(selectedValue)) {
+                return String.valueOf(option.getId());
             }
         }
+        return selectedValue;
+    }
+
+    private void bindDefaultSelected(List<String> previewDefault) {
+        getSelectedValues(previewDefault);
+    }
+
+    private void getSelectedValues(List<String> previewDefault) {
+        ArrayList<String> values = new ArrayList<>();
+        for (String value : previewDefault) {
+            for (IdOptionValue option : options) {
+                if (String.valueOf(option.getId()).equals(value)) values.add(option.getValue());
+            }
+        }
+        fillData(values);
     }
 }

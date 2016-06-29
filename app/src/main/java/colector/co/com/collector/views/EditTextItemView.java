@@ -8,7 +8,6 @@ import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -16,6 +15,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 
 import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
@@ -38,19 +38,11 @@ public class EditTextItemView extends FrameLayout {
     private String validation;
     private Long id;
     private boolean required;
+    private int mType;
+    private List<IdOptionValue> response;
 
     public EditTextItemView(Context context) {
         super(context);
-        init(context);
-    }
-
-    public EditTextItemView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
-    }
-
-    public EditTextItemView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
         init(context);
     }
 
@@ -68,10 +60,11 @@ public class EditTextItemView extends FrameLayout {
         this.activity = (Activity) context;
     }
 
-    private void initValues(Question question){
+    private void initValues(Question question) {
         this.validation = question.getValidacion();
         this.id = question.getId();
         this.required = question.getRequerido();
+        this.mType = question.getType();
         input.setHint(question.getName());
         if (question.getoculto()) this.setVisibility(GONE);
         if (required) {
@@ -79,6 +72,7 @@ public class EditTextItemView extends FrameLayout {
             input.setHint(activity.getString(R.string.required_field, question.getName()));
         }
     }
+
     /**
      * Bind the question info to the view
      *
@@ -107,9 +101,12 @@ public class EditTextItemView extends FrameLayout {
     }
 
     public void bind(final Question question, final List<IdOptionValue> response,
-                     @Nullable String previewDefault){
+                     @Nullable String previewDefault) {
         initValues(question);
-        if (previewDefault != null) label.setText(previewDefault);
+        this.response = response;
+        if (previewDefault != null)
+            if (mType != 4) label.setText(previewDefault);
+            else label.setText(getResponseValue(previewDefault));
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setOnClickListener(new OnClickListener() {
             @Override
@@ -157,7 +154,29 @@ public class EditTextItemView extends FrameLayout {
     }
 
     public IdValue getResponse() {
-        return new IdValue(id, label.getText().toString(), validation);
+        if (mType == 4) {
+            return new IdValue(id, getResponseId(), validation, mType);
+        } else
+            return new IdValue(id, label.getText().toString(), validation, mType);
+    }
+
+    private String getResponseId() {
+        for (IdOptionValue item : response) {
+            if (item.getValue().equals(label.getText().toString())) {
+                return String.valueOf(item.getId());
+            }
+        }
+        return String.valueOf(response.get(0).getId());
+    }
+
+
+    private String getResponseValue(String value) {
+        for (IdOptionValue item : response) {
+            if (String.valueOf(item.getId()).equals(value)) {
+                return String.valueOf(item.getValue());
+            }
+        }
+        return value;
     }
 
 

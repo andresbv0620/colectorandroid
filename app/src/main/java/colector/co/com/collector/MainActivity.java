@@ -1,9 +1,9 @@
 package colector.co.com.collector;
 
-import android.app.ActivityManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.TabHost;
 import android.widget.Toast;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import colector.co.com.collector.fragments.SurveyAvailable;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.syncService;
@@ -19,18 +21,17 @@ import colector.co.com.collector.utils.syncService;
 public class MainActivity extends FragmentActivity {
     private FragmentTabHost mTabHost;
 
+    @BindView(R.id.fab_sync_surveys)
     FloatingActionButton FABSync;
+    @BindView(R.id.fab_uploadall_urveys)
     FloatingActionButton FABuploadAll;
+    @BindView(R.id.fab_eraseall_donesurveys)
     FloatingActionButton FABdeleteAll;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        FABSync = (FloatingActionButton) findViewById(R.id.fab_sync_surveys);
-        FABuploadAll = (FloatingActionButton) findViewById(R.id.fab_uploadall_urveys);
-        FABdeleteAll = (FloatingActionButton) findViewById(R.id.fab_eraseall_donesurveys);
+        ButterKnife.bind(this);
 
         FABSync.setVisibility(View.INVISIBLE);//ESTE
         FABuploadAll.setVisibility(View.INVISIBLE);
@@ -45,7 +46,7 @@ public class MainActivity extends FragmentActivity {
                         .setPositiveButton(getString(R.string.common_ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getBaseContext(), "Actualizar Nuevos Forms." , Toast.LENGTH_LONG).show();
+                                Toast.makeText(getBaseContext(), "Actualizar Nuevos Forms.", Toast.LENGTH_LONG).show();
                             }
 
                         })
@@ -56,7 +57,7 @@ public class MainActivity extends FragmentActivity {
 
         FABuploadAll.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick( View view) {
+            public void onClick(View view) {
                 AlertDialog show = new AlertDialog.Builder(MainActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setMessage(R.string.survey_allupload)
@@ -68,7 +69,7 @@ public class MainActivity extends FragmentActivity {
                                     Intent intent = new Intent(getBaseContext(), syncService.class);
                                     intent.setFlags(AppSettings.SERVICE_FLAG_UPLOAD);
                                     startService(intent);
-                                }else
+                                } else
                                     Toast.makeText(getBaseContext(), "El sistema esta trabajando. Por favor intentar en un momento.", Toast.LENGTH_LONG).show();
 
                             }
@@ -89,12 +90,12 @@ public class MainActivity extends FragmentActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 //if (!isServiceRunning()) {
-                                    Toast.makeText(getBaseContext(), "Tranquilo, el sistema enviara todos los formularios automaticamente", Toast.LENGTH_LONG).show();
-                                    Intent intent = new Intent(getBaseContext(), syncService.class);
-                                    intent.setFlags(AppSettings.SERVICE_FLAG_DELETE);
-                                    startService(intent);
+                                Toast.makeText(getBaseContext(), "Tranquilo, el sistema enviara todos los formularios automaticamente", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(getBaseContext(), syncService.class);
+                                intent.setFlags(AppSettings.SERVICE_FLAG_DELETE);
+                                startService(intent);
                                 //}else
-                                  //  Toast.makeText(getBaseContext(), "El sistema esta trabajando. Por favor intentar en un momento.", Toast.LENGTH_LONG).show();
+                                //  Toast.makeText(getBaseContext(), "El sistema esta trabajando. Por favor intentar en un momento.", Toast.LENGTH_LONG).show();
 
                             }
 
@@ -108,6 +109,7 @@ public class MainActivity extends FragmentActivity {
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
         buildTabs();
     }
+
     private boolean isServiceRunning() {
         /*try {
             ActivityManager manager = (ActivityManager) getBaseContext().getSystemService(getBaseContext().ACTIVITY_SERVICE);
@@ -124,7 +126,7 @@ public class MainActivity extends FragmentActivity {
     }
 
 
-    private void buildTabs(){
+    private void buildTabs() {
         mTabHost.addTab(
                 mTabHost.newTabSpec(AppSettings.TAB_ID_AVAILABLE_SURVEY).setIndicator(getResources().getString(R.string.survey_surveys), null),
                 SurveyAvailable.class, null);
@@ -142,7 +144,7 @@ public class MainActivity extends FragmentActivity {
                     FABSync.setVisibility(View.INVISIBLE);//este
                     FABuploadAll.setVisibility(View.INVISIBLE);
                     FABdeleteAll.setVisibility(View.INVISIBLE);
-                }else if (selectedTab.equalsIgnoreCase(AppSettings.TAB_ID_DONE_SURVEY)) {
+                } else if (selectedTab.equalsIgnoreCase(AppSettings.TAB_ID_DONE_SURVEY)) {
                     FABSync.setVisibility(View.INVISIBLE);
                     FABuploadAll.setVisibility(View.VISIBLE);//ESTE
                     FABuploadAll.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload));
