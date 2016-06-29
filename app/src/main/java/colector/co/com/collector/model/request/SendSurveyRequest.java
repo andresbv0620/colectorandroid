@@ -25,7 +25,6 @@ public class SendSurveyRequest {
     private String horaini;
     private String horafin;
     private List<IdInputValue> responses;
-    private Context context = ColectorApplication.getInstance();
 
 
     public SendSurveyRequest(Survey survey) {
@@ -54,8 +53,8 @@ public class SendSurveyRequest {
             else {
                 int lastIndex = item.getValue().length();
                 int slashIndex = item.getValue().lastIndexOf("/");
-                responses.add(new IdInputValue(String.valueOf(item.getId()), context.getString(R.string.image_name_format,
-                        NetworkUtils.getAndroidID(context),
+                responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,
+                        NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
                         item.getValue().substring((slashIndex + 1), lastIndex))));
             }
 
