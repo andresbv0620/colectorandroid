@@ -8,7 +8,6 @@ import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -161,15 +160,13 @@ public class EditTextItemView extends FrameLayout {
             return new IdValue(id, label.getText().toString(), validation, mType);
     }
 
-    private
-    @Nullable
-    String getResponseId() {
+    private String getResponseId() {
         for (IdOptionValue item : response) {
             if (item.getValue().equals(label.getText().toString())) {
                 return String.valueOf(item.getId());
             }
         }
-        return null;
+        return String.valueOf(response.get(0).getId());
     }
 
 
