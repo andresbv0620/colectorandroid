@@ -6,6 +6,8 @@ import android.util.Log;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import colector.co.com.collector.model.ImageRequest;
+import colector.co.com.collector.model.ImageResponse;
 import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.LoginRequest;
 import colector.co.com.collector.model.request.SendSurveyRequest;
@@ -13,6 +15,7 @@ import colector.co.com.collector.model.response.GetSurveysResponse;
 import colector.co.com.collector.model.response.LoginResponse;
 import colector.co.com.collector.model.response.SendSurveyResponse;
 import colector.co.com.collector.session.AppSession;
+import colector.co.com.collector.utils.NetworkUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,6 +35,22 @@ public class ApiCallsManager {
         this.mContext = mContext;
         this.mBus = mBus;
         mApiClient = ApiClient.getInstance(mContext);
+    }
+
+    @Subscribe
+    public void doUploadImage(ImageRequest imageRequest){
+        mApiClient.doUploadImage(imageRequest).enqueue(new Callback<ImageResponse>() {
+            @Override
+            public void onResponse(Call<ImageResponse> call, Response<ImageResponse> response) {
+                if (response.isSuccessful())
+                    mBus.post(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ImageResponse> call, Throwable t) {
+
+            }
+        });
     }
 
     @Subscribe

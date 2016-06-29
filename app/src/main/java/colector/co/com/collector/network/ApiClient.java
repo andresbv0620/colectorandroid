@@ -6,12 +6,15 @@ import com.squareup.otto.Bus;
 
 import java.io.IOException;
 
+import colector.co.com.collector.model.ImageRequest;
+import colector.co.com.collector.model.ImageResponse;
 import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.LoginRequest;
 import colector.co.com.collector.model.request.SendSurveyRequest;
 import colector.co.com.collector.model.response.GetSurveysResponse;
 import colector.co.com.collector.model.response.LoginResponse;
 import colector.co.com.collector.model.response.SendSurveyResponse;
+import colector.co.com.collector.utils.NetworkUtils;
 import colector.co.com.collector.utils.PrefsUtils;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -106,5 +109,13 @@ public class ApiClient {
     public Call<SendSurveyResponse> uploadSurveys(SendSurveyRequest uploadSurvey, String token) {
         ApiService service = retrofitAdapter.create(ApiService.class);
         return service.uploadSurveys(uploadSurvey, token);
+    }
+
+    public Call<ImageResponse> doUploadImage(ImageRequest imageRequest){
+        ApiService service = retrofitAdapter.create(ApiService.class);
+        return service.doStoreImage(NetworkUtils.obtainPartImageData(imageRequest.getImage()),
+                                    imageRequest.getExtension(),imageRequest.getQuestion_id(),
+                                    imageRequest.getSurvey_id(),imageRequest.getColector_id(),
+                                    imageRequest.getName());
     }
 }

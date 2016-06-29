@@ -1,5 +1,6 @@
 package colector.co.com.collector.network;
 
+import colector.co.com.collector.model.ImageResponse;
 import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.LoginRequest;
 import colector.co.com.collector.model.request.SendSurveyRequest;
@@ -44,10 +45,11 @@ public interface ApiService {
 
     //Waiting for url and type of response.
     @Multipart
-    @POST("<waiting for url>")
-    Call<Object> doStoreImage(@Part MultipartBody.Part image,
+    @POST("service/fill/img")
+    Call<ImageResponse> doStoreImage(@Part MultipartBody.Part image,
                               @Part("extension") String extension,
                               @Part("question_id") long question_id,
                               @Part("survey_id") long survey_id,
+                              @Part("colector_id") long colector_id,
                               @Part("name") String name);
 }
