@@ -35,6 +35,7 @@ public class MultipleItemViewContainer extends LinearLayout {
     TextView collapse;
     private Long id;
     private String validation;
+    private int mType;
 
     private ArrayList<IdOptionValue> options = new ArrayList<>();
     private boolean required = false;
@@ -52,6 +53,7 @@ public class MultipleItemViewContainer extends LinearLayout {
     public void bind(ArrayList<IdOptionValue> response, Question question,
                      @Nullable List<String> previewDefault) {
         if (response.isEmpty()) return;
+        this.mType = question.getType();
         this.id = question.getId();
         this.validation = question.getValidacion();
         required = question.getRequerido();
@@ -116,7 +118,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++) {
             MultipleItemView itemView = (MultipleItemView) container.getChildAt(itemViewIndex);
             if (itemView.toggle.isChecked()) {
-                responses.add(new IdValue(id, itemView.textView.getText().toString(), validation));
+                responses.add(new IdValue(id, String.valueOf(itemView.option.getId()), validation, mType));
             }
         }
         return responses;

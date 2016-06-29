@@ -34,6 +34,7 @@ public class PhotoItemViewContainer extends LinearLayout {
     public Long id;
     private String validation;
     private OnAddPhotoListener callback;
+    private int mType;
 
     public PhotoItemViewContainer(Context context) {
         super(context);
@@ -48,6 +49,7 @@ public class PhotoItemViewContainer extends LinearLayout {
     public void bind(Question question, OnAddPhotoListener callback, @Nullable List<String> previewDefault) {
         this.callback = callback;
         id = question.getId();
+        mType = question.getType();
         validation = question.getValidacion();
         label.setText(question.getName());
         button.setText(question.getName());
@@ -78,7 +80,7 @@ public class PhotoItemViewContainer extends LinearLayout {
         RealmList<IdValue> responses = new RealmList<>();
         for (int itemViewIndex = 0; itemViewIndex < photoContainer.getChildCount(); itemViewIndex++) {
             PhotoItemView itemView = (PhotoItemView) photoContainer.getChildAt(itemViewIndex);
-            responses.add(new IdValue(id, itemView.url, validation));
+            responses.add(new IdValue(id, itemView.url, validation, mType));
         }
         return responses;
     }

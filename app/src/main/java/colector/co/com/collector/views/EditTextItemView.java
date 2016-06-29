@@ -16,6 +16,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 
 import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
@@ -37,6 +38,8 @@ public class EditTextItemView extends FrameLayout {
     private String validation;
     private Long id;
     private boolean required;
+    private int mType;
+    private List<IdOptionValue> response;
 
     public EditTextItemView(Context context) {
         super(context);
@@ -59,10 +62,11 @@ public class EditTextItemView extends FrameLayout {
         this.activity = (Activity) context;
     }
 
-    private void initValues(Question question){
+    private void initValues(Question question) {
         this.validation = question.getValidacion();
         this.id = question.getId();
         this.required = question.getRequerido();
+        this.mType = question.getType();
         input.setHint(question.getName());
         if (question.getoculto()) this.setVisibility(GONE);
         if (required) {
@@ -70,12 +74,12 @@ public class EditTextItemView extends FrameLayout {
             input.setHint(activity.getString(R.string.required_field, question.getName()));
         }
     }
+
     /**
      * Bind the question info to the view
      *
      * @param question       to inflate
      * @param previewDefault information
-     * @param activity       where the view is Inflated
      */
     public void bind(Question question, @Nullable String previewDefault) {
         initValues(question);
@@ -99,8 +103,9 @@ public class EditTextItemView extends FrameLayout {
     }
 
     public void bind(final Question question, final List<IdOptionValue> response,
-                     @Nullable String previewDefault){
+                     @Nullable String previewDefault) {
         initValues(question);
+        this.response = response;
         if (previewDefault != null) label.setText(previewDefault);
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setOnClickListener(new OnClickListener() {
@@ -148,7 +153,21 @@ public class EditTextItemView extends FrameLayout {
     }
 
     public IdValue getResponse() {
-        return new IdValue(id, label.getText().toString(), validation);
+        if (mType == 4) {
+            return new IdValue(id, getResponseId(), validation, mType);
+        } else
+            return new IdValue(id, label.getText().toString(), validation, mType);
+    }
+
+    private
+    @Nullable
+    String getResponseId() {
+        for (IdOptionValue item : response) {
+            if (item.getValue().equals(label.getText().toString())) {
+                return String.valueOf(item.getId());
+            }
+        }
+        return null;
     }
 
 
