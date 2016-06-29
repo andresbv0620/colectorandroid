@@ -19,6 +19,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
+import colector.co.com.collector.listeners.CallDialogListener;
 import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
@@ -53,6 +54,14 @@ public class EditTextItemView extends FrameLayout {
         init(context);
     }
 
+    public TextInputEditText getLabel() {
+        return label;
+    }
+
+    public void setLabel(TextInputEditText label) {
+        this.label = label;
+    }
+
     private void init(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.edit_text_item_view, this, true);
         ButterKnife.bind(this, view);
@@ -75,7 +84,6 @@ public class EditTextItemView extends FrameLayout {
      *
      * @param question       to inflate
      * @param previewDefault information
-     * @param activity       where the view is Inflated
      */
     public void bind(Question question, @Nullable String previewDefault) {
         initValues(question);
@@ -106,13 +114,14 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(question.getName(), response, label);
+                listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) listener.callDialog(question.getName(), response, label);
+                if (hasFocus)
+                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
             }
         });
     }
@@ -163,10 +172,6 @@ public class EditTextItemView extends FrameLayout {
         public void afterTextChanged(Editable editable) {
             validateField();
         }
-    }
-
-    public interface CallDialogListener {
-        public void callDialog(String title, List<IdOptionValue> response, TextInputEditText input);
     }
 }
 
