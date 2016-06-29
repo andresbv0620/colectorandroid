@@ -133,10 +133,8 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
      */
     @Subscribe
     public void onSuccessUploadSurvey(SendSurveyResponse response) {
-        Snackbar snack = Snackbar.make(coordinatorLayout, response.getResponseDescription(), Snackbar.LENGTH_LONG);
-        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
-        snack.show();
-        getImagesToUpload();
+        if (response.getResponseCode().equals(200l)) getImagesToUpload();
+        else showSnackBarError(response.getResponseDescription());
     }
 
     /**
@@ -144,6 +142,7 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
      * If there is uploaded to the web service otherwise update local database
      */
     private void getImagesToUpload() {
+        generalIndex = 0;
         answersWithImages = ImageRequest.getFileSurveys(surveyToUpload.getInstanceAnswers());
         if (!answersWithImages.isEmpty()) uploadImages();
         else uploadSurveySave();
@@ -158,24 +157,28 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
     }
 
     /**
-     * Method subscribed to the ImageREsponse change
+     * Method subscribed to the ImageResponse change
      * If there are no more images update data base
+     *
      * @param response to watch change
      */
     @Subscribe
     public void onImageUploaded(ImageResponse response) {
-        Snackbar snack = Snackbar.make(coordinatorLayout, response.getResponseDescription(), Snackbar.LENGTH_LONG);
-        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
-        snack.show();
-        generalIndex++;
-        if (generalIndex >= answersWithImages.size()) uploadSurveySave();
-        else uploadImages();
+        if (response.getResponseCode().equals("200")) {
+            generalIndex++;
+            if (generalIndex >= answersWithImages.size()) uploadSurveySave();
+            else uploadImages();
+        } else showSnackBarError(response.getResponseDescription());
+
     }
 
     /**
      * After upload the survey to remote update local database
      */
     private void uploadSurveySave() {
+        Snackbar snack = Snackbar.make(coordinatorLayout, getString(R.string.survey_save_send_ok), Snackbar.LENGTH_LONG);
+        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
+        snack.show();
         DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
         adapter.getItems().remove(this.surveyToUpload);
         adapter.notifyDataSetChanged();
@@ -189,5 +192,11 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
     @Override
     public void onError() {
         loading.setVisibility(View.GONE);
+    }
+
+    private void showSnackBarError(String error) {
+        Snackbar snack = Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_LONG);
+        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
+        snack.show();
     }
 }

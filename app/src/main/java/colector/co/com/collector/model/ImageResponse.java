@@ -7,7 +7,7 @@ public class ImageResponse {
     private String response_code;
     private String response_description;
 
-    public String getResponse_code() {
+    public String getResponseCode() {
         return response_code;
     }
 
