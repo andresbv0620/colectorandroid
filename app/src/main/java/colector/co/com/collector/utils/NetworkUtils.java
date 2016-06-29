@@ -1,5 +1,8 @@
 package colector.co.com.collector.utils;
 
+import android.content.Context;
+import android.provider.Settings;
+
 import java.io.File;
 
 import okhttp3.MediaType;
@@ -24,5 +27,9 @@ public class NetworkUtils {
         MultipartBody.Part imagePart = MultipartBody.Part.createFormData("document", imgFile.getName(), requestFile);
 
         return imagePart;
+    }
+
+    public static String getAndroidID(Context mContext){
+        return Settings.Secure.getString(mContext.getContentResolver(),Settings.Secure.ANDROID_ID);
     }
 }

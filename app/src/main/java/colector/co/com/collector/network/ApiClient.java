@@ -111,11 +111,11 @@ public class ApiClient {
         return service.uploadSurveys(uploadSurvey, token);
     }
 
-    public Call<ImageResponse> doUploadImage(ImageRequest imageRequest){
+    public Call<ImageResponse> doUploadImage(ImageRequest imageRequest) {
         ApiService service = retrofitAdapter.create(ApiService.class);
         return service.doStoreImage(NetworkUtils.obtainPartImageData(imageRequest.getImage()),
-                                    imageRequest.getExtension(),imageRequest.getQuestion_id(),
-                                    imageRequest.getSurvey_id(),imageRequest.getColector_id(),
-                                    imageRequest.getName());
+                imageRequest.getExtension(), imageRequest.getQuestion_id(),
+                imageRequest.getSurvey_id(), imageRequest.getColector_id(),
+                imageRequest.getName());
     }
 }
