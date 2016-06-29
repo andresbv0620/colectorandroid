@@ -42,12 +42,12 @@ public interface ApiService {
     Call<SendSurveyResponse> uploadSurveys(@Body SendSurveyRequest surveysRequest,
                                            @Header("token") String token);
 
-    //Waiting for url and type of response.
     @Multipart
     @POST("service/fill/img/")
     Call<Object> doStoreImage(@Part MultipartBody.Part image,
                               @Part("extension") String extension,
                               @Part("question_id") long question_id,
                               @Part("survey_id") long survey_id,
+                              @Part("colector_id") long colector_id,
                               @Part("name") String name);
 }
