@@ -1,6 +1,14 @@
 package colector.co.com.collector.model;
 
+import android.content.Context;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import colector.co.com.collector.R;
+import colector.co.com.collector.session.AppSession;
+import colector.co.com.collector.utils.NetworkUtils;
 
 /**
  * Created by Jose Rodriguez on 29/06/2016.
@@ -13,13 +21,17 @@ public class ImageRequest {
     private long colector_id;
     private String name;
 
-    public ImageRequest(File image, String extension, long question_id, long survey_id, long colector_id, String name) {
-        this.image = image;
-        this.extension = extension;
-        this.question_id = question_id;
-        this.survey_id = survey_id;
-        this.colector_id = colector_id;
-        this.name = name;
+    public ImageRequest(Survey survey, IdValue imageSave, Context context) {
+        int dotIndex = imageSave.getValue().lastIndexOf(".");
+        int slashIndex = imageSave.getValue().lastIndexOf("/");
+        this.image = new File(imageSave.getValue());
+        this.extension = imageSave.getValue().substring(dotIndex + 1);
+        this.question_id = imageSave.getId();
+        this.survey_id = survey.getForm_id();
+        this.colector_id = AppSession.getInstance().getUser().getColector_id();
+        this.name = context.getString(R.string.image_name_format,
+                NetworkUtils.getAndroidID(context),
+                imageSave.getValue().substring((slashIndex + 1), dotIndex));
     }
 
     public File getImage() {
@@ -44,5 +56,20 @@ public class ImageRequest {
 
     public String getName() {
         return name;
+    }
+
+    public static ArrayList<IdValue> getFileSurveys(List<IdValue> answers) {
+        ArrayList<IdValue> answerWithImages = new ArrayList<>();
+        for (IdValue answer : answers) {
+            switch (answer.getmType()) {
+                case 6:
+                case 14:
+                    answerWithImages.add(answer);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return answerWithImages;
     }
 }

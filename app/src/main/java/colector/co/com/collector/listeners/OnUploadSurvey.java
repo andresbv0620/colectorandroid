@@ -9,5 +9,9 @@ import colector.co.com.collector.model.Survey;
 
 public interface OnUploadSurvey {
 
+    /**
+     * On Upload button clicked
+     * @param survey clicked
+     */
     void onUploadClicked(Survey survey);
 }

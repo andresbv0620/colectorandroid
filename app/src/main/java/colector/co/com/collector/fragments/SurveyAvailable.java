@@ -26,6 +26,9 @@ import colector.co.com.collector.adapters.SurveyAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.listeners.OnUploadSurvey;
+import colector.co.com.collector.model.IdValue;
+import colector.co.com.collector.model.ImageRequest;
+import colector.co.com.collector.model.ImageResponse;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.request.SendSurveyRequest;
 import colector.co.com.collector.model.response.SendSurveyResponse;
@@ -48,6 +51,8 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
     private Bus mBus = BusProvider.getBus();
     private Survey surveyToUpload;
     private SurveyAdapter adapter;
+    private ArrayList<IdValue> answersWithImages = new ArrayList<>();
+    private int generalIndex = 0;
 
     @Override
     public void onStart() {
@@ -120,12 +125,51 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
         mBus.post(uploadSurvey);
     }
 
+    /**
+     * Method subscribed to change on SendSurveyResponses
+     * If the upload if ok and there are images to upload, upload the images
+     *
+     * @param response to watch change
+     */
     @Subscribe
     public void onSuccessUploadSurvey(SendSurveyResponse response) {
         Snackbar snack = Snackbar.make(coordinatorLayout, response.getResponseDescription(), Snackbar.LENGTH_LONG);
         ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
         snack.show();
-        uploadSurveySave();
+        getImagesToUpload();
+    }
+
+    /**
+     * Get the answer related with Images
+     * If there is uploaded to the web service otherwise update local database
+     */
+    private void getImagesToUpload() {
+        answersWithImages = ImageRequest.getFileSurveys(surveyToUpload.getInstanceAnswers());
+        if (!answersWithImages.isEmpty()) uploadImages();
+        else uploadSurveySave();
+    }
+
+    /**
+     * Upload Images with web service
+     */
+    private void uploadImages() {
+        ImageRequest fileToUpload = new ImageRequest(surveyToUpload, answersWithImages.get(generalIndex), getContext());
+        mBus.post(fileToUpload);
+    }
+
+    /**
+     * Method subscribed to the ImageREsponse change
+     * If there are no more images update data base
+     * @param response to watch change
+     */
+    @Subscribe
+    public void onImageUploaded(ImageResponse response) {
+        Snackbar snack = Snackbar.make(coordinatorLayout, response.getResponseDescription(), Snackbar.LENGTH_LONG);
+        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
+        snack.show();
+        generalIndex++;
+        if (generalIndex >= answersWithImages.size()) uploadSurveySave();
+        else uploadImages();
     }
 
     /**

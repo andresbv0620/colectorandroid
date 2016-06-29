@@ -77,5 +77,6 @@
     <string name="camara">camara</string>
 
     <string name="buscar">Buscar..</string>
+    <string name="image_name_format">%1$s_%2$s</string>
 
 </resources>
