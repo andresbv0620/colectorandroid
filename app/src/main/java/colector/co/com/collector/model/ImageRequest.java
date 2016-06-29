@@ -24,6 +24,7 @@ public class ImageRequest {
     public ImageRequest(Survey survey, IdValue imageSave, Context context) {
         int dotIndex = imageSave.getValue().lastIndexOf(".");
         int slashIndex = imageSave.getValue().lastIndexOf("/");
+        int lastIndex = imageSave.getValue().length();
         this.image = new File(imageSave.getValue());
         this.extension = imageSave.getValue().substring(dotIndex + 1);
         this.question_id = imageSave.getId();
@@ -31,7 +32,7 @@ public class ImageRequest {
         this.colector_id = AppSession.getInstance().getUser().getColector_id();
         this.name = context.getString(R.string.image_name_format,
                 NetworkUtils.getAndroidID(context),
-                imageSave.getValue().substring((slashIndex + 1), dotIndex));
+                imageSave.getValue().substring((slashIndex + 1), lastIndex));
     }
 
     public File getImage() {
