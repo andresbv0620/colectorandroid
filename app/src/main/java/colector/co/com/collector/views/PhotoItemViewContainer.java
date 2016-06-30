@@ -63,7 +63,7 @@ public class PhotoItemViewContainer extends LinearLayout {
             }
         });
         if (previewDefault != null) for (String url : previewDefault) {
-            addImages(url);
+            if (!url.equals("")) addImages(url);
         }
     }
 
