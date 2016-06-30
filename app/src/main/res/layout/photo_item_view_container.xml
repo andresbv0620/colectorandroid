@@ -29,6 +29,8 @@
 
     <Button
         android:id="@+id/button"
+        android:drawableLeft="@drawable/ic_image"
+        android:drawablePadding="@dimen/tiny_space"
         style="@style/ButtonStyle.Survey"
         tools:text="Photos" />
 

@@ -51,7 +51,7 @@
             android:name=".SurveyActivity"
             android:label="@string/title_activity_survey"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"></activity>
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden"></activity>
         <activity
             android:name=".SignatureActivity"
             android:label="@string/title_activity_survey"

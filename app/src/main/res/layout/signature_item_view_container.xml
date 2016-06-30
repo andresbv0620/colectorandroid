@@ -21,6 +21,8 @@
 
     <Button
         android:id="@+id/button"
+        android:drawableLeft="@drawable/ic_border_color"
+        android:drawablePadding="@dimen/tiny_space"
         style="@style/ButtonStyle.Survey"
         tools:text="Signature" />
 
