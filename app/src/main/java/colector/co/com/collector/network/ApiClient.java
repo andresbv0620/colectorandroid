@@ -30,7 +30,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ApiClient {
 
-    private static final String BASE_URL = "http://52.39.239.120/";
+    private static final String BASE_URL = "http://web.colector.co/";
     private static ApiClient mApiClient;
     private static Retrofit retrofitAdapter;
     private static HttpLoggingInterceptor interceptor;

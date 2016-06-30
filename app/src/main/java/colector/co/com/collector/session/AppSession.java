@@ -1,11 +1,9 @@
 package colector.co.com.collector.session;
 
-import android.support.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import colector.co.com.collector.fragments.SurveyAvailable;
+import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.response.ResponseData;
 
@@ -17,7 +15,6 @@ public class AppSession {
     private static AppSession singletonObject;
     private ResponseData user;
     private List<Survey> surveyAvailable;
-    private List<Survey> surveyDone;
     private Survey currentSurvey;
     private static int typeSurveySelected;
     private String currentPhotoPath;
@@ -43,16 +40,8 @@ public class AppSession {
     }
 
 
-    public List<Survey> getSurveyDone() {
-        return surveyDone == null ? new ArrayList<Survey>() : surveyDone;
-    }
-
-    public void setSurveyDone(List<Survey> surveyDone) {
-        this.surveyDone = surveyDone;
-    }
-
     public List<Survey> getSurveyAvailable() {
-        return surveyAvailable == null ? new ArrayList<Survey>() : surveyAvailable;
+        return surveyAvailable == null ? DatabaseHelper.getInstance().getSurveys() : surveyAvailable;
     }
 
     public void setSurveyAvailable(List<Survey> surveyAvailable) {

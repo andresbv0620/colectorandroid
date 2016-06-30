@@ -71,6 +71,7 @@ public class DatabaseHelper {
         });
     }
 
+    // Need to be fix
     public ArrayList<Survey> getSurveysDone(ArrayList<Survey> surveys) {
         ArrayList<Survey> surveyFilled = new ArrayList<>();
         for (Survey survey : surveys) {
@@ -137,5 +138,10 @@ public class DatabaseHelper {
             }
         }
         return surveyFilled;
+    }
+
+    public List<Survey> getSurveys() {
+        RealmResults<Survey> results = realm.where(Survey.class).findAll();
+        return results.subList(0, results.size());
     }
 }
