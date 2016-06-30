@@ -60,7 +60,7 @@ public class SignatureItemViewContainer extends LinearLayout {
                 internalCallback.onAddSignatureClicked(SignatureItemViewContainer.this);
             }
         });
-        if (previewDefault != null) {
+        if (previewDefault != null && !previewDefault.equals("")) {
             addSignature(previewDefault);
         }
     }

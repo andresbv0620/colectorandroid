@@ -142,7 +142,6 @@ public class MultipleItemViewContainer extends LinearLayout {
             for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++)
                 responses.add(new IdValue(id, getSelectedId(((TextView) container.getChildAt(itemViewIndex))
                         .getText().toString()), validation, mType));
-        else responses.add(new IdValue(id, "", validation, mType));
         return responses;
     }
 
