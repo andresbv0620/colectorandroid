@@ -18,22 +18,14 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,25 +44,19 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import colector.co.com.collector.adapters.OptionAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.fragments.DialogList;
 import colector.co.com.collector.listeners.CallDialogListener;
 import colector.co.com.collector.listeners.OnAddPhotoListener;
+import colector.co.com.collector.listeners.OnAddSignatureListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.listeners.OnEditTextClickedOrFocused;
 import colector.co.com.collector.model.IdOptionValue;
-import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
-import colector.co.com.collector.model.QuestionVisibilityRules;
-import colector.co.com.collector.model.ResponseAttribute;
-import colector.co.com.collector.model.ResponseComplex;
-import colector.co.com.collector.model.ResponseItem;
 import colector.co.com.collector.model.Section;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.SurveySave;
 import colector.co.com.collector.session.AppSession;
-import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.FindGPSLocation;
 import colector.co.com.collector.views.EditTextDatePickerItemView;
 import colector.co.com.collector.views.EditTextItemView;
@@ -78,16 +64,15 @@ import colector.co.com.collector.views.MultipleItemViewContainer;
 import colector.co.com.collector.views.PhotoItemView;
 import colector.co.com.collector.views.PhotoItemViewContainer;
 import colector.co.com.collector.views.SectionItemView;
-
-import static android.graphics.Color.parseColor;
+import colector.co.com.collector.views.SignatureItemViewContainer;
 
 public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener,
         CallDialogListener {
     private FindGPSLocation gps;
 
-    private ArrayList<LinearLayout> pictureLayouts = new ArrayList<>();
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
     private PhotoItemViewContainer activePhotoContainer;
+    private SignatureItemViewContainer signatureContainer;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_TAKE_MAPSGPS = 2;
@@ -105,13 +90,11 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     CoordinatorLayout coordinatorLayout;
 
     private Long timeStandIni;
-    private PopupWindow popupWindow;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
-    private static final String TAG = "Survey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -202,15 +185,16 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
                 for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
                     View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
-                    if (sectionView instanceof EditTextItemView) {
+                    if (sectionView instanceof EditTextItemView)
                         fieldsValid = fieldsValid & ((EditTextItemView) sectionView).validateField();
-                    } else if (sectionView instanceof MultipleItemViewContainer) {
+                    else if (sectionView instanceof MultipleItemViewContainer)
                         fieldsValid = fieldsValid & ((MultipleItemViewContainer) sectionView).validateFields();
-                    } else if (sectionView instanceof PhotoItemViewContainer) {
+                    else if (sectionView instanceof PhotoItemViewContainer)
                         fieldsValid = fieldsValid & ((PhotoItemViewContainer) sectionView).validateFields();
-                    } else if (sectionView instanceof EditTextDatePickerItemView) {
+                    else if (sectionView instanceof EditTextDatePickerItemView)
                         fieldsValid = fieldsValid & ((EditTextDatePickerItemView) sectionView).validateField();
-                    }
+                    else if (sectionView instanceof SignatureItemViewContainer)
+                        fieldsValid = fieldsValid & ((SignatureItemViewContainer) sectionView).validateField();
                 }
             }
         }
@@ -231,56 +215,45 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void buildSection(Section section, LinearLayout linear) {
         for (Question question : section.getInputs()) {
-            buildQuestion(question, question.getName(), question.getId(), question.getType(),
-                    question.getMin(), question.getMax(), question.getDefectoPrevio(),
-                    question.getRequerido(), question.getValidacion(), question.getDefecto(),
-                    question.getResponses(), question.getOptions(), question.getAtributos(),
-                    question.getValorVisibility(), question.getoculto(), linear);
+            buildQuestion(question, linear);
         }
     }
 
-    private void buildQuestion(Question question, String label, Long id, int type,
-                               String min, String max, Boolean defectoPrevio,
-                               Boolean required, String Validacio, String defecto,
-                               List<IdOptionValue> response, List<ResponseComplex> options, List<ResponseAttribute> atributos,
-                               List<QuestionVisibilityRules> ValorVisibility, Boolean oculto, LinearLayout linear) {
-        if (required)
-            label += "**";
-
-        Log.i(AppSettings.TAG, ">>>>>>>>>item.getType(): " + type);
-        switch (type) {
+    private void buildQuestion(final Question question, LinearLayout linear) {
+        switch (question.getType()) {
             // Input Text
             case 1:
             case 2:
             case 8:
             default:
                 EditTextItemView editItemView = new EditTextItemView(this);
-                editItemView.bind(question, surveys.getAnswer(id));
+                editItemView.bind(question, surveys.getAnswer(question.getId()));
                 linear.addView(editItemView);
                 break;
             // Option Spinner
             case 3:
             case 4:
                 EditTextItemView editTextItemView = new EditTextItemView(this);
-                editTextItemView.bind(question, response, surveys.getAnswer(id));
+                editTextItemView.bind(question, question.getResponses(), surveys.getAnswer(question.getId()));
                 linear.addView(editTextItemView);
                 break;
             //Multiple opcion
             case 5:
                 MultipleItemViewContainer multipleItemViewContainer = new MultipleItemViewContainer(this);
-                multipleItemViewContainer.bind(new ArrayList<>(response), question, surveys.getListAnswers(id));
+                multipleItemViewContainer.bind(new ArrayList<>(question.getResponses()), question,
+                        surveys.getListAnswers(question.getId()));
                 linear.addView(multipleItemViewContainer);
                 break;
             // picture
             case 6:
                 PhotoItemViewContainer photoItemViewContainer = new PhotoItemViewContainer(this);
-                photoItemViewContainer.bind(question, this, surveys.getListAnswers(id));
+                photoItemViewContainer.bind(question, this, surveys.getListAnswers(question.getId()));
                 linear.addView(photoItemViewContainer);
                 break;
             // date
             case 7:
                 EditTextDatePickerItemView editTextDatePickerItemView = new EditTextDatePickerItemView(this);
-                editTextDatePickerItemView.bind(question, surveys.getAnswer(id), new OnEditTextClickedOrFocused() {
+                editTextDatePickerItemView.bind(question, surveys.getAnswer(question.getId()), new OnEditTextClickedOrFocused() {
                     @Override
                     public void onEditTextAction(EditTextDatePickerItemView view) {
                         DialogFragment newFragment = new TimePickerFragment(view.getLabel());
@@ -292,39 +265,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
             // dynamic form
             case 10:
-                LinearLayout toInsertQuestion = new LinearLayout(this);
-                ResponseComplex toModify = null;
-                toInsertQuestion.setOrientation(LinearLayout.VERTICAL);
-                toInsertQuestion.addView(buildSeparator());
-                setLayoutParams(toInsertQuestion);
-                linear.addView(buildTextView(label));
-                linear.addView(buildButton(getString(R.string.survey_search), showPopupSearch(options, toInsertQuestion, id)));
-
-                if (surveys.getInstanceId() != null) {
-
-                    for (ResponseComplex item : options) {
-                        String recordID = item.getRecord_id();
-
-                        if ((defectoPrevio || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT) &&
-                                recordID.equals(surveys.getAnswer(id))) {
-                            toModify = item;
-                            break;
-                        }
-                    }
-                } else {
-                    toInsertQuestion.setTag(new ResponseComplex());
-                }
-
-                if (toModify == null) {
-                    for (ResponseAttribute item : atributos) {
-                        buildQuestion(question, item.getLabel(), item.getInput_id(), item.getType(), null, null, null, null, null, null, item.getResponses(), null, null, null, oculto, toInsertQuestion);
-                    }
-                } else {
-                    fillDynamicForm(toModify, toInsertQuestion, id);
-                }
-
-                toInsertQuestion.addView(buildSeparator());
-                linear.addView(toInsertQuestion);
                 break;
 
             // GPS
@@ -334,208 +274,18 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
             // signature
             case 14:
-                linear.addView(buildTextView(label));
-                linear.addView(buildImageLinear(id));
-                final Long _idSignature = id;
-                linear.addView(buildButton(label, new View.OnClickListener() {
+                SignatureItemViewContainer signatureItemViewContainer = new SignatureItemViewContainer(this);
+                signatureItemViewContainer.bind(question, surveys.getAnswer(question.getId()), new OnAddSignatureListener() {
                     @Override
-                    public void onClick(View v) {
-                        AppSession.getInstance().setCurrentPhotoID(_idSignature);
-                        dispatchTakeSignatureIntent(_idSignature);
+                    public void onAddSignatureClicked(SignatureItemViewContainer container) {
+                        signatureContainer = container;
+                        AppSession.getInstance().setCurrentPhotoID(question.getId());
+                        dispatchTakeSignatureIntent(question.getId());
                     }
-                }));
-                linear.addView(buildSeparator());
+                });
+                linear.addView(signatureItemViewContainer);
                 break;
         }
-    }
-
-
-    // ---------- CREATE COMPONENTS -----------
-
-    /**
-     * Create programatically a button
-     *
-     * @param label
-     * @return
-     */
-    private LinearLayout buildButton(String label, View.OnClickListener listener) {
-
-        LinearLayout toReturn = new LinearLayout(this);
-
-        Button button = new Button(this);
-        button.setText(label);
-        button.setOnClickListener(listener);
-        button.setBackgroundResource(R.drawable.rounded_shape);
-        button.setTextColor(parseColor("#FFFFFF"));
-        button.setPadding(15, 10, 15, 10);
-        button.setMinWidth(300);
-
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(30, 30, 30, 30);
-
-        toReturn.setLayoutParams(layoutParams);
-        toReturn.setGravity(Gravity.CENTER);
-        toReturn.addView(button);
-
-        return toReturn;
-    }
-
-
-    private EditText buildEditText(View.OnClickListener listener, Long id, Boolean defectoPrevio) {
-        EditText toReturn = new EditText(this);
-        toReturn.setOnClickListener(listener);
-        toReturn.setFocusable(false);
-        toReturn.setTag(id);
-        // set value if is modified
-        if (surveys.getInstanceId() != null) {
-            if (defectoPrevio || AppSession.getTypeSurveySelected() == AppSettings.SURVEY_SELECTED_EDIT)
-                toReturn.setText(surveys.getAnswer(id));
-        }
-        return toReturn;
-    }
-
-    /**
-     * Create programtically a textview
-     *
-     * @param label
-     * @return textview with text @param label
-     */
-    private TextView buildTextView(String label) {
-        TextView toReturn = new TextView(this);
-        toReturn.setText(label);
-        setLayoutParams(toReturn);
-        toReturn.setTextColor(ContextCompat.getColor(this, R.color.text_color));
-        return toReturn;
-    }
-
-    /**
-     * Create programtically a LinearLayout to print ImageView
-     *
-     * @param id
-     * @return ImageView with text @param id
-     */
-    private LinearLayout buildImageLinear(Long id) {
-        LinearLayout toReturn = new LinearLayout(this);
-        toReturn.setOrientation(LinearLayout.HORIZONTAL);
-        toReturn.setTag(id);
-        setLayoutParams(toReturn);
-        //TODO pintar la imagen que se puso durante la creación
-        pictureLayouts.add(toReturn);
-        return toReturn;
-    }
-
-
-    /**
-     * FIN VISIBILITY RULES
-     * */
-
-    /**
-     * Create programtically a ImageView
-     *
-     * @return ImageView with text @param id
-     */
-    private ImageView buildImageView() {
-        ImageView toReturn = new ImageView(this);
-        setLayoutParams(toReturn);
-        //TODO pintar la imagen que se puso durante la creación
-        return toReturn;
-    }
-
-
-    // --------- UTILITIES --------------
-
-    private void setLayoutParams(View view) {
-
-        LinearLayout.LayoutParams layoutWRAP = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        LinearLayout.LayoutParams layoutMATCH = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        LinearLayout.LayoutParams layoutIMAGE = new LinearLayout.LayoutParams(
-                100, 100);
-
-        if (view instanceof TextView) {
-            layoutWRAP.setMargins(0, 15, 0, 15);
-            view.setLayoutParams(layoutWRAP);
-        } else if (view instanceof LinearLayout || view instanceof EditText) {
-            view.setLayoutParams(layoutMATCH);
-        } else if (view instanceof ImageView) {
-            layoutIMAGE.setMargins(15, 15, 15, 15);
-            view.setLayoutParams(layoutIMAGE);
-        }
-    }
-
-    private View buildSeparator() {
-        View toReturn = new View(this);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
-        layoutParams.setMargins(10, 5, 10, 5);
-        toReturn.setLayoutParams(layoutParams);
-        toReturn.setBackgroundColor(Color.rgb(51, 51, 51));
-        return toReturn;
-    }
-
-
-    private View.OnClickListener showPopupSearch(final List<ResponseComplex> options, final LinearLayout linear, final Long idQuestion) {
-
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-                View popupView = layoutInflater.inflate(R.layout.popup_search, null);
-                ListView listOptions = (ListView) popupView.findViewById(R.id.search_list_option);
-                popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, true);
-                popupWindow.setTouchable(true);
-                popupWindow.setFocusable(true);
-                popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
-
-                listOptions.setAdapter(new OptionAdapter(popupView.getContext(), options));
-
-                listOptions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                        fillDynamicForm(options.get(position), linear, idQuestion);
-                        popupWindow.dismiss();
-                    }
-                });
-
-                ((Button) popupView.findViewById(R.id.search_close)).setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View arg0) {
-                        popupWindow.dismiss();
-                    }
-                });
-            }
-        };
-
-    }
-
-    /**
-     * to fill diferents fields from opcion choose
-     */
-    private void fillDynamicForm(ResponseComplex option, LinearLayout linear, Long idQuestion) {
-
-        linear.removeAllViews();
-
-        LinearLayout toInsertQuestion = new LinearLayout(this);
-        toInsertQuestion.setOrientation(LinearLayout.VERTICAL);
-        setLayoutParams(toInsertQuestion);
-
-
-        linear.setTag(new IdValue(idQuestion, option.getRecord_id(), null));
-        for (ResponseItem data : option.getResponses()) {
-            TextView toInsert = new TextView(SurveyActivity.this);
-            toInsert.setText(data.getLabel() + ": " + data.getValue());
-            toInsert.setTextColor(ContextCompat.getColor(SurveyActivity.this, R.color.text_color));
-            linear.addView(toInsert);
-        }
-
-
     }
 
     /**
@@ -632,12 +382,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     @SuppressLint("ValidFragment")
-    public static class TimePickerFragment extends DialogFragment
+    private static class TimePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
         private EditText toPrint;
 
-        public TimePickerFragment(EditText toPrint) {
+        private TimePickerFragment(EditText toPrint) {
             super();
             this.toPrint = toPrint;
         }
@@ -706,7 +456,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     /**
      * Create file to take a picture
      *
-     * @return
+     * @return New File address
      * @throws IOException
      */
     private File createImageFile() throws IOException {
@@ -723,14 +473,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         return image;
     }
 
-    /**
-     * Result of process to take a picture
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
-
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
@@ -743,46 +485,17 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     }
                     break;
                 case REQUEST_TAKE_MAPSGPS:
-                    Log.d(TAG, "AQUI ACCION GPS");
                     break;
                 case REQUEST_TAKE_SIGNATURE:
-                    //ACTIVIDAD REGRESA SIGNATURE
+                    // Signature Request
                     try {
-                        setPic(AppSession.getInstance().getCurrentPhotoPath());
-                        Log.d(TAG, "Firma Ok");
+                        signatureContainer.addSignature(AppSession.getInstance().getCurrentPhotoPath());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     break;
             }
 
-        }
-    }
-
-    /**
-     * Set the picture in image view
-     */
-    private void setPic(final String mCurrentPhotoPath) {
-
-        final ImageView imageView = new ImageView(this);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-        layoutParams.weight = 1.0f;
-        imageView.setLayoutParams(layoutParams);
-        ColectorApplication.getInstance().getGlideInstance().load(mCurrentPhotoPath)
-                .override(600, 600).into(imageView);
-
-        Long idImageView = getIntent().getExtras().getLong("idImageView", -1);
-        if (idImageView > -1) {
-            for (final LinearLayout item : pictureLayouts)
-                if (item.getTag() != null && AppSession.getInstance().getCurrentPhotoID() != null) {
-                    Long tagID = (Long) item.getTag();
-                    if (tagID.equals(AppSession.getInstance().getCurrentPhotoID()))
-                        item.removeAllViews();
-                    item.addView(imageView);
-                }
         }
     }
 
@@ -815,6 +528,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                                 sectionView).getResponses());
                     else if (sectionView instanceof EditTextDatePickerItemView)
                         surveySave.getResponses().add(((EditTextDatePickerItemView)
+                                sectionView).getResponse());
+                    else if (sectionView instanceof SignatureItemViewContainer)
+                        surveySave.getResponses().add(((SignatureItemViewContainer)
                                 sectionView).getResponse());
                 }
             }
