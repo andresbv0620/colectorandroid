@@ -1,7 +1,5 @@
 package colector.co.com.collector.model.request;
 
-import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,14 +46,17 @@ public class SendSurveyRequest {
     private void setResponsesData(List<IdValue> responsesData) {
         responses = new ArrayList<>();
         for (IdValue item : responsesData) {
-            if (item.getmType() != 6)
-                responses.add(new IdInputValue(String.valueOf(item.getId()), item.getValue()));
-            else {
-                int lastIndex = item.getValue().length();
-                int slashIndex = item.getValue().lastIndexOf("/");
-                responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,
-                        NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
-                        item.getValue().substring((slashIndex + 1), lastIndex))));
+            switch (item.getmType()) {
+                case 6:
+                case 14:
+                    int lastIndex = item.getValue().length();
+                    int slashIndex = item.getValue().lastIndexOf("/");
+                    responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,
+                            NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
+                            item.getValue().substring((slashIndex + 1), lastIndex))));
+                    break;
+                default:
+                    responses.add(new IdInputValue(String.valueOf(item.getId()), item.getValue()));
             }
 
         }
