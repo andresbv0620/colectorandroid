@@ -42,7 +42,8 @@ public class ColectorApplication extends Application {
 
         PreferencesManager.initializeInstance(this);
 
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
+                .deleteRealmIfMigrationNeeded().build();
         Realm.setDefaultConfiguration(realmConfiguration);
     }
 
