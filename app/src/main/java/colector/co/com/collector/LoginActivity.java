@@ -25,6 +25,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.database.DatabaseHelper;
+import colector.co.com.collector.helpers.PreferencesManager;
 import colector.co.com.collector.http.ResourceNetwork;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.model.Survey;
@@ -58,19 +59,25 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_login);
-        ButterKnife.bind(this);
-        UUID = Utilities.getUUID(this);
+        if (!PreferencesManager.getInstance().isActiveAccount()) {
+            ButterKnife.bind(this);
+            UUID = Utilities.getUUID(this);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            checkPermissions();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                checkPermissions();
 
-        AppSettings.URL_BASE = ResourceNetwork.URL_BASE_PROD;
-        etUsername.setText("");
-        etPassword.setText("");
-        textViewLoginUiid.setText(UUID);
-        progressDialogLogin = new ProgressDialog(this);
-        progressDialogLogin.setCancelable(false);
-        progressDialogLogin.setMessage(getString(R.string.generalProgressDialogMessageLogin));
+            AppSettings.URL_BASE = ResourceNetwork.URL_BASE_PROD;
+            etUsername.setText("");
+            etPassword.setText("");
+            textViewLoginUiid.setText(UUID);
+            progressDialogLogin = new ProgressDialog(this);
+            progressDialogLogin.setCancelable(false);
+            progressDialogLogin.setMessage(getString(R.string.generalProgressDialogMessageLogin));
+        } else {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     @Override
@@ -126,6 +133,7 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     @Override
     public void onSuccess() {
         progressDialogLogin.dismiss();
+        PreferencesManager.getInstance().setActiveAccount();
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();

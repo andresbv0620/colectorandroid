@@ -9,6 +9,7 @@ import com.bumptech.glide.RequestManager;
 import com.crashlytics.android.Crashlytics;
 import com.squareup.otto.Bus;
 
+import colector.co.com.collector.helpers.PreferencesManager;
 import colector.co.com.collector.network.ApiCallsManager;
 import colector.co.com.collector.network.BusProvider;
 import colector.co.com.collector.utils.PrefsUtils;
@@ -38,6 +39,8 @@ public class ColectorApplication extends Application {
 
         // Init Glide
         glide = Glide.with(this);
+
+        PreferencesManager.initializeInstance(this);
 
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
         Realm.setDefaultConfiguration(realmConfiguration);
