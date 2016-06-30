@@ -81,10 +81,11 @@ public class PhotoItemViewContainer extends LinearLayout {
 
     public RealmList<IdValue> getResponses() {
         RealmList<IdValue> responses = new RealmList<>();
-        for (int itemViewIndex = 0; itemViewIndex < photoContainer.getChildCount(); itemViewIndex++) {
-            PhotoItemView itemView = (PhotoItemView) photoContainer.getChildAt(itemViewIndex);
-            responses.add(new IdValue(id, itemView.url, validation, mType));
-        }
+        if (photoContainer.getChildCount() > 0)
+            for (int itemViewIndex = 0; itemViewIndex < photoContainer.getChildCount(); itemViewIndex++)
+                responses.add(new IdValue(id, ((PhotoItemView) photoContainer.getChildAt(itemViewIndex)).url,
+                        validation, mType));
+        else responses.add(new IdValue(id, "", validation, mType));
         return responses;
     }
 
