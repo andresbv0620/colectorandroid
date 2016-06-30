@@ -79,13 +79,6 @@ public class EditTextDatePickerItemView extends FrameLayout {
                 callback.onEditTextAction(EditTextDatePickerItemView.this);
             }
         });
-        label.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
-                    callback.onEditTextAction(EditTextDatePickerItemView.this);
-            }
-        });
     }
 
     private void requestFocus(View view) {
