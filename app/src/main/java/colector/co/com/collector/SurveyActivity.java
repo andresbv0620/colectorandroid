@@ -187,24 +187,28 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             View sectionItem = container.getChildAt(child);
             if (sectionItem instanceof SectionItemView) {
                 ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
-                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
-                    View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
-                    if (sectionView instanceof EditTextItemView)
-                        fieldsValid = fieldsValid & ((EditTextItemView) sectionView).validateField();
-                    else if (sectionView instanceof MultipleItemViewContainer)
-                        fieldsValid = fieldsValid & ((MultipleItemViewContainer) sectionView).validateFields();
-                    else if (sectionView instanceof PhotoItemViewContainer)
-                        fieldsValid = fieldsValid & ((PhotoItemViewContainer) sectionView).validateFields();
-                    else if (sectionView instanceof EditTextDatePickerItemView)
-                        fieldsValid = fieldsValid & ((EditTextDatePickerItemView) sectionView).validateField();
-                    else if (sectionView instanceof SignatureItemViewContainer)
-                        fieldsValid = fieldsValid & ((SignatureItemViewContainer) sectionView).validateField();
-                    else if (sectionView instanceof FileItemViewContainer)
-                        fieldsValid = fieldsValid & ((FileItemViewContainer) sectionView).validateFields();
-                }
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++)
+                    fieldsValid = fieldsValid & validateFieldsOnView(sectionItemContainer
+                            .getChildAt(sectionItemIndex));
             }
         }
         return fieldsValid;
+    }
+
+    private boolean validateFieldsOnView(View sectionView) {
+        if (sectionView instanceof EditTextItemView)
+            return ((EditTextItemView) sectionView).validateField();
+        if (sectionView instanceof MultipleItemViewContainer)
+            return ((MultipleItemViewContainer) sectionView).validateFields();
+        if (sectionView instanceof PhotoItemViewContainer)
+            return ((PhotoItemViewContainer) sectionView).validateFields();
+        if (sectionView instanceof EditTextDatePickerItemView)
+            return ((EditTextDatePickerItemView) sectionView).validateField();
+        if (sectionView instanceof SignatureItemViewContainer)
+            return ((SignatureItemViewContainer) sectionView).validateField();
+        if (sectionView instanceof FileItemViewContainer)
+            return ((FileItemViewContainer) sectionView).validateFields();
+        return true;
     }
 
 
