@@ -6,10 +6,20 @@
     android:background="@color/background_color"
     tools:context="colector.co.com.collector.SurveyActivity">
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:titleTextColor="@android:color/white"
+        android:background="?attr/colorPrimary">
+    </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar">
 
         <ScrollView
             android:id="@+id/container_employee_information"
@@ -24,35 +34,7 @@
 
             </LinearLayout>
         </ScrollView>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/small_space"
-            android:layout_marginTop="@dimen/small_space"
-            android:clickable="true"
-            android:src="@drawable/map_marker"
-            app:backgroundTint="#1C28AB"
-            app:layout_anchor="@id/survey_container"
-            app:layout_anchorGravity="top|right"
-            app:rippleColor="#FFF" />
-
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fabsave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/small_space"
-            android:layout_marginRight="@dimen/small_space"
-            android:clickable="true"
-            android:src="@drawable/ic_upload"
-            app:backgroundTint="#1C28AB"
-            app:layout_anchor="@id/survey_container"
-            app:layout_anchorGravity="bottom|right"
-            app:rippleColor="#FFF" />
-
-    </android.support.design.widget.CoordinatorLayout>
+    </LinearLayout>
 
     <com.rey.material.widget.ProgressView
         android:id="@+id/loading"

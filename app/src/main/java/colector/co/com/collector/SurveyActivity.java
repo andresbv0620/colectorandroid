@@ -20,6 +20,9 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -81,17 +84,16 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     private static final int REQUEST_TAKE_MAPSGPS = 2;
     private static final int REQUEST_TAKE_SIGNATURE = 3;
     private static final int REQUEST_PICKFILE_CODE = 4;
+    private boolean isGpsCanBeClicked;
 
-    @BindView(R.id.fab)
-    FloatingActionButton FABGPS;
-    @BindView(R.id.fabsave)
-    FloatingActionButton FABSAVE;
     @BindView(R.id.survey_container)
     LinearLayout container;
     @BindView(R.id.loading)
     View loading;
     @BindView(R.id.coordinator)
-    CoordinatorLayout coordinatorLayout;
+    LinearLayout coordinatorLayout;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
 
     private Long timeStandIni;
     /**
@@ -106,10 +108,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
         showLoading();
-        setTitle(surveys.getForm_name());
+        setUpToolbar(surveys.getForm_name());
         setupGPS();
-        configureGPSButton();
-        configureSaveButton();
         configureInitTime();
         buildSurvey();
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -117,30 +117,42 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void setupGPS() {
         gps = new FindGPSLocation(this);
-        FABGPS.setVisibility(View.INVISIBLE);
-
     }
 
-    private void configureGPSButton() {
-        FABGPS.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (gps != null && gps.canGetLocation()) {
-                    mapGPSIntent(String.valueOf(gps.getLongitude()), String.valueOf(gps.getLatitude()));
-                }
-            }
-        });
-        ;
+    private void setUpToolbar(String title){
+        if (mToolbar != null) {
+            setSupportActionBar(mToolbar);
+            getSupportActionBar().setTitle(title);
+        }
     }
 
-    private void configureSaveButton() {
-        FABSAVE.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismissKeyBoard();
-                threadSaveModulo();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_active_survey,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+
+            case R.id.mUpload:  dismissKeyBoard();
+                                threadSaveModulo();
+                                break;
+
+            case R.id.mGps: if (isGpsCanBeClicked) {
+                                if (gps != null && gps.canGetLocation()) {
+                                    mapGPSIntent(String.valueOf(gps.getLongitude()), String.valueOf(gps.getLatitude()));
+                                }
+                            }
+                            else {
+                                Snackbar snack = Snackbar.make(coordinatorLayout, R.string.opcion_no_disponible, Snackbar.LENGTH_LONG);
+                                ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
+                                snack.show();
+                            }
+                            break;
             }
-        });
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -279,7 +291,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
             // GPS
             case 12:
-                FABGPS.setVisibility(View.VISIBLE);
+                isGpsCanBeClicked = true;
                 break;
 
             // signature

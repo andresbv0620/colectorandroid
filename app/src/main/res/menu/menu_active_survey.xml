@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/mUpload"
+        android:icon="@drawable/ic_check"
+        app:showAsAction="ifRoom"
+        android:title="Upload">
+    </item>
+    <item
+        android:id="@+id/mGps"
+        android:icon="@drawable/ic_map_marker"
+        app:showAsAction="ifRoom|withText"
+        android:title="Gps">
+    </item>
+</menu>

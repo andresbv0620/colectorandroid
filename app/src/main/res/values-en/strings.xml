@@ -65,4 +65,6 @@
     <string name="camara">camera</string>
 
     <string name="buscar">Search..</string>
+
+    <string name="opcion_no_disponible">Option not available for this form.</string>
 </resources>
