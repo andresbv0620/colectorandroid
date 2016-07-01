@@ -49,6 +49,7 @@ public class SendSurveyRequest {
             switch (item.getmType()) {
                 case 6:
                 case 14:
+                case 16:
                     int lastIndex = item.getValue().length();
                     int slashIndex = item.getValue().lastIndexOf("/");
                     responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,

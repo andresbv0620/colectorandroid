@@ -2,6 +2,7 @@ package colector.co.com.collector.model;
 
 import android.support.annotation.Nullable;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +27,30 @@ public class Survey extends RealmObject {
     private String horafin;
 
     private RealmList<Section> sections;
-    private @Nullable Long instanceId;
+    private
+    @Nullable
+    Long instanceId;
     private String instanceDate;
-    private @Nullable RealmList<IdValue> instanceAnswers;
+    private
+    @Nullable
+    RealmList<IdValue> instanceAnswers;
 
     public Survey() {
         super();
+    }
+
+    public Survey(Survey survey, SurveySave answers) {
+        form_id = survey.getForm_id();
+        form_name = survey.getForm_name();
+        form_description = survey.getForm_description();
+        precargado = survey.getForm_precargados();
+        sections = survey.getSections();
+        instanceId = answers.getId();
+        instanceAnswers = answers.getResponses();
+        longitud = answers.getLongitude();
+        latitud = answers.getLatitude();
+        horaini = answers.getHoraIni();
+        horafin = answers.getHoraFin();
     }
 
     public Survey(Long form_id, String form_name, String form_description,//String precargado,
@@ -95,7 +114,9 @@ public class Survey extends RealmObject {
         this.sections = sections;
     }
 
-    public @Nullable Long getInstanceId() {
+    public
+    @Nullable
+    Long getInstanceId() {
         return instanceId;
     }
 
