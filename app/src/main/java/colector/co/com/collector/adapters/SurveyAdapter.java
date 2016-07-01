@@ -125,7 +125,7 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
             imageButtonNotSync.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
-                    callback.onUploadClicked(item);
+                    callback.onUploadClicked(item, SurveyAdapter.this);
                 }
             });
 
@@ -138,8 +138,7 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
                     context.startActivity(intent);
                 }
             });
-        }
-        else {
+        } else {
             configureUploadedRow(item);
         }
     }

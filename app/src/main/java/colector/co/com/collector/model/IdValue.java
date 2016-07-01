@@ -1,9 +1,6 @@
 package colector.co.com.collector.model;
 
-import android.support.annotation.Nullable;
-
 import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by dherrera on 11/10/15.
@@ -64,5 +61,15 @@ public class IdValue extends RealmObject {
 
     public void setValidation(String validation) {
         this.validation = validation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof IdValue && this.id.equals(((IdValue) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

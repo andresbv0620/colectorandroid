@@ -1,25 +1,18 @@
 package colector.co.com.collector.fragments;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,20 +20,13 @@ import colector.co.com.collector.R;
 import colector.co.com.collector.SurveyActivity;
 import colector.co.com.collector.adapters.SurveyAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
-import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.listeners.OnUploadSurvey;
-import colector.co.com.collector.model.IdValue;
-import colector.co.com.collector.model.ImageRequest;
-import colector.co.com.collector.model.ImageResponse;
 import colector.co.com.collector.model.Survey;
-import colector.co.com.collector.model.request.SendSurveyRequest;
-import colector.co.com.collector.model.response.SendSurveyResponse;
-import colector.co.com.collector.network.BusProvider;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
 
 
-public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataBaseSave {
+public class SurveyAvailable extends Fragment {
 
     @BindView(R.id.list_items)
     ListView list;
@@ -48,26 +34,24 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
     View loading;
     @BindView(R.id.coordinator)
     CoordinatorLayout coordinatorLayout;
+    OnUploadSurvey callback;
 
     private String idTabs;
     private ArrayList<Survey> toPrint;
-    private Bus mBus = BusProvider.getBus();
-    private Survey surveyToUpload;
     private SurveyAdapter adapter;
-    private ArrayList<IdValue> answersWithImages = new ArrayList<>();
-    private int generalIndex = 0;
     private ProgressDialog progressDialog;
 
+
     @Override
-    public void onStart() {
-        mBus.register(this);
-        super.onStart();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        callback = (OnUploadSurvey) context;
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        mBus.unregister(this);
+    public void onDetach() {
+        super.onDetach();
+        callback = null;
     }
 
     @Override
@@ -104,14 +88,14 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
             toPrint = DatabaseHelper.getInstance().getSurveysUploaded(
                     new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
 
-            for (Survey survey: toUnion)
+            for (Survey survey : toUnion)
                 toPrint.add(survey);
         }
     }
 
 
     private void fillList() {
-        adapter = new SurveyAdapter(getActivity(), toPrint, idTabs, this);
+        adapter = new SurveyAdapter(getActivity(), toPrint, idTabs, callback);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -121,91 +105,5 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
                 startActivity(intent);
             }
         });
-    }
-
-    @Override
-    public void onUploadClicked(Survey survey) {
-        surveyToUpload = survey;
-        //loading.setVisibility(View.VISIBLE);
-        progressDialog.show();
-        SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
-        mBus.post(uploadSurvey);
-    }
-
-    /**
-     * Method subscribed to change on SendSurveyResponses
-     * If the upload if ok and there are images to upload, upload the images
-     *
-     * @param response to watch change
-     */
-    @Subscribe
-    public void onSuccessUploadSurvey(SendSurveyResponse response) {
-        if (response.getResponseCode().equals(200l)) getImagesToUpload();
-        else showSnackBarError(response.getResponseDescription());
-    }
-
-    /**
-     * Get the answer related with Images
-     * If there is uploaded to the web service otherwise update local database
-     */
-    private void getImagesToUpload() {
-        generalIndex = 0;
-        answersWithImages = ImageRequest.getFileSurveys(surveyToUpload.getInstanceAnswers());
-        if (answersWithImages != null && !answersWithImages.isEmpty()) uploadImages();
-        else uploadSurveySave();
-    }
-
-    /**
-     * Upload Images with web service
-     */
-    private void uploadImages() {
-        ImageRequest fileToUpload = new ImageRequest(surveyToUpload, answersWithImages.get(generalIndex), getContext());
-        mBus.post(fileToUpload);
-    }
-
-    /**
-     * Method subscribed to the ImageResponse change
-     * If there are no more images update data base
-     *
-     * @param response to watch change
-     */
-    @Subscribe
-    public void onImageUploaded(ImageResponse response) {
-        if (response.getResponseCode().equals("200")) {
-            generalIndex++;
-            if (generalIndex >= answersWithImages.size()) uploadSurveySave();
-            else uploadImages();
-        } else showSnackBarError(response.getResponseDescription());
-
-    }
-
-    /**
-     * After upload the survey to remote update local database
-     */
-    private void uploadSurveySave() {
-        Snackbar snack = Snackbar.make(coordinatorLayout, getString(R.string.survey_save_send_ok), Snackbar.LENGTH_LONG);
-        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
-        snack.show();
-        progressDialog.hide();
-        DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
-        this.surveyToUpload.setUploaded(true);
-        //adapter.getItems().remove(this.surveyToUpload);
-        adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onSuccess() {
-        loading.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void onError() {
-        loading.setVisibility(View.GONE);
-    }
-
-    private void showSnackBarError(String error) {
-        Snackbar snack = Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_LONG);
-        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
-        snack.show();
     }
 }
