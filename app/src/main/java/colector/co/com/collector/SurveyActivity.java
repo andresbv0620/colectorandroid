@@ -26,7 +26,6 @@ import android.view.WindowManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +46,7 @@ import butterknife.ButterKnife;
 import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.fragments.DialogList;
 import colector.co.com.collector.listeners.CallDialogListener;
+import colector.co.com.collector.listeners.OnAddFileListener;
 import colector.co.com.collector.listeners.OnAddPhotoListener;
 import colector.co.com.collector.listeners.OnAddSignatureListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
@@ -58,8 +58,10 @@ import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.SurveySave;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.utils.FindGPSLocation;
+import colector.co.com.collector.utils.RealPathUtil;
 import colector.co.com.collector.views.EditTextDatePickerItemView;
 import colector.co.com.collector.views.EditTextItemView;
+import colector.co.com.collector.views.FileItemViewContainer;
 import colector.co.com.collector.views.MultipleItemViewContainer;
 import colector.co.com.collector.views.PhotoItemView;
 import colector.co.com.collector.views.PhotoItemViewContainer;
@@ -72,11 +74,13 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
     private PhotoItemViewContainer activePhotoContainer;
+    private FileItemViewContainer activeFileContainer;
     private SignatureItemViewContainer signatureContainer;
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_TAKE_MAPSGPS = 2;
     private static final int REQUEST_TAKE_SIGNATURE = 3;
+    private static final int REQUEST_PICKFILE_CODE = 4;
 
     @BindView(R.id.fab)
     FloatingActionButton FABGPS;
@@ -195,6 +199,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         fieldsValid = fieldsValid & ((EditTextDatePickerItemView) sectionView).validateField();
                     else if (sectionView instanceof SignatureItemViewContainer)
                         fieldsValid = fieldsValid & ((SignatureItemViewContainer) sectionView).validateField();
+                    else if (sectionView instanceof FileItemViewContainer)
+                        fieldsValid = fieldsValid & ((FileItemViewContainer) sectionView).validateFields();
                 }
             }
         }
@@ -285,7 +291,32 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 });
                 linear.addView(signatureItemViewContainer);
                 break;
+            // File
+            case 16:
+                FileItemViewContainer fileItemViewContainer = new FileItemViewContainer(this);
+                fileItemViewContainer.bind(question, new OnAddFileListener() {
+                    @Override
+                    public void onAddFileClicked(FileItemViewContainer container) {
+                        activeFileContainer = container;
+                        AppSession.getInstance().setCurrentPhotoID(container.id);
+                        launchGetFileIntent();
+                    }
+
+                    @Override
+                    public void onFileClicked(LinearLayout container, PhotoItemView view) {
+
+                    }
+                }, surveys.getListAnswers(question.getId()));
+                linear.addView(fileItemViewContainer);
+                break;
+
         }
+    }
+
+    private void launchGetFileIntent() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_PICKFILE_CODE);
     }
 
     /**
@@ -422,9 +453,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void dispatchTakeSignatureIntent(Long id) {
         Intent intentSignature = new Intent(getApplicationContext(), SignatureActivity.class);
-
         Bundle extras = getIntent().putExtra("idImageView", id).getExtras();
-
         startActivityForResult(intentSignature, REQUEST_TAKE_SIGNATURE, extras);
     }
 
@@ -494,6 +523,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         e.printStackTrace();
                     }
                     break;
+                case REQUEST_PICKFILE_CODE:
+                    // Pick File Request
+                    try {
+                        activeFileContainer.addImagesFile(RealPathUtil.getRealPathFromUri(this, data.getData()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
 
         }
@@ -532,6 +569,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     else if (sectionView instanceof SignatureItemViewContainer)
                         surveySave.getResponses().add(((SignatureItemViewContainer)
                                 sectionView).getResponse());
+                    else if (sectionView instanceof FileItemViewContainer)
+                        surveySave.getResponses().addAll(((FileItemViewContainer)
+                                sectionView).getResponses());
                 }
             }
         }
