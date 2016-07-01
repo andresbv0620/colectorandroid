@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-        android:minHeight="?attr/actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:titleTextColor="@android:color/white"
-        android:background="?attr/colorPrimary">
-    </android.support.v7.widget.Toolbar>
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        app:titleTextColor="@android:color/white"></android.support.v7.widget.Toolbar>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/layout_main_tabs"
@@ -46,6 +45,7 @@
             android:layout_margin="1dp"
             android:clickable="true"
             android:src="@drawable/ic_sync"
+            android:visibility="gone"
             app:backgroundTint="#1C28AB"
             app:layout_anchor="@android:id/tabcontent"
             app:layout_anchorGravity="bottom|right"
@@ -58,6 +58,7 @@
             android:layout_margin="1dp"
             android:clickable="true"
             android:src="@drawable/ic_upload"
+            android:visibility="gone"
             app:backgroundTint="#1C28AB"
             app:layout_anchor="@android:id/tabcontent"
             app:layout_anchorGravity="bottom|right"
@@ -70,6 +71,7 @@
             android:layout_margin="1dp"
             android:clickable="true"
             android:src="@drawable/ic_erase"
+            android:visibility="gone"
             app:backgroundTint="#1C28AB"
             app:layout_anchor="@android:id/tabcontent"
             app:layout_anchorGravity="bottom|right"
