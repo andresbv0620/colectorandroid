@@ -81,5 +81,6 @@
 
     <string name="opcion_no_disponible">Está opción no se encuentra activada para este formulario.</string>
     <string name="please_sign">Por favor firme en el área delimitada.</string>
+    <string name="sync_data">Subiendo datos, por favor espere. Está operación podría ser larga.</string>
 
 </resources>

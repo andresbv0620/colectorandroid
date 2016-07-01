@@ -1,5 +1,6 @@
 package colector.co.com.collector.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -55,6 +56,7 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
     private SurveyAdapter adapter;
     private ArrayList<IdValue> answersWithImages = new ArrayList<>();
     private int generalIndex = 0;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onStart() {
@@ -81,7 +83,9 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
         View v = inflater.inflate(R.layout.fragment_survey_available, container, false);
         ButterKnife.bind(this, v);
         idTabs = this.getTag();
-        loading.setVisibility(View.VISIBLE);
+        //loading.setVisibility(View.VISIBLE);
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage(getString(R.string.sync_data));
         setupTabs();
         fillList();
         loading.setVisibility(View.GONE);
@@ -122,7 +126,8 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
     @Override
     public void onUploadClicked(Survey survey) {
         surveyToUpload = survey;
-        loading.setVisibility(View.VISIBLE);
+        //loading.setVisibility(View.VISIBLE);
+        progressDialog.show();
         SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
         mBus.post(uploadSurvey);
     }
@@ -181,6 +186,7 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
         Snackbar snack = Snackbar.make(coordinatorLayout, getString(R.string.survey_save_send_ok), Snackbar.LENGTH_LONG);
         ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
         snack.show();
+        progressDialog.hide();
         DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
         this.surveyToUpload.setUploaded(true);
         //adapter.getItems().remove(this.surveyToUpload);

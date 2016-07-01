@@ -68,4 +68,5 @@
 
     <string name="opcion_no_disponible">Option not available for this form.</string>
     <string name="please_sign">Please sign at the delimited area.</string>
+    <string name="sync_data">Uploading data, please wait. This operation will be take a while.</string>
 </resources>
