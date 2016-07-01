@@ -16,7 +16,11 @@
             android:id="@+id/cancel"
             android:layout_width="0dp"
             android:layout_height="50dp"
-            android:layout_weight=".30"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_marginRight="4dp"
+            android:drawableLeft="@drawable/ic_arrow_left"
+            android:drawablePadding="3dp"
             android:background="@drawable/rounded_shape"
             android:text="@string/common_cancel"
             android:textColor="#FFF" />
@@ -24,78 +28,48 @@
         <Button
             android:id="@+id/clear"
             android:layout_width="0dp"
+            android:gravity="center"
+            android:layout_marginLeft="4dp"
             android:layout_height="50dp"
-            android:layout_weight=".35"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/ic_pencil_off"
+            android:drawablePadding="3dp"
             android:background="@drawable/rounded_shape"
             android:text="@string/common_clear"
             android:textColor="#FFF" />
 
-        <Button
-            android:id="@+id/getsign"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_weight=".35"
-            android:background="@drawable/rounded_shape"
-            android:text="@string/common_save"
-            android:textColor="#FFF" />
     </LinearLayout>
 
-    <TableLayout
-        android:id="@+id/tableLayout1"
+    <TextView
+        android:id="@+id/textViewSignature2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TableRow
-            android:id="@+id/tableRow1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/textViewSignature2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:paddingLeft="10sp"
-                android:text="Your Name"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:visibility="invisible" />
-
-            <EditText
-                android:id="@+id/yourName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:maxLength="30">
-
-                <requestFocus />
-            </EditText>
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/textViewSignature2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLength="30"
-                android:text=""
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            <TextView
-                android:id="@+id/textViewSignature2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLength="30"
-                android:text="Please Sign below ..."
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </TableRow>
-    </TableLayout>
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:text="@string/please_sign"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
+        android:orientation="vertical"
+        android:background="@drawable/border_layout_sign"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:layout_weight="4"/>
+
+    <Button
+        android:id="@+id/getsign"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="5dp"
+        android:layout_margin="5dp"
+        android:paddingRight="5dp"
+        android:gravity="center"
+        android:drawableLeft="@drawable/ic_pencil_lock"
+        android:drawablePadding="3dp"
+        android:background="@drawable/rounded_shape"
+        android:text="@string/common_save"
+        android:textColor="#FFF" />
+
 </LinearLayout>

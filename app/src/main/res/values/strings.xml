@@ -80,5 +80,6 @@
     <string name="image_name_format">%1$s_%2$s</string>
 
     <string name="opcion_no_disponible">Está opción no se encuentra activada para este formulario.</string>
+    <string name="please_sign">Por favor firme en el área delimitada.</string>
 
 </resources>

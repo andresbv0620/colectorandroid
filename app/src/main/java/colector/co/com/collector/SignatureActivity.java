@@ -107,8 +107,6 @@ public class SignatureActivity extends Activity {
         mCancel = (Button)findViewById(R.id.cancel);
         mView = mContent;
 
-        yourName = (EditText) findViewById(R.id.yourName);
-        yourName.setVisibility(View.INVISIBLE);
         mClear.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)

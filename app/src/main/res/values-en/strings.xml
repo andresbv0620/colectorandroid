@@ -67,4 +67,5 @@
     <string name="buscar">Search..</string>
 
     <string name="opcion_no_disponible">Option not available for this form.</string>
+    <string name="please_sign">Please sign at the delimited area.</string>
 </resources>
