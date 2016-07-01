@@ -1,5 +1,6 @@
 package colector.co.com.collector.listeners;
 
+import colector.co.com.collector.adapters.SurveyAdapter;
 import colector.co.com.collector.model.Survey;
 
 /**
@@ -13,5 +14,5 @@ public interface OnUploadSurvey {
      * On Upload button clicked
      * @param survey clicked
      */
-    void onUploadClicked(Survey survey);
+    void onUploadClicked(Survey survey, SurveyAdapter surveyAdapter);
 }
