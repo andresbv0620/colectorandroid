@@ -4,8 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
@@ -16,13 +17,15 @@ import colector.co.com.collector.R;
 
 /**
  * @author Gabriel Rodriguez
- * @version 1.0
+ * @version 2.0
  */
 
-public class PhotoItemView extends FrameLayout {
+public class PhotoItemView extends LinearLayout {
 
     @BindView(R.id.photo)
     ImageView photo;
+    @BindView(R.id.file_name)
+    TextView fileName;
     public String url;
 
     public PhotoItemView(Context context) {
@@ -45,5 +48,13 @@ public class PhotoItemView extends FrameLayout {
                         photo.setImageBitmap(resource);
                     }
                 });
+    }
+
+    public void bind(String fileName, String url) {
+        this.url = url;
+        this.fileName.setVisibility(VISIBLE);
+        this.fileName.setText(fileName);
+        ColectorApplication.getInstance().getGlideInstance().load(R.drawable.ic_document)
+                .centerCrop().into(photo);
     }
 }
