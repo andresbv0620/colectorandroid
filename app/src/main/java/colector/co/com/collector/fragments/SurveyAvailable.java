@@ -151,7 +151,7 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
     private void getImagesToUpload() {
         generalIndex = 0;
         answersWithImages = ImageRequest.getFileSurveys(surveyToUpload.getInstanceAnswers());
-        if (!answersWithImages.isEmpty()) uploadImages();
+        if (answersWithImages != null && !answersWithImages.isEmpty()) uploadImages();
         else uploadSurveySave();
     }
 
