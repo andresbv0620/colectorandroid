@@ -58,7 +58,7 @@ import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.SurveySave;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.utils.FindGPSLocation;
-import colector.co.com.collector.utils.RealPathUtil;
+import colector.co.com.collector.utils.PathUtils;
 import colector.co.com.collector.views.EditTextDatePickerItemView;
 import colector.co.com.collector.views.EditTextItemView;
 import colector.co.com.collector.views.FileItemViewContainer;
@@ -308,7 +308,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
                     @Override
                     public void onFileClicked(LinearLayout container, PhotoItemView view) {
-
+                        showAlertDialog(container, view);
                     }
                 }, surveys.getListAnswers(question.getId()));
                 linear.addView(fileItemViewContainer);
@@ -319,7 +319,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void launchGetFileIntent() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(intent, REQUEST_PICKFILE_CODE);
     }
 
@@ -334,7 +335,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     /**
      * Back button event
      */
-    public void exitFormAlert() {
+    private void exitFormAlert() {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setMessage(R.string.survey_back)
@@ -530,7 +531,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 case REQUEST_PICKFILE_CODE:
                     // Pick File Request
                     try {
-                        activeFileContainer.addImagesFile(RealPathUtil.getRealPathFromUri(this, data.getData()));
+                        String uri = PathUtils.getPath(this, data.getData());
+                        if (activeFileContainer.getExtension(uri) != FileItemViewContainer.ERROR_PATH)
+                            activeFileContainer.addImagesFile(uri);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/small_space">
+    android:layout_margin="@dimen/small_space"
+    android:orientation="vertical">
 
     <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/photo"
         android:layout_width="@dimen/photo_dimensions"
         android:layout_height="@dimen/photo_dimensions"
+        android:layout_gravity="center_horizontal"
         android:scaleType="centerCrop"
-        tools:src="@drawable/ic_launcher">
+        tools:src="@drawable/ic_launcher" />
 
-    </ImageView>
+    <TextView
+        android:id="@+id/file_name"
+        style="@style/BaseTextView"
+        android:layout_gravity="bottom|center"
+        android:ellipsize="end"
+        android:maxLength="12"
+        android:maxLines="1"
+        android:visibility="gone"
+        tools:text="Prueba de Archivo con mucho te"
+        tools:visibility="visible" />
 
-</FrameLayout>
+</LinearLayout>

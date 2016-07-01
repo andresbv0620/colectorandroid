@@ -37,6 +37,9 @@ public class FileItemViewContainer extends LinearLayout {
     private OnAddFileListener internalCallback;
     private boolean required;
     private int mType;
+    public final static int ERROR_PATH = 0x00;
+    private final static int IMAGE_PATH = 0x01;
+    private final static int PDF_PATH = 0x02;
 
     public FileItemViewContainer(Context context) {
         super(context);
@@ -48,6 +51,12 @@ public class FileItemViewContainer extends LinearLayout {
         ButterKnife.bind(this, view);
     }
 
+    /**
+     * Bind the basic information of the view
+     * @param question to be inflate
+     * @param callback to notify abut click actions
+     * @param previewDefault value
+     */
     public void bind(Question question, OnAddFileListener callback, @Nullable List<String> previewDefault) {
         this.internalCallback = callback;
         id = question.getId();
@@ -67,9 +76,14 @@ public class FileItemViewContainer extends LinearLayout {
         }
     }
 
+    /**
+     * Add image reference to the url file
+     * @param url of file
+     */
     public void addImagesFile(String url) {
         final PhotoItemView photoItemView = new PhotoItemView(getContext());
-        photoItemView.bind(url);
+        if (getExtension(url) == PDF_PATH) photoItemView.bind(getFileName(url), url);
+        else photoItemView.bind(url);
         photoItemView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,6 +93,10 @@ public class FileItemViewContainer extends LinearLayout {
         photoContainer.addView(photoItemView);
     }
 
+    /**
+     * Get url responses
+     * @return List of url responses
+     */
     public RealmList<IdValue> getResponses() {
         RealmList<IdValue> responses = new RealmList<>();
         if (photoContainer.getChildCount() > 0)
@@ -89,6 +107,11 @@ public class FileItemViewContainer extends LinearLayout {
         return responses;
     }
 
+    /**
+     * Validate Fields of the question if it is necessary
+     *
+     * @return true if it is valid
+     */
     public boolean validateFields() {
         if (!required) return true;
         if (photoContainer.getChildCount() > 0) {
@@ -97,6 +120,31 @@ public class FileItemViewContainer extends LinearLayout {
         }
         label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
         return false;
+    }
+
+    /**
+     * Get file extension to know how to inflate it content
+     *
+     * @param url file
+     * @return validation code
+     */
+    public int getExtension(String url) {
+        String extension = url.substring(url.lastIndexOf(".") + 1);
+        if (extension.equals("jpg") || extension.equals("png")) return IMAGE_PATH;
+        if (extension.equals("pdf")) return PDF_PATH;
+        return ERROR_PATH;
+    }
+
+    /**
+     * Get the file Name without slash or dot
+     *
+     * @param url path
+     * @return file name
+     */
+    private String getFileName(String url) {
+        int dotIndex = url.lastIndexOf(".");
+        int slashIndex = url.lastIndexOf("/");
+        return url.substring((slashIndex + 1), dotIndex);
     }
 
 }
