@@ -7,7 +7,12 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TabHost;
 import android.widget.Toast;
@@ -18,7 +23,8 @@ import colector.co.com.collector.fragments.SurveyAvailable;
 import colector.co.com.collector.settings.AppSettings;
 import colector.co.com.collector.utils.syncService;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends AppCompatActivity {
+
     private FragmentTabHost mTabHost;
 
     @BindView(R.id.fab_sync_surveys)
@@ -27,6 +33,10 @@ public class MainActivity extends FragmentActivity {
     FloatingActionButton FABuploadAll;
     @BindView(R.id.fab_eraseall_donesurveys)
     FloatingActionButton FABdeleteAll;
+
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,6 +117,7 @@ public class MainActivity extends FragmentActivity {
 
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
+        setUpToolbar();
         buildTabs();
     }
 
@@ -125,6 +136,18 @@ public class MainActivity extends FragmentActivity {
         return true;
     }
 
+    private void setUpToolbar(){
+        if (mToolbar != null) {
+            setSupportActionBar(mToolbar);
+            getSupportActionBar().setTitle("Colector");
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
     private void buildTabs() {
         mTabHost.addTab(
