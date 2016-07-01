@@ -3,11 +3,16 @@ package colector.co.com.collector.helpers;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.gson.Gson;
+
+import colector.co.com.collector.model.response.ResponseData;
+
 /**
  * Created by Jose Rodriguez on 30/06/2016.
  */
 public class PreferencesManager {
     public static final String ACTIVE_ACCOUNT = "colector.co.com.collector.LONG_ACTIVE_ACCOUNT_ID";
+    public static final String RESPONSE_OBJECT_ACCOUNT = "colector.co.com.collector.RESPONSE_OBJECT_ACCOUNT";
     private static final String PREF_NAME = "colector.co.com.collector.COLECTOR_PREFERENCES";
     private static PreferencesManager sInstance;
     private final SharedPreferences mPreferences;
@@ -34,6 +39,16 @@ public class PreferencesManager {
         SharedPreferences.Editor edit = mPreferences.edit();
         edit.putBoolean(PreferencesManager.ACTIVE_ACCOUNT, true);
         edit.commit();
+    }
+
+    public void storeResponseData(ResponseData responseData){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString(PreferencesManager.RESPONSE_OBJECT_ACCOUNT, new Gson().toJson(responseData));
+        edit.commit();
+    }
+
+    public ResponseData getUserData(){
+        return new Gson().fromJson(getPrefs().getString(PreferencesManager.RESPONSE_OBJECT_ACCOUNT, ""),ResponseData.class);
     }
 
     public boolean isActiveAccount(){

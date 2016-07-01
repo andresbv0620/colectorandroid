@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import colector.co.com.collector.database.DatabaseHelper;
+import colector.co.com.collector.helpers.PreferencesManager;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.response.ResponseData;
 
@@ -49,7 +50,7 @@ public class AppSession {
     }
 
     public ResponseData getUser() {
-        return user;
+        return PreferencesManager.getInstance().getUserData();
     }
 
     public void setUser(ResponseData user) {

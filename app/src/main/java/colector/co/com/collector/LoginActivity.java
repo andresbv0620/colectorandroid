@@ -148,6 +148,7 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     @Subscribe
     public void onSuccessLoginResponse(LoginResponse response){
         if (!response.getResponseData().isEmpty()){
+                PreferencesManager.getInstance().storeResponseData(response.getResponseData().get(0));
                 AppSession.getInstance().setUser(response.getResponseData().get(0));
                 // Invoke the survey synchronize
                 GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser()
