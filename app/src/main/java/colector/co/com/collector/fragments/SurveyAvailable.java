@@ -17,6 +17,8 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -90,16 +92,16 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
         if (idTabs.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY)) {
             AppSession.getInstance().cleanSurveyAvailable();
             toPrint = new ArrayList<>(AppSession.getInstance().getSurveyAvailable());
+        } else if (idTabs.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
 
+            ArrayList<Survey> toUnion = DatabaseHelper.getInstance().getSurveysDone(
+                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
 
-        } else if (idTabs.equals(AppSettings.TAB_ID_UPLOADED_SURVEY)) {
             toPrint = DatabaseHelper.getInstance().getSurveysUploaded(
                     new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
 
-
-        } else if (idTabs.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
-            toPrint = DatabaseHelper.getInstance().getSurveysDone(
-                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+            for (Survey survey: toUnion)
+                toPrint.add(survey);
         }
     }
 
@@ -180,7 +182,8 @@ public class SurveyAvailable extends Fragment implements OnUploadSurvey, OnDataB
         ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
         snack.show();
         DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
-        adapter.getItems().remove(this.surveyToUpload);
+        this.surveyToUpload.setUploaded(true);
+        //adapter.getItems().remove(this.surveyToUpload);
         adapter.notifyDataSetChanged();
     }
 

@@ -34,6 +34,7 @@ public class Survey extends RealmObject {
     private
     @Nullable
     RealmList<IdValue> instanceAnswers;
+    private boolean uploaded;
 
     public Survey() {
         super();
@@ -51,6 +52,7 @@ public class Survey extends RealmObject {
         latitud = answers.getLatitude();
         horaini = answers.getHoraIni();
         horafin = answers.getHoraFin();
+        uploaded = answers.isUploaded();
     }
 
     public Survey(Long form_id, String form_name, String form_description,//String precargado,
@@ -199,5 +201,13 @@ public class Survey extends RealmObject {
             }
         }
         return listAnswers;
+    }
+
+    public boolean isUploaded() {
+        return uploaded;
+    }
+
+    public void setUploaded(boolean uploaded) {
+        this.uploaded = uploaded;
     }
 }

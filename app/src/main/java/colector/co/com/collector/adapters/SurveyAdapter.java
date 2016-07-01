@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -43,6 +44,12 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
     ImageButton uploadUpload;
     @BindView(R.id.buttonEditSurvey)
     ImageButton editUpload;
+    @BindView(R.id.imageButtonNotSync)
+    ImageButton imageButtonNotSync;
+    @BindView(R.id.imageButtonSyncDone)
+    ImageButton imageButtonSyncDone;
+    @BindView(R.id.containerDescription)
+    LinearLayout containerDescription;
 
 
     public SurveyAdapter(Context context, ArrayList<Survey> items, String idTab, OnUploadSurvey callback) {
@@ -68,9 +75,10 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
 
         if (idTab.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY))
             row_description.setText(item.getForm_description());
-        else if (idTab.equals(AppSettings.TAB_ID_DONE_SURVEY)) configureDoneRow(item, position);
-        else if (idTab.equals(AppSettings.TAB_ID_UPLOADED_SURVEY))
-            configureUploadedRow(item);
+        else if (idTab.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
+            configureDoneRow(item, position);
+        }
+
         return row;
     }
 
@@ -85,44 +93,55 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
         row_description.setText(item.getSurveyDoneDescription());
         deleteButton.setTag(item.getInstanceId());
         deleteButton.setVisibility(View.VISIBLE);
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                new AlertDialog.Builder(getContext())
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setMessage(R.string.ans_message_delete_survey_undone)
-                        .setPositiveButton(getContext().getString(R.string.common_erase), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                DatabaseHelper.getInstance().deleteSurveysDone(item.getInstanceId());
-                                items.remove(item);
-                                SurveyAdapter.this.notifyDataSetChanged();
-                            }
 
-                        })
-                        .setNegativeButton(getContext().getString(R.string.common_cancel), null)
-                        .show();
-            }
-        });
-        uploadUpload.setTag(item.getInstanceId());
-        uploadUpload.setVisibility(View.VISIBLE);
-        uploadUpload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                callback.onUploadClicked(item);
-            }
-        });
+        if (!item.isUploaded()) {
+            imageButtonSyncDone.setVisibility(View.GONE);
+            imageButtonNotSync.setVisibility(View.VISIBLE);
+            deleteButton.setVisibility(View.GONE);
+            uploadUpload.setVisibility(View.GONE);
+            editUpload.setVisibility(View.GONE);
 
-        editUpload.setTag(item.getInstanceId());
-        editUpload.setVisibility(View.VISIBLE);
-        editUpload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AppSession.getInstance().setCurrentSurvey(items.get(position), AppSettings.SURVEY_SELECTED_EDIT);
-                Intent intent = new Intent(getContext(), SurveyActivity.class);
-                context.startActivity(intent);
-            }
-        });
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View view) {
+                    new AlertDialog.Builder(getContext())
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setMessage(R.string.ans_message_delete_survey_undone)
+                            .setPositiveButton(getContext().getString(R.string.common_erase), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    DatabaseHelper.getInstance().deleteSurveysDone(item.getInstanceId());
+                                    items.remove(item);
+                                    SurveyAdapter.this.notifyDataSetChanged();
+                                }
+
+                            })
+                            .setNegativeButton(getContext().getString(R.string.common_cancel), null)
+                            .show();
+                }
+            });
+            imageButtonNotSync.setTag(item.getInstanceId());
+            imageButtonNotSync.setVisibility(View.VISIBLE);
+            imageButtonNotSync.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View view) {
+                    callback.onUploadClicked(item);
+                }
+            });
+
+            containerDescription.setClickable(true);
+            containerDescription.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AppSession.getInstance().setCurrentSurvey(items.get(position), AppSettings.SURVEY_SELECTED_EDIT);
+                    Intent intent = new Intent(getContext(), SurveyActivity.class);
+                    context.startActivity(intent);
+                }
+            });
+        }
+        else {
+            configureUploadedRow(item);
+        }
     }
 
     /**
@@ -132,6 +151,8 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
      */
     private void configureUploadedRow(final Survey item) {
         row_description.setText(item.getSurveyDoneDescription());
+        imageButtonSyncDone.setVisibility(View.VISIBLE);
+        imageButtonNotSync.setVisibility(View.GONE);
         deleteButton.setVisibility(View.GONE);
         uploadUpload.setVisibility(View.GONE);
         editUpload.setVisibility(View.GONE);

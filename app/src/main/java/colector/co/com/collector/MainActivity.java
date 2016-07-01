@@ -156,27 +156,14 @@ public class MainActivity extends AppCompatActivity {
         mTabHost.addTab(
                 mTabHost.newTabSpec(AppSettings.TAB_ID_DONE_SURVEY).setIndicator(getResources().getString(R.string.survey_survyes_done), null),
                 SurveyAvailable.class, null);
-        mTabHost.addTab(
-                mTabHost.newTabSpec(AppSettings.TAB_ID_UPLOADED_SURVEY).setIndicator(getResources().getString(R.string.survey_survyes_uploaded), null),
-                SurveyAvailable.class, null);
 
         mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 
             public void onTabChanged(String selectedTab) {
                 if (selectedTab.equalsIgnoreCase(AppSettings.TAB_ID_AVAILABLE_SURVEY)) {
-                    FABSync.setVisibility(View.INVISIBLE);//este
-                    FABuploadAll.setVisibility(View.INVISIBLE);
-                    FABdeleteAll.setVisibility(View.INVISIBLE);
+                    //Nothing to do here.
                 } else if (selectedTab.equalsIgnoreCase(AppSettings.TAB_ID_DONE_SURVEY)) {
-                    FABSync.setVisibility(View.INVISIBLE);
-                    FABuploadAll.setVisibility(View.VISIBLE);//ESTE
-                    FABuploadAll.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload));
-                    FABdeleteAll.setVisibility(View.INVISIBLE);
-                } else if (selectedTab.equalsIgnoreCase(AppSettings.TAB_ID_UPLOADED_SURVEY)) {
-                    FABSync.setVisibility(View.INVISIBLE);
-                    FABuploadAll.setVisibility(View.INVISIBLE);
-                    FABuploadAll.setImageDrawable(getResources().getDrawable(R.drawable.ic_reupload));
-                    FABdeleteAll.setVisibility(View.VISIBLE);//SETE
+                    //Nothing to do here.
                 }
             }
         });

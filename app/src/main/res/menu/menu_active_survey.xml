@@ -9,7 +9,7 @@
     </item>
     <item
         android:id="@+id/mGps"
-        android:icon="@drawable/ic_map_marker"
+        android:icon="@drawable/ic_crosshairs_gps"
         app:showAsAction="ifRoom|withText"
         android:title="Gps">
     </item>
