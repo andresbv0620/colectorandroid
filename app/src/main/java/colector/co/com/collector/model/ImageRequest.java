@@ -65,6 +65,7 @@ public class ImageRequest {
             switch (answer.getmType()) {
                 case 6:
                 case 14:
+                case 16:
                     if (!answer.getValue().equals("")) answerWithImages.add(answer);
                     break;
                 default:
