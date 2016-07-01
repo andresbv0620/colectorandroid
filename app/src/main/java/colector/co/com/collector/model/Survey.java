@@ -2,7 +2,6 @@ package colector.co.com.collector.model;
 
 import android.support.annotation.Nullable;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +31,7 @@ public class Survey extends RealmObject {
     Long instanceId;
     private String instanceDate;
     private
-    @Nullable
-    RealmList<IdValue> instanceAnswers;
+    RealmList<IdValue> instanceAnswers = new RealmList<>();
     private boolean uploaded;
 
     public Survey() {
@@ -168,9 +166,6 @@ public class Survey extends RealmObject {
     }
 
     public RealmList<IdValue> getInstanceAnswers() {
-        if (instanceAnswers == null) {
-            instanceAnswers = new RealmList<>();
-        }
         return instanceAnswers;
     }
 
@@ -209,5 +204,11 @@ public class Survey extends RealmObject {
 
     public void setUploaded(boolean uploaded) {
         this.uploaded = uploaded;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Survey && this.form_id.equals(((Survey) o).form_id) &&
+                this.instanceAnswers.equals(((Survey) o).instanceAnswers);
     }
 }

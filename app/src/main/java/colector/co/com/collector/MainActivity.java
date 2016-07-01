@@ -4,15 +4,12 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TabHost;
 import android.widget.Toast;
 
 import com.squareup.otto.Bus;
@@ -34,24 +31,17 @@ import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.request.SendSurveyRequest;
 import colector.co.com.collector.model.response.SendSurveyResponse;
 import colector.co.com.collector.network.BusProvider;
+import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.settings.AppSettings;
-import colector.co.com.collector.utils.syncService;
 
 public class MainActivity extends AppCompatActivity implements OnDataBaseSave, OnUploadSurvey {
 
     private FragmentTabHost mTabHost;
 
-    @BindView(R.id.fab_sync_surveys)
-    FloatingActionButton FABSync;
-    @BindView(R.id.fab_uploadall_urveys)
-    FloatingActionButton FABuploadAll;
-    @BindView(R.id.fab_eraseall_donesurveys)
-    FloatingActionButton FABdeleteAll;
-
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
 
-    private ArrayList<Survey> toUnion;
+    private ArrayList<Survey> surveysDone = new ArrayList<>();
     private Bus mBus = BusProvider.getBus();
     private ProgressDialog progressDialog;
     private Survey surveyToUpload;
@@ -67,98 +57,10 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.sync_data));
-
-        FABSync.setVisibility(View.INVISIBLE);//ESTE
-        FABuploadAll.setVisibility(View.INVISIBLE);
-        FABdeleteAll.setVisibility(View.INVISIBLE);
-
-        FABSync.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setMessage(R.string.survey_reload)
-                        .setPositiveButton(getString(R.string.common_ok), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getBaseContext(), "Actualizar Nuevos Forms.", Toast.LENGTH_LONG).show();
-                            }
-
-                        })
-                        .setNegativeButton(getString(R.string.common_cancel), null)
-                        .show();
-            }
-        });
-
-        FABuploadAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog show = new AlertDialog.Builder(MainActivity.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setMessage(R.string.survey_allupload)
-                        .setPositiveButton(getString(R.string.common_ok), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (!isServiceRunning()) {
-                                    Toast.makeText(getBaseContext(), "Tranquilo, el sistema enviara todos los formularios automaticamente", Toast.LENGTH_LONG).show();
-                                    Intent intent = new Intent(getBaseContext(), syncService.class);
-                                    intent.setFlags(AppSettings.SERVICE_FLAG_UPLOAD);
-                                    startService(intent);
-                                } else
-                                    Toast.makeText(getBaseContext(), "El sistema esta trabajando. Por favor intentar en un momento.", Toast.LENGTH_LONG).show();
-
-                            }
-                        })
-                        .setNegativeButton(getString(R.string.common_cancel), null)
-                        .show();
-
-            }
-        });
-
-        FABdeleteAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setMessage(R.string.survey_alldelete)
-                        .setPositiveButton(getString(R.string.common_ok), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                //if (!isServiceRunning()) {
-                                Toast.makeText(getBaseContext(), "Tranquilo, el sistema enviara todos los formularios automaticamente", Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(getBaseContext(), syncService.class);
-                                intent.setFlags(AppSettings.SERVICE_FLAG_DELETE);
-                                startService(intent);
-                                //}else
-                                //  Toast.makeText(getBaseContext(), "El sistema esta trabajando. Por favor intentar en un momento.", Toast.LENGTH_LONG).show();
-
-                            }
-
-                        })
-                        .setNegativeButton(getString(R.string.common_cancel), null)
-                        .show();
-            }
-        });
-
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
         setUpToolbar();
         buildTabs();
-    }
-
-    private boolean isServiceRunning() {
-        /*try {
-            ActivityManager manager = (ActivityManager) getBaseContext().getSystemService(getBaseContext().ACTIVITY_SERVICE);
-            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-                if ("colector.co.com.collector.utils.syncService".equals(service.service.getClassName())) {
-                    return true;
-                }
-            }
-        }catch(Exception e){
-            Toast.makeText(getBaseContext(), "Service Err " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        return false;*/
-        return true;
     }
 
     private void setUpToolbar() {
@@ -185,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
+                                uploadSurveyDone();
                             }
                         })
                         .setNegativeButton(getString(R.string.common_cancel), null)
@@ -202,26 +105,12 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
         mTabHost.addTab(
                 mTabHost.newTabSpec(AppSettings.TAB_ID_DONE_SURVEY).setIndicator(getResources().getString(R.string.survey_survyes_done), null),
                 SurveyAvailable.class, null);
-
-        mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-
-            public void onTabChanged(String selectedTab) {
-                if (selectedTab.equalsIgnoreCase(AppSettings.TAB_ID_AVAILABLE_SURVEY)) {
-                    //Nothing to do here.
-                } else if (selectedTab.equalsIgnoreCase(AppSettings.TAB_ID_DONE_SURVEY)) {
-                    //Nothing to do here.
-                }
-            }
-        });
     }
 
     @Override
     public void onUploadClicked(Survey survey, SurveyAdapter adapter) {
-        surveyToUpload = survey;
         this.adapter = adapter;
-        progressDialog.show();
-        SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
-        mBus.post(uploadSurvey);
+        uploadSurveyRemote(survey);
     }
 
     /**
@@ -233,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     @Subscribe
     public void onSuccessUploadSurvey(SendSurveyResponse response) {
         if (response.getResponseCode().equals(200l)) getImagesToUpload();
-        else showSnackBarError(response.getResponseDescription());
+        else showToastError(response.getResponseDescription());
     }
 
     /**
@@ -268,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
             if (generalIndex >= answersWithImages.size()) {
                 uploadSurveySave();
             } else uploadImages();
-        } else showSnackBarError(response.getResponseDescription());
+        } else showToastError(response.getResponseDescription());
 
     }
 
@@ -277,9 +166,6 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      */
     private void uploadSurveySave() {
         DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
-        progressDialog.hide();
-        this.surveyToUpload.setUploaded(true);
-        if (adapter != null) adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -296,17 +182,43 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
 
     @Override
     public void onSuccess() {
-
+        progressDialog.hide();
+        if (adapter != null) {
+            surveyToUpload.setUploaded(true);
+            adapter.notifyDataSetChanged();
+        }
+        if (!surveysDone.isEmpty()) {
+            uploadSurveyDone();
+        }
     }
 
     @Override
     public void onError() {
-
+        progressDialog.hide();
+        //Notify Error
     }
 
-    private void showSnackBarError(String error) {
-//        Snackbar snack = Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_LONG);
-//        ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
-//        snack.show();
+    private void showToastError(String error) {
+        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
+
+    private void uploadSurveyDone() {
+        surveysDone = DatabaseHelper.getInstance().getSurveysDone(
+                new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+        if (!surveysDone.isEmpty()) uploadSurveyRemote(surveysDone.get(0));
+        else {
+            Toast.makeText(this, R.string.survey_save_send_ok, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    private void uploadSurveyRemote(Survey survey) {
+        surveyToUpload = survey;
+        progressDialog.show();
+        SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
+        mBus.post(uploadSurvey);
+    }
+
 }
