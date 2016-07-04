@@ -70,4 +70,5 @@
     <string name="please_sign">Please sign at the delimited area.</string>
     <string name="sync_data">Uploading data, please wait. This operation will be take a while.</string>
     <string name="sync_all_data">You\'re About to synchronize all the data stored in the application, this can be long.</string>
+    <string name="logout">Logout</string>
 </resources>

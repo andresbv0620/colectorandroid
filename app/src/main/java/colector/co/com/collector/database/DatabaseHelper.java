@@ -133,4 +133,13 @@ public class DatabaseHelper {
         RealmResults<Survey> results = realm.where(Survey.class).findAll();
         return results.subList(0, results.size());
     }
+
+    public void deleteDatabase(){
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Realm.getDefaultInstance().deleteAll();
+            }
+        });
+    }
 }

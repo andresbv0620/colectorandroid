@@ -83,5 +83,6 @@
     <string name="please_sign">Por favor firme en el área delimitada.</string>
     <string name="sync_data">Subiendo datos, por favor espere. Está operación podría ser larga.</string>
     <string name="sync_all_data">Estas a punto de sincronizar toda la data almacenada en la aplicación, está operacion puede ser larga.</string>
+    <string name="logout">Cerrar sesión</string>
 
 </resources>

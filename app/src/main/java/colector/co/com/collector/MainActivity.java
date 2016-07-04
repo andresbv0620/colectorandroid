@@ -22,6 +22,7 @@ import butterknife.ButterKnife;
 import colector.co.com.collector.adapters.SurveyAdapter;
 import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.fragments.SurveyAvailable;
+import colector.co.com.collector.helpers.PreferencesManager;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.listeners.OnUploadSurvey;
 import colector.co.com.collector.model.IdValue;
@@ -94,6 +95,13 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
                         .show();
 
                 break;
+
+            case R.id.logout:   DatabaseHelper databaseHelper = new DatabaseHelper();
+                                databaseHelper.deleteDatabase();
+                                PreferencesManager.getInstance().logoutAccount();
+                                startActivity(new Intent(this, LoginActivity.class));
+                                finish();
+                                break;
         }
         return super.onOptionsItemSelected(item);
     }

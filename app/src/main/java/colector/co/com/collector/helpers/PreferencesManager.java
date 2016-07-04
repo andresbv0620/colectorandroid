@@ -41,6 +41,12 @@ public class PreferencesManager {
         edit.commit();
     }
 
+    public void logoutAccount() {
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putBoolean(PreferencesManager.ACTIVE_ACCOUNT, false);
+        edit.commit();
+    }
+
     public void storeResponseData(ResponseData responseData){
         SharedPreferences.Editor edit = mPreferences.edit();
         edit.putString(PreferencesManager.RESPONSE_OBJECT_ACCOUNT, new Gson().toJson(responseData));
