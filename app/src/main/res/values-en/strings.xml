@@ -71,4 +71,5 @@
     <string name="sync_data">Uploading data, please wait. This operation will be take a while.</string>
     <string name="sync_all_data">You\'re About to synchronize all the data stored in the application, this can be long.</string>
     <string name="logout">Logout</string>
+    <string name="click_agregar"> (click to add)</string>
 </resources>
