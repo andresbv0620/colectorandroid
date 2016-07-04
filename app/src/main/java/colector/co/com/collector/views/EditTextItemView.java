@@ -105,20 +105,17 @@ public class EditTextItemView extends FrameLayout {
         initValues(question);
         this.response = response;
         if (previewDefault != null)
-            if (mType != 4) label.setText(previewDefault);
-            else label.setText(getResponseValue(previewDefault));
+            if (mType != 4) {
+                label.setText(previewDefault);
+            }
+            else {
+                label.setText(getResponseValue(previewDefault));
+            }
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
-            }
-        });
-        label.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
-                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
             }
         });
     }
