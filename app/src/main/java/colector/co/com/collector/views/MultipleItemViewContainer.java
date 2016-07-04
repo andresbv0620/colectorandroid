@@ -44,6 +44,8 @@ public class MultipleItemViewContainer extends LinearLayout {
     private boolean required = false;
     private String finalResult = "";
 
+    private ArrayList<String> selectedResults = new ArrayList<>();
+
     public MultipleItemViewContainer(Context context) {
         super(context);
         init(context);
@@ -70,7 +72,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         } else label.setText(question.getName());
 
         //Adding extra text info, to notify the user the action to make.
-        label.setText(label.getText() + " "+ getContext().getString(R.string.click_agregar));
+        label.setText(label.getText() + " " + getContext().getString(R.string.click_agregar));
         //Bind the show and hide buttons
         bindShowButton();
         bindCollapseButton(collapse);
@@ -82,12 +84,15 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public void fillData(List<String> results) {
         // Bind the items
-        for (String result : results) {
-            finalResult = finalResult.isEmpty() ? result :  finalResult+", "+result;
+        if (!results.isEmpty()) {
+            selectedResults = new ArrayList<>(results);
+            for (String result : selectedResults) {
+                finalResult = finalResult.isEmpty() ? result : finalResult + ", " + result;
+            }
+            TextView textView = new TextView(getContext());
+            textView.setText(finalResult);
+            container.addView(textView);
         }
-        TextView textView = new TextView(getContext());
-        textView.setText(finalResult);
-        container.addView(textView);
     }
 
     private void setOnClickListeners(final String title, final List<IdOptionValue> response) {
@@ -128,7 +133,7 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public boolean validateFields() {
         if (!required) return true;
-        if (container.getChildCount() > 0) {
+        if (!selectedResults.isEmpty()) {
             label.setTextColor(ContextCompat.getColor(getContext(), R.color.text_color));
             return true;
         }
@@ -138,10 +143,9 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public RealmList<IdValue> getResponses() {
         RealmList<IdValue> responses = new RealmList<>();
-        if (container.getChildCount() > 0)
-            for (int itemViewIndex = 0; itemViewIndex < container.getChildCount(); itemViewIndex++)
-                responses.add(new IdValue(id, getSelectedId(((TextView) container.getChildAt(itemViewIndex))
-                        .getText().toString()), validation, mType));
+        if (!selectedResults.isEmpty())
+            for (String item : selectedResults)
+                responses.add(new IdValue(id, getSelectedId(item), validation, mType));
         return responses;
     }
 

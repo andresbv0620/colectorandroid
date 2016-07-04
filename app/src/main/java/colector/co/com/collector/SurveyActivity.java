@@ -577,9 +577,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
                     if (sectionView instanceof EditTextItemView)
                         surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
-//                    else if (sectionView instanceof MultipleItemViewContainer)
-//                        surveySave.getResponses().addAll(((MultipleItemViewContainer)
-//                                sectionView).getResponses());
+                    else if (sectionView instanceof MultipleItemViewContainer)
+                        surveySave.getResponses().addAll(((MultipleItemViewContainer)
+                                sectionView).getResponses());
                     else if (sectionView instanceof PhotoItemViewContainer)
                         surveySave.getResponses().addAll(((PhotoItemViewContainer)
                                 sectionView).getResponses());
