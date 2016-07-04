@@ -128,18 +128,10 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
                     callback.onUploadClicked(item, SurveyAdapter.this);
                 }
             });
+            configureContainerClickListener(position);
 
-            containerDescription.setClickable(true);
-            containerDescription.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    AppSession.getInstance().setCurrentSurvey(items.get(position), AppSettings.SURVEY_SELECTED_EDIT);
-                    Intent intent = new Intent(getContext(), SurveyActivity.class);
-                    context.startActivity(intent);
-                }
-            });
         } else {
-            configureUploadedRow(item);
+            configureUploadedRow(item, position);
         }
     }
 
@@ -148,12 +140,31 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
      *
      * @param item survey
      */
-    private void configureUploadedRow(final Survey item) {
+    private void configureUploadedRow(final Survey item, int position) {
         row_description.setText(item.getSurveyDoneDescription());
         imageButtonSyncDone.setVisibility(View.VISIBLE);
         imageButtonNotSync.setVisibility(View.GONE);
         deleteButton.setVisibility(View.GONE);
         uploadUpload.setVisibility(View.GONE);
         editUpload.setVisibility(View.GONE);
+        configureContainerClickListener(position);
+    }
+
+
+    /**
+     * Configure row click listener
+     *
+     * @param position of row
+     */
+    private void configureContainerClickListener(final int position) {
+        containerDescription.setClickable(true);
+        containerDescription.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AppSession.getInstance().setCurrentSurvey(items.get(position), AppSettings.SURVEY_SELECTED_EDIT);
+                Intent intent = new Intent(getContext(), SurveyActivity.class);
+                context.startActivity(intent);
+            }
+        });
     }
 }
