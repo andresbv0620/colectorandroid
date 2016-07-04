@@ -82,6 +82,8 @@ public class EditTextItemView extends FrameLayout {
     public void bind(Question question, @Nullable String previewDefault) {
         initValues(question);
         if (previewDefault != null) label.setText(previewDefault);
+        else if (question.getDefecto() != null && !question.getDefecto().equals(""))
+            label.setText(question.getDefecto());
         switch (question.getType()) {
             case 1:
                 break;
@@ -107,8 +109,7 @@ public class EditTextItemView extends FrameLayout {
         if (previewDefault != null)
             if (mType != 4) {
                 label.setText(previewDefault);
-            }
-            else {
+            } else {
                 label.setText(getResponseValue(previewDefault));
             }
         final CallDialogListener listener = (CallDialogListener) activity;
