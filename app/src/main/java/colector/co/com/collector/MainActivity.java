@@ -29,7 +29,9 @@ import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.ImageRequest;
 import colector.co.com.collector.model.ImageResponse;
 import colector.co.com.collector.model.Survey;
+import colector.co.com.collector.model.request.GetSurveysRequest;
 import colector.co.com.collector.model.request.SendSurveyRequest;
+import colector.co.com.collector.model.response.GetSurveysResponse;
 import colector.co.com.collector.model.response.SendSurveyResponse;
 import colector.co.com.collector.network.BusProvider;
 import colector.co.com.collector.session.AppSession;
@@ -96,12 +98,13 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
 
                 break;
 
-            case R.id.logout:   DatabaseHelper databaseHelper = new DatabaseHelper();
-                                databaseHelper.deleteDatabase();
-                                PreferencesManager.getInstance().logoutAccount();
-                                startActivity(new Intent(this, LoginActivity.class));
-                                finish();
-                                break;
+            case R.id.logout:
+                DatabaseHelper databaseHelper = new DatabaseHelper();
+                databaseHelper.deleteDatabase();
+                PreferencesManager.getInstance().logoutAccount();
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -203,7 +206,6 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     @Override
     public void onError() {
         progressDialog.hide();
-        //Notify Error
     }
 
     private void showToastError(String error) {
@@ -214,12 +216,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
         surveysDone = DatabaseHelper.getInstance().getSurveysDone(
                 new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
         if (!surveysDone.isEmpty()) uploadSurveyRemote(surveysDone.get(0));
-        else {
-            Toast.makeText(this, R.string.survey_save_send_ok, Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
+        else uploadSurveysAvailable();
     }
 
     private void uploadSurveyRemote(Survey survey) {
@@ -227,6 +224,38 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
         progressDialog.show();
         SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
         mBus.post(uploadSurvey);
+    }
+
+    private void uploadSurveysAvailable() {
+        progressDialog.show();
+        GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser()
+                .getColector_id());
+        mBus.post(toSend);
+    }
+
+    @Subscribe
+    public void onSuccessSurveysResponse(GetSurveysResponse response) {
+        AppSession.getInstance().setSurveyAvailable(response.getResponseData());
+        DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(),
+                new OnDataBaseSave() {
+                    @Override
+                    public void onSuccess() {
+                        progressDialog.hide();
+                        reLaunchActivity();
+                    }
+
+                    @Override
+                    public void onError() {
+                        progressDialog.hide();
+                    }
+                });
+    }
+
+    private void reLaunchActivity() {
+        Toast.makeText(this, R.string.survey_save_send_ok, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 }
