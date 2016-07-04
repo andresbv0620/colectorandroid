@@ -67,6 +67,9 @@ public class MultipleItemViewContainer extends LinearLayout {
         if (required) {
             label.setText(getContext().getString(R.string.required_field, question.getName()));
         } else label.setText(question.getName());
+
+        //Adding extra text info, to notify the user the action to make.
+        label.setText(label.getText() + " "+ getContext().getString(R.string.click_agregar));
         //Bind the show and hide buttons
         bindShowButton();
         bindCollapseButton(collapse);
@@ -78,11 +81,15 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public void fillData(List<String> results) {
         // Bind the items
+
+        String finalResult = "";
         for (String result : results) {
-            TextView textView = new TextView(getContext());
-            textView.setText(result);
-            container.addView(textView);
+            finalResult = finalResult.isEmpty() ? result :  finalResult+", "+result;
         }
+
+        TextView textView = new TextView(getContext());
+        textView.setText(finalResult);
+        container.addView(textView);
     }
 
     private void setOnClickListeners(final String title, final List<IdOptionValue> response) {

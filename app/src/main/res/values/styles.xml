@@ -37,7 +37,7 @@
     <style name="BaseTextView.SectionTitle">
         <item name="android:textSize">@dimen/title_text_size</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:maxLines">1</item>
+        <item name="android:maxLines">3</item>
         <item name="android:background">@color/section_title_background_color</item>
         <item name="android:padding">@dimen/small_space</item>
     </style>

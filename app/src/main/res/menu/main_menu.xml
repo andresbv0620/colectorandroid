@@ -12,5 +12,10 @@
             android:icon="@drawable/ic_dots_vertical"
             app:showAsAction="ifRoom|withText"
             android:title="Menu">
+                <menu>
+                        <group android:id="@+id/dogsGroup">
+                                <item android:titleCondensed="@string/logout" android:title="@string/logout" android:id="@+id/logout"></item>
+                        </group>
+                </menu>
         </item>
 </menu>
