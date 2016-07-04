@@ -42,6 +42,7 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     private ArrayList<IdOptionValue> options = new ArrayList<>();
     private boolean required = false;
+    private String finalResult = "";
 
     public MultipleItemViewContainer(Context context) {
         super(context);
@@ -81,12 +82,9 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public void fillData(List<String> results) {
         // Bind the items
-
-        String finalResult = "";
         for (String result : results) {
             finalResult = finalResult.isEmpty() ? result :  finalResult+", "+result;
         }
-
         TextView textView = new TextView(getContext());
         textView.setText(finalResult);
         container.addView(textView);
@@ -97,14 +95,9 @@ public class MultipleItemViewContainer extends LinearLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
-            }
-        });
-        label.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
+                if (finalResult.isEmpty()) {
                     listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
+                }
             }
         });
     }
