@@ -50,11 +50,13 @@ public class SendSurveyRequest {
                 case 6:
                 case 14:
                 case 16:
-                    int lastIndex = item.getValue().length();
-                    int slashIndex = item.getValue().lastIndexOf("/");
-                    responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,
-                            NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
-                            item.getValue().substring((slashIndex + 1), lastIndex))));
+                    if (!item.getValue().equals("")) {
+                        int lastIndex = item.getValue().length();
+                        int slashIndex = item.getValue().lastIndexOf("/");
+                        responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,
+                                NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
+                                item.getValue().substring((slashIndex + 1), lastIndex))));
+                    }
                     break;
                 default:
                     responses.add(new IdInputValue(String.valueOf(item.getId()), item.getValue()));
