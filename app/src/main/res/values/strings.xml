@@ -85,5 +85,6 @@
     <string name="sync_all_data">Estas a punto de sincronizar toda la data almacenada en la aplicación, está operacion puede ser larga.</string>
     <string name="logout">Cerrar sesión</string>
     <string name="click_agregar"> (clic aquí para agregar)</string>
+    <string name="gps_alert">Este formulario posee una entrada gps, para continuar deberá activarlo</string>
 
 </resources>
