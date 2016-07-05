@@ -23,6 +23,8 @@ import colector.co.com.collector.listeners.CallDialogListener;
 import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
+import colector.co.com.collector.model.QuestionVisibilityRules;
+import io.realm.RealmList;
 
 /**
  * @author Gabriel Rodriguez
@@ -40,6 +42,14 @@ public class EditTextItemView extends FrameLayout {
     private boolean required;
     private int mType;
     private List<IdOptionValue> response;
+    private boolean alreadyShow;
+    private boolean isGoneByRules;
+
+    public RealmList<QuestionVisibilityRules> getVisibilityRules() {
+        return visibilityRules;
+    }
+
+    private RealmList<QuestionVisibilityRules> visibilityRules;
 
     public EditTextItemView(Context context) {
         super(context);
@@ -84,6 +94,9 @@ public class EditTextItemView extends FrameLayout {
         if (previewDefault != null) label.setText(previewDefault);
         else if (question.getDefecto() != null && !question.getDefecto().equals(""))
             label.setText(question.getDefecto());
+        label.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
+        isGoneByRules = question.getValorVisibility().isEmpty();
+        visibilityRules = question.getValorVisibility();
         switch (question.getType()) {
             case 1:
                 break;
@@ -122,8 +135,10 @@ public class EditTextItemView extends FrameLayout {
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
            @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
+                if (hasFocus && !alreadyShow) {
+                    alreadyShow = true;
                     listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+                }
             }
         });
     }
@@ -150,7 +165,8 @@ public class EditTextItemView extends FrameLayout {
         if (!required) return true;
         if (label.getText().toString().trim().isEmpty()) {
             input.setError(activity.getString(R.string.required_error));
-            requestFocus(label);
+            if (mType != 4 && mType != 3)
+                requestFocus(label);
             return false;
         } else {
             input.setErrorEnabled(false);
@@ -184,6 +200,18 @@ public class EditTextItemView extends FrameLayout {
         return value;
     }
 
+    public void setVisibilityLabel(){
+        label.setVisibility(View.VISIBLE);
+    }
+
+    public void setIsShow(){
+        alreadyShow = false;
+    }
+
+    public boolean getIsGoneByVisibilityRules(){
+        return isGoneByRules;
+    }
+
 
     private class EditTextWatcher implements TextWatcher {
 
@@ -198,4 +226,3 @@ public class EditTextItemView extends FrameLayout {
         }
     }
 }
-

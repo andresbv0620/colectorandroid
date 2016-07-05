@@ -21,6 +21,7 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,7 +56,9 @@ import colector.co.com.collector.listeners.OnAddSignatureListener;
 import colector.co.com.collector.listeners.OnDataBaseSave;
 import colector.co.com.collector.listeners.OnEditTextClickedOrFocused;
 import colector.co.com.collector.model.IdOptionValue;
+import colector.co.com.collector.model.IdValue;
 import colector.co.com.collector.model.Question;
+import colector.co.com.collector.model.QuestionVisibilityRules;
 import colector.co.com.collector.model.Section;
 import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.SurveySave;
@@ -213,6 +216,25 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
         snack.show();
         hideLoading();
+    }
+
+    private void validateVisibilityRules(String value){
+        for (int child = 0; child < container.getChildCount(); child++) {
+            View sectionItem = container.getChildAt(child);
+            if (sectionItem instanceof SectionItemView) {
+                ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                    if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView){
+                        EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
+                        if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()){
+                            QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
+                            if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase()))
+                                element.setVisibilityLabel();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private boolean validateFields() {
@@ -438,7 +460,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     @Override
-    public void callDialog(String title, List<IdOptionValue> response, Object parent, int type) {
+    public void callDialog(String title, List<IdOptionValue> response, final Object parent, int type) {
         DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
                 new ArrayList<>(response), type);
         dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
@@ -448,7 +470,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 @Override
                 public void setItemSelected(String item) {
                     input.setText(item);
-                    //input.setEnabled(false);
+                    validateVisibilityRules(item);
+                    if (!item.isEmpty())
+                        ((EditTextItemView) parent).setIsShow();
                 }
             });
         } else if (parent instanceof MultipleItemViewContainer) {

@@ -96,7 +96,8 @@ public class EditTextDatePickerItemView extends FrameLayout {
         if (!required) return true;
         if (label.getText().toString().trim().isEmpty()) {
             input.setError(activity.getString(R.string.required_error));
-            requestFocus(label);
+            if (mType != 4 || mType != 3)
+                requestFocus(label);
             return false;
         } else {
             input.setErrorEnabled(false);
