@@ -100,9 +100,14 @@ public class MultipleItemViewContainer extends LinearLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (finalResult.isEmpty()) {
+            listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
+            }
+        });
+        label.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus)
                     listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
-                }
             }
         });
     }

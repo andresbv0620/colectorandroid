@@ -448,7 +448,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 @Override
                 public void setItemSelected(String item) {
                     input.setText(item);
-                    input.setEnabled(false);
+                    //input.setEnabled(false);
                 }
             });
         } else if (parent instanceof MultipleItemViewContainer) {
@@ -458,7 +458,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 @Override
                 public void setItemsSelected(List<String> items, Question question) {
                     view.fillData(items);
-                    view.setEnabled(false);
+                    //view.setEnabled(false);
                 }
             });
         }

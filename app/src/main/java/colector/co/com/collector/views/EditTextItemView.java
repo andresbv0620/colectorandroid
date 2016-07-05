@@ -119,6 +119,13 @@ public class EditTextItemView extends FrameLayout {
                 listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
             }
         });
+        label.setOnFocusChangeListener(new OnFocusChangeListener() {
+           @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus)
+                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+            }
+        });
     }
 
     private void allowsMultilineEditText() {
