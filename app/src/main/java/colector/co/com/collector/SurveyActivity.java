@@ -101,7 +101,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
-    private int positionOfFirstRequieredField = 0;
     private boolean isSectionOfFirstFieldStored = false;
     private View sectionItemViewSelected = null;
 
@@ -231,7 +230,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     if (!fieldSectionValid && !isSectionOfFirstFieldStored){
                         sectionItemViewSelected = sectionItemContainer
                                 .getChildAt(sectionItemIndex);
-                        positionOfFirstRequieredField = sectionItemIndex;
                         isSectionOfFirstFieldStored = true;
                     }
                 }
