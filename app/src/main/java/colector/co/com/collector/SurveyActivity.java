@@ -6,9 +6,11 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -117,7 +119,21 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     private void setupGPS() {
-        gps = new FindGPSLocation(this);
+        if (isGpsCanBeClicked) {
+            final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(getString(R.string.gps_alert))
+                        .setCancelable(false)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                            }
+                        });
+                final AlertDialog alert = builder.create();
+                alert.show();
+            }
+        }
     }
 
     private void setUpToolbar(String title) {
@@ -144,6 +160,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
             case R.id.mGps:
                 if (isGpsCanBeClicked) {
+                    gps = new FindGPSLocation(this);
                     if (gps != null && gps.canGetLocation()) {
                         mapGPSIntent(String.valueOf(gps.getLongitude()), String.valueOf(gps.getLatitude()));
                     }
