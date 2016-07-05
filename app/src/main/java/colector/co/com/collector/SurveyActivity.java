@@ -598,8 +598,16 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex());
         else
             surveySave.setId(surveys.getInstanceId());
-        surveySave.setLatitude(String.valueOf(gps.getLatitude()));
-        surveySave.setLongitude(String.valueOf(gps.getLongitude()));
+        try {
+            surveySave.setLatitude(String.valueOf(gps.getLatitude()));
+        }catch (NullPointerException e){
+            surveySave.setLatitude(String.valueOf(0.0f));
+        }
+        try {
+            surveySave.setLongitude(String.valueOf(gps.getLongitude()));
+        }catch (NullPointerException e){
+            surveySave.setLongitude(String.valueOf(0.0f));
+        }
         surveySave.setHoraIni(String.valueOf(timeStandIni));
         surveySave.setHoraFin(String.valueOf(System.currentTimeMillis() / 1000));
         // Difficult Task
