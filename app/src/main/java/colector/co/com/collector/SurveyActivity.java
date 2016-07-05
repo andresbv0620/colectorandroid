@@ -14,8 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
@@ -119,7 +117,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         gps = new FindGPSLocation(this);
     }
 
-    private void setUpToolbar(String title){
+    private void setUpToolbar(String title) {
         if (mToolbar != null) {
             setSupportActionBar(mToolbar);
             getSupportActionBar().setTitle(title);
@@ -128,30 +126,31 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_active_survey,menu);
+        getMenuInflater().inflate(R.menu.menu_active_survey, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
 
-            case R.id.mUpload:  dismissKeyBoard();
-                                threadSaveModulo();
-                                break;
+            case R.id.mUpload:
+                dismissKeyBoard();
+                threadSaveModulo();
+                break;
 
-            case R.id.mGps: if (isGpsCanBeClicked) {
-                                if (gps != null && gps.canGetLocation()) {
-                                    mapGPSIntent(String.valueOf(gps.getLongitude()), String.valueOf(gps.getLatitude()));
-                                }
-                            }
-                            else {
-                                Snackbar snack = Snackbar.make(coordinatorLayout, R.string.opcion_no_disponible, Snackbar.LENGTH_LONG);
-                                ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
-                                snack.show();
-                            }
-                            break;
-            }
+            case R.id.mGps:
+                if (isGpsCanBeClicked) {
+                    if (gps != null && gps.canGetLocation()) {
+                        mapGPSIntent(String.valueOf(gps.getLongitude()), String.valueOf(gps.getLatitude()));
+                    }
+                } else {
+                    Snackbar snack = Snackbar.make(coordinatorLayout, R.string.opcion_no_disponible, Snackbar.LENGTH_LONG);
+                    ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
+                    snack.show();
+                }
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -640,7 +639,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     @Override
     public void onSuccess() {
         hideLoading();
-        finish();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     @Override
