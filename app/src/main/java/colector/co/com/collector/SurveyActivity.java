@@ -99,6 +99,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private boolean isSectionOfFirstFieldStored = false;
+    private View sectionItemViewSelected = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,6 +175,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         if (validateFields()) {
                             saveSurvey();
                         } else {
+                            if (isSectionOfFirstFieldStored){
+                                sectionItemViewSelected.requestFocus();
+                            }
                             showSnackNotification();
                         }
 
@@ -198,9 +204,19 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             View sectionItem = container.getChildAt(child);
             if (sectionItem instanceof SectionItemView) {
                 ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
-                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++)
-                    fieldsValid = fieldsValid & validateFieldsOnView(sectionItemContainer
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                    boolean fieldSectionValid = validateFieldsOnView(sectionItemContainer
                             .getChildAt(sectionItemIndex));
+
+                    fieldsValid = fieldsValid && fieldSectionValid;
+
+                    if (!fieldSectionValid && !isSectionOfFirstFieldStored){
+                        sectionItemViewSelected = sectionItemContainer
+                                .getChildAt(sectionItemIndex);
+                        isSectionOfFirstFieldStored = true;
+                    }
+                }
+
             }
         }
         return fieldsValid;
@@ -239,6 +255,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             buildQuestion(question, linear);
         }
     }
+
+
 
     private void buildQuestion(final Question question, LinearLayout linear) {
         switch (question.getType()) {
