@@ -470,6 +470,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 public void setItemSelected(String item) {
                     input.setText(item);
                     validateVisibilityRules(item);
+                    ((EditTextItemView) parent).removeFocusability();
                     if (!item.isEmpty())
                         ((EditTextItemView) parent).setIsShow();
                 }

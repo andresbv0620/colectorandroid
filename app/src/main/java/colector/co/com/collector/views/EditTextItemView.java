@@ -129,18 +129,22 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+            listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
            @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && !alreadyShow) {
-                    alreadyShow = true;
-                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
-                }
+            if (hasFocus && !alreadyShow) {
+                alreadyShow = true;
+                listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+            }
             }
         });
+    }
+
+    public void removeFocusability(){
+        label.setFocusable(false);
     }
 
     private void allowsMultilineEditText() {
