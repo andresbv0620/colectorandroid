@@ -13,6 +13,8 @@ import colector.co.com.collector.model.response.ResponseData;
 public class PreferencesManager {
     public static final String ACTIVE_ACCOUNT = "colector.co.com.collector.LONG_ACTIVE_ACCOUNT_ID";
     public static final String RESPONSE_OBJECT_ACCOUNT = "colector.co.com.collector.RESPONSE_OBJECT_ACCOUNT";
+    public static final String LATITUDE_SURVEY = "colector.co.com.collector.LATITUDE_SURVEY";
+    public static final String LONGITUDE_SURVEY = "colector.co.com.collector.LONGITUDE_SURVEY";
     private static final String PREF_NAME = "colector.co.com.collector.COLECTOR_PREFERENCES";
     private static PreferencesManager sInstance;
     private final SharedPreferences mPreferences;
@@ -59,6 +61,20 @@ public class PreferencesManager {
 
     public boolean isActiveAccount(){
         return getPrefs().getBoolean(PreferencesManager.ACTIVE_ACCOUNT, false);
+    }
+
+    public void setCoordinates(String latitude, String longitude){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString(LATITUDE_SURVEY, latitude);
+        edit.putString(LONGITUDE_SURVEY, longitude);
+        edit.commit();
+    }
+
+    public void resetCoordinates(){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString(LATITUDE_SURVEY, "0.0");
+        edit.putString(LONGITUDE_SURVEY, "0.0");
+        edit.commit();
     }
 
     public SharedPreferences.Editor getEditor() {

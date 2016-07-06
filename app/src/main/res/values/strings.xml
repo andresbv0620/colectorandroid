@@ -86,5 +86,6 @@
     <string name="logout">Cerrar sesión</string>
     <string name="click_agregar"> (clic aquí para agregar)</string>
     <string name="gps_alert">Este formulario posee una entrada gps, para continuar deberá activarlo</string>
+    <string name="location">Localización</string>
 
 </resources>

@@ -69,7 +69,8 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps">
+        </activity>
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d4313a8130b1fc3a3c6e33d42528d471bcb7945d" />

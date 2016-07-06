@@ -73,4 +73,5 @@
     <string name="logout">Logout</string>
     <string name="click_agregar"> (click to add)</string>
     <string name="gps_alert">This form has a GPS input to continue must activate</string>
+    <string name="location">Location</string>
 </resources>

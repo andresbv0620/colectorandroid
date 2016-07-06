@@ -1,43 +1,112 @@
 package colector.co.com.collector;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity {
+import colector.co.com.collector.helpers.PreferencesManager;
+
+public class MapsActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private GoogleApiClient mGoogleClient;
+    public static final String TAG = MapsActivity.class.getSimpleName();
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    private LocationRequest mLocationRequest;
+    private ProgressBar progressBarLoader;
+    private double currentLongitude = 0.0;
+    private double currentLatitude = 0.0;
 
-    double lat, lon;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
-        Intent data = getIntent();
-        if (data != null) {
-            this.lon = caracterToDouble(data.getExtras().getString("Longitude"));
-            this.lat = caracterToDouble(data.getExtras().getString("Latitude"));
-
-            setUpMapIfNeeded();
-        }else{
-            finish();
-            //Salir sin resultados. Indicar que No se tiene ubicacion.
-        }
-
+        setUpMapIfNeeded();
+        mGoogleClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        //creating locationRequest object
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setInterval(60*1000)       //10 seconds
+                .setFastestInterval(1*1000);//1 second
+        progressBarLoader = (ProgressBar) findViewById(R.id.progressBarMap);
+        setUpToolbar();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+        checkNetwork();
+        mGoogleClient.connect();
+    }
+
+    private void setUpToolbar() {
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (mToolbar != null) {
+            setSupportActionBar(mToolbar);
+            getSupportActionBar().setTitle(getString(R.string.location));
+        }
+    }
+
+    private void checkNetwork() {
+        LocationManager mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+        try {
+            gps_enabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        try {
+            network_enabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        if(!gps_enabled && !network_enabled){
+            //notify user
+            AlertDialog.Builder gpsAlert = new AlertDialog.Builder(this);
+            gpsAlert.setMessage("Please enable location settings on your device. Don't worry, we'll take you there :D");
+            gpsAlert.setPositiveButton("Take me there", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent settings = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(settings);
+                }
+            });
+            gpsAlert.setCancelable(false);
+            gpsAlert.show();
+        }
     }
 
     /**
@@ -63,8 +132,17 @@ public class MapsActivity extends FragmentActivity {
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
-                setUpMap();
+                //setUpMap();
             }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mGoogleClient.isConnected()){
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleClient, this);
+            mGoogleClient.disconnect();
         }
     }
 
@@ -75,30 +153,83 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        LatLng POSSELECTED =
-                new LatLng(lat,lon);
-
-        mMap.addMarker(new MarkerOptions().position(POSSELECTED).title("Colector..."));
-
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(POSSELECTED)
-                .zoom(15)
-                .bearing(70)
-                .tilt(40)
-                .build();
-
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
+        //mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
-    protected double caracterToDouble(String valorXX){
-        double valorDecimal=0;
-        try {
-            valorDecimal = Double.parseDouble(valorXX);
-        }catch(Exception ex){
-                // handle exception
-            valorDecimal=0;
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.i(TAG, "Location services connected");
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleClient);
+        if(location == null){
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleClient, mLocationRequest, this);
+            Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
+        }else{
+            handleNewLocation(location);
         }
-        return valorDecimal;
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.i(TAG, "Location services suspended. Please reconnect.");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+            } catch (IntentSender.SendIntentException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+        }
+    }
+
+    private void handleNewLocation(Location location){
+        Log.d(TAG, location.toString());
+        currentLatitude = location.getLatitude();
+        currentLongitude = location.getLongitude();
+        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+
+        MarkerOptions options = new MarkerOptions()
+                .position(latLng)
+                .title("Im here!")
+                .draggable(true);
+
+        PreferencesManager.getInstance().setCoordinates(String.valueOf(currentLatitude), String.valueOf(currentLongitude));
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker arg0) {
+                // TODO Auto-generated method stub
+                Log.d("System out", "onMarkerDragStart..."+arg0.getPosition().latitude+"..."+arg0.getPosition().longitude);
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onMarkerDragEnd(Marker arg0) {
+                // TODO Auto-generated method stub
+                Log.d("System out", "onMarkerDragEnd..."+arg0.getPosition().latitude+"..."+arg0.getPosition().longitude);
+                PreferencesManager.getInstance().setCoordinates(String.valueOf(arg0.getPosition().latitude), String.valueOf(arg0.getPosition().longitude));
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(arg0.getPosition()));
+            }
+
+            @Override
+            public void onMarkerDrag(Marker arg0) {
+                // TODO Auto-generated method stub
+                Log.i("System out", "onMarkerDrag...");
+            }
+        });
+
+        mMap.addMarker(options);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
+        progressBarLoader.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        handleNewLocation(location);
     }
 }

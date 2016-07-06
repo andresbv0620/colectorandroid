@@ -49,6 +49,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.database.DatabaseHelper;
 import colector.co.com.collector.fragments.DialogList;
+import colector.co.com.collector.helpers.PreferencesManager;
 import colector.co.com.collector.listeners.CallDialogListener;
 import colector.co.com.collector.listeners.OnAddFileListener;
 import colector.co.com.collector.listeners.OnAddPhotoListener;
@@ -118,6 +119,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         setupGPS();
         configureInitTime();
         buildSurvey();
+        PreferencesManager.getInstance().resetCoordinates();
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
@@ -163,10 +165,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
             case R.id.mGps:
                 if (isGpsCanBeClicked) {
-                    gps = new FindGPSLocation(this);
-                    if (gps != null && gps.canGetLocation()) {
-                        mapGPSIntent(String.valueOf(gps.getLongitude()), String.valueOf(gps.getLatitude()));
-                    }
+                    mapGPSIntent();
                 } else {
                     Snackbar snack = Snackbar.make(coordinatorLayout, R.string.opcion_no_disponible, Snackbar.LENGTH_LONG);
                     ((TextView) (snack.getView().findViewById(android.support.design.R.id.snackbar_text))).setTextColor(Color.WHITE);
@@ -518,12 +517,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         }
     }
 
-    private void mapGPSIntent(String Longitude, String Latitude) {
-        Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-        intent.putExtra("Longitude", Longitude);
-        intent.putExtra("Latitude", Latitude);
-
-        startActivityForResult(intent, REQUEST_TAKE_MAPSGPS);
+    private void mapGPSIntent() {
+        startActivity(new Intent(getApplicationContext(), MapsActivity.class));
     }
 
 
@@ -623,12 +618,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         else
             surveySave.setId(surveys.getInstanceId());
         try {
-            surveySave.setLatitude(String.valueOf(gps.getLatitude()));
+            surveySave.setLatitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY,""));
         }catch (NullPointerException e){
             surveySave.setLatitude(String.valueOf(0.0f));
         }
         try {
-            surveySave.setLongitude(String.valueOf(gps.getLongitude()));
+            surveySave.setLongitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY,""));
         }catch (NullPointerException e){
             surveySave.setLongitude(String.valueOf(0.0f));
         }
