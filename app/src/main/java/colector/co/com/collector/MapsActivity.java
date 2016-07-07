@@ -1,13 +1,16 @@
 package colector.co.com.collector;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -59,8 +62,8 @@ public class MapsActivity extends AppCompatActivity implements
         //creating locationRequest object
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-                .setInterval(60*1000)       //10 seconds
-                .setFastestInterval(1*1000);//1 second
+                .setInterval(60 * 1000)       //10 seconds
+                .setFastestInterval(1 * 1000);//1 second
         progressBarLoader = (ProgressBar) findViewById(R.id.progressBarMap);
         setUpToolbar();
     }
@@ -87,13 +90,15 @@ public class MapsActivity extends AppCompatActivity implements
         boolean network_enabled = false;
         try {
             gps_enabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch(Exception ex) {}
+        } catch (Exception ex) {
+        }
 
         try {
             network_enabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch(Exception ex) {}
+        } catch (Exception ex) {
+        }
 
-        if(!gps_enabled && !network_enabled){
+        if (!gps_enabled && !network_enabled) {
             //notify user
             AlertDialog.Builder gpsAlert = new AlertDialog.Builder(this);
             gpsAlert.setMessage("Please enable location settings on your device. Don't worry, we'll take you there :D");
@@ -140,7 +145,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        if (mGoogleClient.isConnected()){
+        if (mGoogleClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleClient, this);
             mGoogleClient.disconnect();
         }
@@ -160,10 +165,10 @@ public class MapsActivity extends AppCompatActivity implements
     public void onConnected(Bundle bundle) {
         Log.i(TAG, "Location services connected");
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleClient);
-        if(location == null){
+        if (location == null) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleClient, mLocationRequest, this);
             Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
-        }else{
+        } else {
             handleNewLocation(location);
         }
     }
@@ -187,7 +192,7 @@ public class MapsActivity extends AppCompatActivity implements
         }
     }
 
-    private void handleNewLocation(Location location){
+    private void handleNewLocation(Location location) {
         Log.d(TAG, location.toString());
         currentLatitude = location.getLatitude();
         currentLongitude = location.getLongitude();
@@ -204,14 +209,14 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onMarkerDragStart(Marker arg0) {
                 // TODO Auto-generated method stub
-                Log.d("System out", "onMarkerDragStart..."+arg0.getPosition().latitude+"..."+arg0.getPosition().longitude);
+                Log.d("System out", "onMarkerDragStart..." + arg0.getPosition().latitude + "..." + arg0.getPosition().longitude);
             }
 
             @SuppressWarnings("unchecked")
             @Override
             public void onMarkerDragEnd(Marker arg0) {
                 // TODO Auto-generated method stub
-                Log.d("System out", "onMarkerDragEnd..."+arg0.getPosition().latitude+"..."+arg0.getPosition().longitude);
+                Log.d("System out", "onMarkerDragEnd..." + arg0.getPosition().latitude + "..." + arg0.getPosition().longitude);
                 PreferencesManager.getInstance().setCoordinates(String.valueOf(arg0.getPosition().latitude), String.valueOf(arg0.getPosition().longitude));
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(arg0.getPosition()));
             }
@@ -225,6 +230,7 @@ public class MapsActivity extends AppCompatActivity implements
 
         mMap.addMarker(options);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
+        mMap.setMyLocationEnabled(true);
         progressBarLoader.setVisibility(View.GONE);
     }
 

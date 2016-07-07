@@ -15,6 +15,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
+import colector.co.com.collector.helpers.PreferencesManager;
 import colector.co.com.collector.listeners.CallDialogListener;
 import colector.co.com.collector.model.IdOptionValue;
 import colector.co.com.collector.model.IdValue;
@@ -84,13 +85,36 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     public void fillData(List<String> results) {
         // Bind the items
+        container.removeAllViews();
         if (!results.isEmpty()) {
             selectedResults = new ArrayList<>(results);
+            String resultToDisplay = "";
             for (String result : selectedResults) {
                 finalResult = finalResult.isEmpty() ? result : finalResult + ", " + result;
+                resultToDisplay = resultToDisplay.isEmpty() ? result : resultToDisplay + ", " + result;
             }
+            //FinalResult = "mazda,hola,como"
+            //result = "hola,como"
+
+            String[] wordsToDelete = finalResult.split(",");
+            ArrayList<String> wordsToRealDelete = new ArrayList<String>();
+
+            for (int i = 0; i < wordsToDelete.length; i++){
+                if (!resultToDisplay.contains(wordsToDelete[i]))
+                    wordsToRealDelete.add(wordsToDelete[i]);
+            }
+            String totalResults = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS,"");
+            if (totalResults.isEmpty()) {
+                PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay);
+            }
+            else {
+                for (String s: wordsToRealDelete)
+                    totalResults = totalResults.replace(s,"");
+                PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay+totalResults);
+            }
+            finalResult = resultToDisplay;
             TextView textView = new TextView(getContext());
-            textView.setText(finalResult);
+            textView.setText(resultToDisplay);
             container.addView(textView);
         }
     }
@@ -106,8 +130,8 @@ public class MultipleItemViewContainer extends LinearLayout {
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
-                    listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
+            if (hasFocus)
+                listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
             }
         });
     }

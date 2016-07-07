@@ -19,6 +19,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import colector.co.com.collector.R;
+import colector.co.com.collector.helpers.PreferencesManager;
 
 /**
  * Created by danielsierraf on 6/27/16.
@@ -102,7 +103,10 @@ public class DataAdapter extends ArrayAdapter<String> implements Filterable {
             holder = (ViewHolder) row.getTag();
         }
         holder.textView.setText(filteredData.get(position));
-        if (mSelected.contains(filteredData.get(position))) holder.checkBox.setChecked(true);
+
+        if (mSelected.contains(filteredData.get(position)))
+            holder.checkBox.setChecked(true);
+
         holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -110,6 +114,13 @@ public class DataAdapter extends ArrayAdapter<String> implements Filterable {
                 else mSelected.remove(filteredData.get(position));
             }
         });
+
+        if (!PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS,"").isEmpty()){
+            if (PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS,"").contains(filteredData.get(position))){
+                holder.checkBox.setChecked(true);
+            }
+        }
+
         return row;
     }
 

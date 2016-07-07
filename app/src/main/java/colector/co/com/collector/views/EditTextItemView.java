@@ -129,16 +129,16 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-            listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+                listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
            @Override
             public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus && !alreadyShow) {
-                alreadyShow = true;
-                listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
-            }
+                if (hasFocus && !alreadyShow) {
+                    alreadyShow = true;
+                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+                }
             }
         });
     }
@@ -215,7 +215,6 @@ public class EditTextItemView extends FrameLayout {
     public boolean getIsGoneByVisibilityRules(){
         return isGoneByRules;
     }
-
 
     private class EditTextWatcher implements TextWatcher {
 

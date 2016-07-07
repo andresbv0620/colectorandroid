@@ -15,6 +15,7 @@ public class PreferencesManager {
     public static final String RESPONSE_OBJECT_ACCOUNT = "colector.co.com.collector.RESPONSE_OBJECT_ACCOUNT";
     public static final String LATITUDE_SURVEY = "colector.co.com.collector.LATITUDE_SURVEY";
     public static final String LONGITUDE_SURVEY = "colector.co.com.collector.LONGITUDE_SURVEY";
+    public static final String OPTIONS_SELECTEDS = "colector.co.com.collector.OPTIONS_SELECTEDS";
     private static final String PREF_NAME = "colector.co.com.collector.COLECTOR_PREFERENCES";
     private static PreferencesManager sInstance;
     private final SharedPreferences mPreferences;
@@ -52,6 +53,12 @@ public class PreferencesManager {
     public void storeResponseData(ResponseData responseData){
         SharedPreferences.Editor edit = mPreferences.edit();
         edit.putString(PreferencesManager.RESPONSE_OBJECT_ACCOUNT, new Gson().toJson(responseData));
+        edit.commit();
+    }
+
+    public void storeOptionsSelecteds(String optionsSelecteds){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString(PreferencesManager.OPTIONS_SELECTEDS, optionsSelecteds);
         edit.commit();
     }
 

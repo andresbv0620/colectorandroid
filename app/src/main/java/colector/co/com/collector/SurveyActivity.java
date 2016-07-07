@@ -65,6 +65,7 @@ import colector.co.com.collector.model.Survey;
 import colector.co.com.collector.model.SurveySave;
 import colector.co.com.collector.session.AppSession;
 import colector.co.com.collector.utils.FindGPSLocation;
+import colector.co.com.collector.utils.GPSTracker;
 import colector.co.com.collector.utils.PathUtils;
 import colector.co.com.collector.views.EditTextDatePickerItemView;
 import colector.co.com.collector.views.EditTextItemView;
@@ -96,7 +97,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     View loading;
     @BindView(R.id.coordinator)
     LinearLayout coordinatorLayout;
-    @BindView(R.id.toolbar)
     Toolbar mToolbar;
 
     private Long timeStandIni;
@@ -114,6 +114,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
+
+        GPSTracker gps = new GPSTracker(SurveyActivity.this);
+
+        if (gps.canGetLocation()) {
+            double latitude = gps.getLatitude();
+            double longitude = gps.getLongitude();
+            PreferencesManager.getInstance().setCoordinates(String.valueOf(latitude), String.valueOf(longitude));
+        }
         showLoading();
         setUpToolbar(surveys.getForm_name());
         setupGPS();
@@ -142,6 +150,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     private void setUpToolbar(String title) {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar != null) {
             setSupportActionBar(mToolbar);
             getSupportActionBar().setTitle(title);
@@ -410,6 +419,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        PreferencesManager.getInstance().storeOptionsSelecteds("");
                         finish();
                     }
 
@@ -659,6 +669,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             }
         }
         // Save on DataBase
+        PreferencesManager.getInstance().storeOptionsSelecteds("");
         DatabaseHelper.getInstance().addSurvey(surveySave, this);
     }
 
