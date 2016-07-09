@@ -226,18 +226,20 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         hideLoading();
     }
 
-    private void validateVisibilityRules(String value){
+    private void validateVisibilityRules(String value, Long idParentRule){
         for (int child = 0; child < container.getChildCount(); child++) {
             View sectionItem = container.getChildAt(child);
             if (sectionItem instanceof SectionItemView) {
                 ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
                 for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
-                    if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView){
+                    if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView ){
                         EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
                         if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()){
                             QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
-                            if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase()))
-                                element.setVisibilityLabel();
+                            if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase()) && questionVisibilityRules.getElemento() == idParentRule)
+                                element.setVisibilityLabel(true);
+                            else
+                                element.setVisibilityLabel(false);
                         }
                     }
                 }
@@ -479,8 +481,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 @Override
                 public void setItemSelected(String item) {
                     input.setText(item);
-                    validateVisibilityRules(item);
-                    ((EditTextItemView) parent).removeFocusability();
+                    EditTextItemView parentRule = ((EditTextItemView) parent);
+                    validateVisibilityRules(item, parentRule.getIdentifier());
                     if (!item.isEmpty())
                         ((EditTextItemView) parent).setIsShow();
                 }

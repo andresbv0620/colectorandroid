@@ -56,6 +56,10 @@ public class EditTextItemView extends FrameLayout {
         init(context);
     }
 
+    public Long getIdentifier(){
+        return id;
+    }
+
     public TextInputEditText getLabel() {
         return label;
     }
@@ -125,6 +129,9 @@ public class EditTextItemView extends FrameLayout {
             } else {
                 label.setText(getResponseValue(previewDefault));
             }
+        label.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
+        isGoneByRules = question.getValorVisibility().isEmpty();
+        visibilityRules = question.getValorVisibility();
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setOnClickListener(new OnClickListener() {
             @Override
@@ -204,8 +211,9 @@ public class EditTextItemView extends FrameLayout {
         return value;
     }
 
-    public void setVisibilityLabel(){
-        label.setVisibility(View.VISIBLE);
+    public void setVisibilityLabel(boolean isVisible){
+        label.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        input.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
     public void setIsShow(){
