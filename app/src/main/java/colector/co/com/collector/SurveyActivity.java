@@ -78,7 +78,6 @@ import colector.co.com.collector.views.SignatureItemViewContainer;
 
 public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener,
         CallDialogListener {
-    private FindGPSLocation gps;
 
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
     private PhotoItemViewContainer activePhotoContainer;
@@ -115,13 +114,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
 
-        GPSTracker gps = new GPSTracker(SurveyActivity.this);
-
-        if (gps.canGetLocation()) {
-            double latitude = gps.getLatitude();
-            double longitude = gps.getLongitude();
-            PreferencesManager.getInstance().setCoordinates(String.valueOf(latitude), String.valueOf(longitude));
-        }
         showLoading();
         setUpToolbar(surveys.getForm_name());
         setupGPS();
@@ -132,7 +124,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     private void setupGPS() {
-        if (isGpsCanBeClicked) {
+        //if (isGpsCanBeClicked) {
             final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -146,7 +138,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 final AlertDialog alert = builder.create();
                 alert.show();
             }
-        }
+        //}
     }
 
     private void setUpToolbar(String title) {
@@ -201,6 +193,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     public void onClick(DialogInterface dialog, int which) {
                         showLoading();
                         if (validateFields()) {
+                            saveLocation();
                             saveSurvey();
                         } else {
                             if (isSectionOfFirstFieldStored){
@@ -213,6 +206,15 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 })
                 .setNegativeButton(getString(R.string.common_cancel), null)
                 .show();
+    }
+
+    private void saveLocation(){
+        GPSTracker gps = new GPSTracker(SurveyActivity.this);
+        if (gps.canGetLocation()) {
+            double latitude = gps.getLatitude();
+            double longitude = gps.getLongitude();
+            PreferencesManager.getInstance().setCoordinates(String.valueOf(latitude), String.valueOf(longitude));
+        }
     }
 
     private void dismissKeyBoard() {
