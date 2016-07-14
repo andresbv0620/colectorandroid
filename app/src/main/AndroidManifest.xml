@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="colector.co.com.collector">
+    package="co.colector">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -20,21 +20,21 @@
 
 
     <application
-        android:name=".ColectorApplication"
+        android:name="co.colector.ColectorApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
         <service
-            android:name=".utils.syncService"
+            android:name="co.colector.utils.syncService"
             android:enabled="true"
             android:exported="true">
 
         </service>
 
         <activity
-            android:name=".LoginActivity"
+            android:name="co.colector.LoginActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -44,16 +44,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="co.colector.MainActivity"
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name=".SurveyActivity"
+            android:name="co.colector.SurveyActivity"
             android:label="@string/title_activity_survey"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden"></activity>
         <activity
-            android:name=".SignatureActivity"
+            android:name="co.colector.SignatureActivity"
             android:label="@string/title_activity_survey"
             android:screenOrientation="portrait"></activity>
         <!--
@@ -68,7 +68,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="co.colector.MapsActivity"
             android:label="@string/title_activity_maps">
         </activity>
         <meta-data
