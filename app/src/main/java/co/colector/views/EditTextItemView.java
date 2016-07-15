@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -44,6 +45,7 @@ public class EditTextItemView extends FrameLayout {
     private List<IdOptionValue> response;
     private boolean alreadyShow;
     private boolean isGoneByRules;
+    private Question question;
 
     public RealmList<QuestionVisibilityRules> getVisibilityRules() {
         return visibilityRules;
@@ -75,6 +77,7 @@ public class EditTextItemView extends FrameLayout {
     }
 
     private void initValues(Question question) {
+        this.question = question;
         this.validation = question.getValidacion();
         this.id = question.getId();
         this.required = question.getRequerido();
@@ -94,6 +97,7 @@ public class EditTextItemView extends FrameLayout {
      * @param previewDefault information
      */
     public void bind(Question question, @Nullable String previewDefault) {
+        this.question = question;
         initValues(question);
         if (previewDefault != null) label.setText(previewDefault);
         else if (question.getDefecto() != null && !question.getDefecto().equals(""))
@@ -180,8 +184,43 @@ public class EditTextItemView extends FrameLayout {
                 requestFocus(label);
             return false;
         } else {
-            input.setErrorEnabled(false);
-            return true;
+            if (mType == 1 || mType == 2){
+                if (question.getMin() != null && question.getMax() != null) {
+                    if (label.getText().toString().length() >= Integer.parseInt(question.getMin()) &&
+                            label.getText().toString().length() <= Integer.parseInt(question.getMax())) {
+                        input.setErrorEnabled(false);
+                        return true;
+                    } else {
+                        input.setError(String.format(activity.getString(R.string.required_error_lenght), question.getMin(), question.getMax()));
+                        return false;
+                    }
+                }
+                else {
+                    input.setErrorEnabled(false);
+                    return true;
+                }
+            }
+            else if (mType == 8 || mType == 15){
+                if (question.getMin() != null && question.getMax() != null){
+                    if (Long.parseLong(label.getText().toString()) >= Long.parseLong(question.getMin()) &&
+                        Long.parseLong(label.getText().toString()) <= Long.parseLong(question.getMax())){
+                        input.setErrorEnabled(false);
+                        return true;
+                    }
+                    else{
+                        input.setError(String.format(activity.getString(R.string.required_error_range), question.getMin(), question.getMax()));
+                        return false;
+                    }
+                }
+                else {
+                    input.setErrorEnabled(false);
+                    return true;
+                }
+            }
+            else {
+                input.setErrorEnabled(false);
+                return true;
+            }
         }
     }
 

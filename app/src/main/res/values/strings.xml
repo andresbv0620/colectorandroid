@@ -62,6 +62,8 @@
     <string name="main_list_title">Cargando</string>
     <string name="main_list_msg">Leyendo Listado</string>
     <string name="required_error">Requerido</string>
+    <string name="required_error_lenght">Debe tener entre %1$s y %2$s caracteres</string>
+    <string name="required_error_range">Debe estar entre %1$s y %2$s</string>
     <string name="type_default">Tipo de pregunta %1$s</string>
     <string name="required_field" translatable="false">%1$s**</string>
     <string name="check_required">Por favor valide los campos requeridos</string>

@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.sync_data));
+        progressDialog.setCancelable(false);
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
         setUpToolbar();

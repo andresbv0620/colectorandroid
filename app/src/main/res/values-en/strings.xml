@@ -77,5 +77,7 @@
 
     <string name="image_name_format">%1$s_%2$s</string>
     <string name="generalProgressDialogMessageLogin">Processing information, please wait</string>
+    <string name="required_error_lenght">Must have between %1$s and %2$s characters</string>
+    <string name="required_error_range">Must be between %1$s and %2$s</string>
 
 </resources>
