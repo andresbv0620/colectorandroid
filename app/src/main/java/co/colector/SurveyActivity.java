@@ -611,6 +611,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         }
         surveySave.setHoraIni(String.valueOf(timeStandIni));
         surveySave.setHoraFin(String.valueOf(System.currentTimeMillis() / 1000));
+        surveySave.setTitulo_reporte(surveys.getTitulo_reporte());
         // Difficult Task
         for (int child = 0; child < container.getChildCount(); child++) {
             View sectionItem = container.getChildAt(child);

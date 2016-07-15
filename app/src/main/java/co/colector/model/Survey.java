@@ -19,6 +19,7 @@ public class Survey extends RealmObject {
     private String form_name;
     private String form_description;
     private Boolean precargado;
+    private Long titulo_reporte;
 
     private String longitud;
     private String latitud;
@@ -51,6 +52,7 @@ public class Survey extends RealmObject {
         horaini = answers.getHoraIni();
         horafin = answers.getHoraFin();
         uploaded = answers.isUploaded();
+        titulo_reporte = answers.getTitulo_reporte();
     }
 
     public Survey(Long form_id, String form_name, String form_description,//String precargado,
@@ -211,4 +213,6 @@ public class Survey extends RealmObject {
         return o instanceof Survey && this.form_id.equals(((Survey) o).form_id) &&
                 this.instanceAnswers.equals(((Survey) o).instanceAnswers);
     }
+
+    public Long getTitulo_reporte(){ return titulo_reporte; }
 }

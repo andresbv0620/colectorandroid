@@ -76,6 +76,8 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
         if (idTab.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY))
             row_description.setText(item.getForm_description());
         else if (idTab.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
+            row_description.setText(item.getAnswer(item.getTitulo_reporte()));
+            row_name.setText(item.getForm_name());
             configureDoneRow(item, position);
         }
 
@@ -90,7 +92,6 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
      * @param position on list
      */
     private void configureDoneRow(final Survey item, final int position) {
-        row_description.setText(item.getSurveyDoneDescription());
         deleteButton.setTag(item.getInstanceId());
         deleteButton.setVisibility(View.VISIBLE);
 
@@ -141,7 +142,6 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
      * @param item survey
      */
     private void configureUploadedRow(final Survey item, int position) {
-        row_description.setText(item.getSurveyDoneDescription());
         imageButtonSyncDone.setVisibility(View.VISIBLE);
         imageButtonNotSync.setVisibility(View.GONE);
         deleteButton.setVisibility(View.GONE);
