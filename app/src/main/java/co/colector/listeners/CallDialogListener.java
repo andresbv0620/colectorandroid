@@ -3,6 +3,7 @@ package co.colector.listeners;
 import java.util.List;
 
 import co.colector.model.IdOptionValue;
+import co.colector.views.SectionItemView;
 
 /**
  * Created by danielsierraf on 6/27/16.
@@ -15,5 +16,5 @@ public interface CallDialogListener {
      * @param parent object that called the dialog
      * @param type Single-option dialog or multiple-option
      */
-    void callDialog(String title, List<IdOptionValue> response, Object parent, int type);
+    void callDialog(String title, List<IdOptionValue> response, Object parent, int type, SectionItemView sectionItemView);
 }

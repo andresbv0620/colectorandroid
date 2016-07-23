@@ -46,6 +46,7 @@ public class EditTextItemView extends FrameLayout {
     private boolean alreadyShow;
     private boolean isGoneByRules;
     private Question question;
+    private SectionItemView sectionItemView;
 
     public RealmList<QuestionVisibilityRules> getVisibilityRules() {
         return visibilityRules;
@@ -53,8 +54,9 @@ public class EditTextItemView extends FrameLayout {
 
     private RealmList<QuestionVisibilityRules> visibilityRules;
 
-    public EditTextItemView(Context context) {
+    public EditTextItemView(Context context, SectionItemView sectionItemView) {
         super(context);
+        this.sectionItemView = sectionItemView;
         init(context);
     }
 
@@ -140,7 +142,7 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+                listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -148,7 +150,7 @@ public class EditTextItemView extends FrameLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && !alreadyShow) {
                     alreadyShow = true;
-                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0);
+                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView);
                 }
             }
         });

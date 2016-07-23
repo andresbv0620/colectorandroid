@@ -97,6 +97,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     Toolbar mToolbar;
 
     private Long timeStandIni;
+    private ArrayList<EditTextItemView> elementsVisibility = new ArrayList<EditTextItemView>();
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -225,20 +226,25 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         hideLoading();
     }
 
-    private void validateVisibilityRules(String value, Long idParentRule){
+    private void validateVisibilityRules(String value, Long idParentRule, SectionItemView sectionItemView){
         for (int child = 0; child < container.getChildCount(); child++) {
             View sectionItem = container.getChildAt(child);
             if (sectionItem instanceof SectionItemView) {
-                ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
-                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
-                    if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView ){
-                        EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
-                        if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()){
-                            QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
-                            if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase()) && questionVisibilityRules.getElemento() == idParentRule)
-                                element.setVisibilityLabel(true);
-                            else
-                                element.setVisibilityLabel(false);
+                if (sectionItem.equals(sectionItemView)) {
+                    ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
+                    for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                        if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView) {
+                            EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
+                            if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()) {
+                                QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
+                                if (questionVisibilityRules.getElemento() == idParentRule) {
+                                    if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase())) {
+                                        element.setVisibilityLabel(true);
+                                    } else {
+                                        element.setVisibilityLabel(false);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -292,41 +298,41 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         for (Section section : surveys.getSections()) {
             SectionItemView sectionItem = new SectionItemView(this);
             sectionItem.bind(section.getName());
-            buildSection(section, sectionItem.sectionItemsContainer);
+            buildSection(section, sectionItem.sectionItemsContainer, sectionItem);
             container.addView(sectionItem);
         }
         hideLoading();
     }
 
-    private void buildSection(Section section, LinearLayout linear) {
+    private void buildSection(Section section, LinearLayout linear, SectionItemView sectionItemView) {
         for (Question question : section.getInputs()) {
-            buildQuestion(question, linear);
+            buildQuestion(question, linear, sectionItemView);
         }
     }
 
 
 
-    private void buildQuestion(final Question question, LinearLayout linear) {
+    private void buildQuestion(final Question question, LinearLayout linear, SectionItemView sectionItemView) {
         switch (question.getType()) {
             // Input Text
             case 1:
             case 2:
             case 8:
             default:
-                EditTextItemView editItemView = new EditTextItemView(this);
+                EditTextItemView editItemView = new EditTextItemView(this, sectionItemView);
                 editItemView.bind(question, surveys.getAnswer(question.getId()));
                 linear.addView(editItemView);
                 break;
             // Option Spinner
             case 3:
             case 4:
-                EditTextItemView editTextItemView = new EditTextItemView(this);
+                EditTextItemView editTextItemView = new EditTextItemView(this, sectionItemView);
                 editTextItemView.bind(question, question.getResponses(), surveys.getAnswer(question.getId()));
                 linear.addView(editTextItemView);
                 break;
             //Multiple opcion
             case 5:
-                MultipleItemViewContainer multipleItemViewContainer = new MultipleItemViewContainer(this);
+                MultipleItemViewContainer multipleItemViewContainer = new MultipleItemViewContainer(this, sectionItemView);
                 multipleItemViewContainer.bind(new ArrayList<>(question.getResponses()), question,
                         surveys.getListAnswers(question.getId()));
                 linear.addView(multipleItemViewContainer);
@@ -440,7 +446,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     @Override
-    public void callDialog(String title, List<IdOptionValue> response, final Object parent, int type) {
+    public void callDialog(String title, List<IdOptionValue> response, final Object parent, int type, final SectionItemView sectionItemView) {
         DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
                 new ArrayList<>(response), type);
         dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
@@ -451,7 +457,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 public void setItemSelected(String item) {
                     input.setText(item);
                     EditTextItemView parentRule = ((EditTextItemView) parent);
-                    validateVisibilityRules(item, parentRule.getIdentifier());
+                    validateVisibilityRules(item, parentRule.getIdentifier(), sectionItemView);
                     if (!item.isEmpty())
                         ((EditTextItemView) parent).setIsShow();
                 }

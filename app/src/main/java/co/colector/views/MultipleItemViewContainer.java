@@ -46,9 +46,11 @@ public class MultipleItemViewContainer extends LinearLayout {
     private String finalResult = "";
 
     private ArrayList<String> selectedResults = new ArrayList<>();
+    private SectionItemView sectionItemView;
 
-    public MultipleItemViewContainer(Context context) {
+    public MultipleItemViewContainer(Context context, SectionItemView sectionItemView) {
         super(context);
+        this.sectionItemView = sectionItemView;
         init(context);
     }
 
@@ -124,14 +126,14 @@ public class MultipleItemViewContainer extends LinearLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-            listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
+            listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
             if (hasFocus)
-                listener.callDialog(title, response, MultipleItemViewContainer.this, 1);
+                listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
             }
         });
     }
