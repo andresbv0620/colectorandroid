@@ -112,13 +112,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
-
+        PreferencesManager.getInstance().setCoordinates("", "");
         showLoading();
         setUpToolbar(surveys.getForm_name());
         setupGPS();
         configureInitTime();
         buildSurvey();
-        PreferencesManager.getInstance().resetCoordinates();
     }
 
     private void setupGPS() {
@@ -207,11 +206,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     private void saveLocation(){
-        GPSTracker gps = new GPSTracker(SurveyActivity.this);
-        if (gps.canGetLocation()) {
-            double latitude = gps.getLatitude();
-            double longitude = gps.getLongitude();
-            PreferencesManager.getInstance().setCoordinates(String.valueOf(latitude), String.valueOf(longitude));
+        if (PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY,"").isEmpty() &&
+            PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY,"").isEmpty()) {
+            GPSTracker gps = new GPSTracker(SurveyActivity.this);
+            if (gps.canGetLocation()) {
+                double latitude = gps.getLatitude();
+                double longitude = gps.getLongitude();
+                PreferencesManager.getInstance().setCoordinates(String.valueOf(latitude), String.valueOf(longitude));
+            }
         }
     }
 
