@@ -190,7 +190,7 @@ public class EditTextItemView extends FrameLayout {
                 if (question.getMin() != null && question.getMax() != null) {
                     if (label.getText().toString().length() >= Integer.parseInt(question.getMin()) &&
                             label.getText().toString().length() <= Integer.parseInt(question.getMax())) {
-                        input.setErrorEnabled(false);
+                        input.setError(null);
                         return true;
                     } else {
                         input.setError(String.format(activity.getString(R.string.required_error_lenght), question.getMin(), question.getMax()));
@@ -198,29 +198,34 @@ public class EditTextItemView extends FrameLayout {
                     }
                 }
                 else {
-                    input.setErrorEnabled(false);
+                    input.setError(null);
                     return true;
                 }
             }
             else if (mType == 8 || mType == 15){
                 if (question.getMin() != null && question.getMax() != null){
-                    if (Long.parseLong(label.getText().toString()) >= Long.parseLong(question.getMin()) &&
-                        Long.parseLong(label.getText().toString()) <= Long.parseLong(question.getMax())){
-                        input.setErrorEnabled(false);
-                        return true;
-                    }
-                    else{
+                    if (Long.parseLong(label.getText().toString()) > Long.parseLong(question.getMax())){
                         input.setError(String.format(activity.getString(R.string.required_error_range), question.getMin(), question.getMax()));
                         return false;
                     }
+                    else {
+                        if (Long.parseLong(label.getText().toString()) >= Long.parseLong(question.getMin()) &&
+                                Long.parseLong(label.getText().toString()) <= Long.parseLong(question.getMax())) {
+                            input.setError(null);
+                            return true;
+                        } else {
+                            input.setError(String.format(activity.getString(R.string.required_error_range), question.getMin(), question.getMax()));
+                            return false;
+                        }
+                    }
                 }
                 else {
-                    input.setErrorEnabled(false);
+                    input.setError(null);
                     return true;
                 }
             }
             else {
-                input.setErrorEnabled(false);
+                input.setError(null);
                 return true;
             }
         }
