@@ -73,6 +73,7 @@ public class EditTextDatePickerItemView extends FrameLayout {
     public void bind(Question question, @Nullable String previewDefault, final OnEditTextClickedOrFocused callback) {
         initValues(question);
         if (previewDefault != null) label.setText(previewDefault);
+        label.setFocusable(false);
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
