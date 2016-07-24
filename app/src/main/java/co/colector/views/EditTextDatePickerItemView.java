@@ -18,6 +18,8 @@ import co.colector.R;
 import co.colector.listeners.OnEditTextClickedOrFocused;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
+import co.colector.model.AnswerValue;
+import io.realm.RealmList;
 
 /**
  * @author Gabriel Rodriguez
@@ -107,7 +109,8 @@ public class EditTextDatePickerItemView extends FrameLayout {
     }
 
     public IdValue getResponse() {
-        return new IdValue(id, label.getText().toString(), validation, mType);
+        return new IdValue(id, new RealmList<>(new AnswerValue(label.getText().toString())),
+                validation, mType);
     }
 
 

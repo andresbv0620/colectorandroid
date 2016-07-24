@@ -16,6 +16,8 @@ import co.colector.R;
 import co.colector.listeners.OnAddSignatureListener;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
+import co.colector.model.AnswerValue;
+import io.realm.RealmList;
 
 /**
  * @author Gabriel Rodriguez
@@ -74,8 +76,9 @@ public class SignatureItemViewContainer extends LinearLayout {
 
     public IdValue getResponse() {
         if (signatureContainer.getChildCount() > 0)
-            return new IdValue(id, ((SignatureItemView) signatureContainer.getChildAt(0)).url, validation, mType);
-        else return new IdValue(id, "", validation, mType);
+            return new IdValue(id, new RealmList<>(new AnswerValue(((SignatureItemView)
+                    signatureContainer.getChildAt(0)).url)), validation, mType);
+        else return new IdValue(id, new RealmList<>(new AnswerValue("")), validation, mType);
 
 
     }

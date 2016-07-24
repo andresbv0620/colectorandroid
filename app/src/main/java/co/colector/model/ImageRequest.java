@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import co.colector.ColectorApplication;
 import co.colector.R;
 import co.colector.session.AppSession;
 import co.colector.utils.NetworkUtils;
@@ -21,13 +22,14 @@ public class ImageRequest {
     private long colector_id;
     private String name;
 
-    public ImageRequest(Survey survey, IdValue imageSave, Context context) {
+    public ImageRequest(Survey survey, AnswerValue imageSave, long questionId) {
+        Context context = ColectorApplication.getInstance();
         int dotIndex = imageSave.getValue().lastIndexOf(".");
         int slashIndex = imageSave.getValue().lastIndexOf("/");
         int lastIndex = imageSave.getValue().length();
         this.image = new File(imageSave.getValue());
         this.extension = imageSave.getValue().substring(dotIndex + 1);
-        this.question_id = imageSave.getId();
+        this.question_id = questionId;
         this.survey_id = survey.getForm_id();
         this.colector_id = AppSession.getInstance().getUser().getColector_id();
         this.name = context.getString(R.string.image_name_format,
@@ -59,14 +61,17 @@ public class ImageRequest {
         return name;
     }
 
-    public static ArrayList<IdValue> getFileSurveys(List<IdValue> answers) {
-        ArrayList<IdValue> answerWithImages = new ArrayList<>();
+    public static ArrayList<ImageRequest> getFileSurveys(Survey survey) {
+        List<IdValue> answers = survey.getInstanceAnswers();
+        ArrayList<ImageRequest> answerWithImages = new ArrayList<>();
         for (IdValue answer : answers) {
             switch (answer.getmType()) {
                 case 6:
                 case 14:
                 case 16:
-                    if (!answer.getValue().equals("")) answerWithImages.add(answer);
+                    for (AnswerValue answerValue : answer.getValue())
+                        if (!answerValue.getValue().equals(""))
+                            answerWithImages.add(new ImageRequest(survey, answerValue, answer.getId()));
                     break;
                 default:
                     break;

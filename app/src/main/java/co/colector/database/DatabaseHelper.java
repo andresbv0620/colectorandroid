@@ -1,5 +1,7 @@
 package co.colector.database;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,7 +136,7 @@ public class DatabaseHelper {
         return results.subList(0, results.size());
     }
 
-    public void deleteDatabase(){
+    public void deleteDatabase() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {

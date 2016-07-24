@@ -1,5 +1,6 @@
 package co.colector.model;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 /**
@@ -8,7 +9,7 @@ import io.realm.RealmObject;
 public class IdValue extends RealmObject {
 
     private Long id;
-    private String value;
+    private RealmList<AnswerValue> value;
     private String validation;
     private int mType;
 
@@ -16,14 +17,14 @@ public class IdValue extends RealmObject {
         super();
     }
 
-    public IdValue(Long id, String value, String validation) {
+    public IdValue(Long id, RealmList<AnswerValue> value, String validation) {
         super();
         this.id = id;
         this.value = value;
         this.validation = validation;
     }
 
-    public IdValue(Long id, String value, String validation, int type) {
+    public IdValue(Long id, RealmList<AnswerValue> value, String validation, int type) {
         super();
         this.id = id;
         this.value = value;
@@ -47,11 +48,11 @@ public class IdValue extends RealmObject {
         this.id = id;
     }
 
-    public String getValue() {
+    public RealmList<AnswerValue> getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(RealmList<AnswerValue> value) {
         this.value = value;
     }
 
@@ -71,5 +72,15 @@ public class IdValue extends RealmObject {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "IdValue{" +
+                "id=" + id +
+                ", value='" + value + '\'' +
+                ", validation='" + validation + '\'' +
+                ", mType=" + mType +
+                '}';
     }
 }

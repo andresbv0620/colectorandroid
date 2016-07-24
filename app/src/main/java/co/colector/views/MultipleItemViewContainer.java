@@ -20,6 +20,7 @@ import co.colector.listeners.CallDialogListener;
 import co.colector.model.IdOptionValue;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
+import co.colector.model.AnswerValue;
 import io.realm.RealmList;
 
 /**
@@ -101,18 +102,17 @@ public class MultipleItemViewContainer extends LinearLayout {
             String[] wordsToDelete = finalResult.split(",");
             ArrayList<String> wordsToRealDelete = new ArrayList<String>();
 
-            for (int i = 0; i < wordsToDelete.length; i++){
+            for (int i = 0; i < wordsToDelete.length; i++) {
                 if (!resultToDisplay.contains(wordsToDelete[i]))
                     wordsToRealDelete.add(wordsToDelete[i]);
             }
-            String totalResults = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS,"");
+            String totalResults = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS, "");
             if (totalResults.isEmpty()) {
                 PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay);
-            }
-            else {
-                for (String s: wordsToRealDelete)
-                    totalResults = totalResults.replace(s,"");
-                PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay+totalResults);
+            } else {
+                for (String s : wordsToRealDelete)
+                    totalResults = totalResults.replace(s, "");
+                PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay + totalResults);
             }
             finalResult = resultToDisplay;
             TextView textView = new TextView(getContext());
@@ -126,14 +126,14 @@ public class MultipleItemViewContainer extends LinearLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-            listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
+                listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus)
-                listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
+                if (hasFocus)
+                    listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
             }
         });
     }
@@ -172,21 +172,21 @@ public class MultipleItemViewContainer extends LinearLayout {
         return false;
     }
 
-    public RealmList<IdValue> getResponses() {
-        RealmList<IdValue> responses = new RealmList<>();
+    public IdValue getResponses() {
+        RealmList<AnswerValue> responses = new RealmList<>();
         if (!selectedResults.isEmpty())
             for (String item : selectedResults)
-                responses.add(new IdValue(id, getSelectedId(item), validation, mType));
-        return responses;
+                responses.add(getSelectedId(item));
+        return new IdValue(id, responses, validation, mType);
     }
 
-    private String getSelectedId(String selectedValue) {
+    private AnswerValue getSelectedId(String selectedValue) {
         for (IdOptionValue option : options) {
             if (option.getValue().equals(selectedValue)) {
-                return String.valueOf(option.getId());
+                return new AnswerValue(String.valueOf(option.getId()));
             }
         }
-        return selectedValue;
+        return new AnswerValue(String.valueOf(selectedValue));
     }
 
     private void bindDefaultSelected(List<String> previewDefault) {

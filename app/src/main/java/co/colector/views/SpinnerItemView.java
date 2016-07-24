@@ -20,6 +20,8 @@ import co.colector.R;
 import co.colector.model.IdOptionValue;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
+import co.colector.model.AnswerValue;
+import io.realm.RealmList;
 
 /**
  * @author Gabriel Rodriguez
@@ -92,6 +94,6 @@ public class SpinnerItemView extends LinearLayout {
     }
 
     public IdValue getResponse() {
-        return new IdValue(id, spinner.getSelectedItem().toString(), validation);
+        return new IdValue(id, new RealmList<>(new AnswerValue(spinner.getSelectedItem().toString())), validation);
     }
 }

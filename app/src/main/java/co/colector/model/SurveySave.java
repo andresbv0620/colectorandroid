@@ -1,5 +1,7 @@
 package co.colector.model;
 
+import java.util.ArrayList;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -107,5 +109,21 @@ public class SurveySave extends RealmObject {
 
     public void setTitulo_reporte(Long titulo_reporte) {
         this.titulo_reporte = titulo_reporte;
+    }
+
+    @Override
+    public String toString() {
+        return "SurveySave{" +
+                "instanceId=" + instanceId +
+                ", id=" + id +
+                ", latitude='" + latitude + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", HoraIni='" + HoraIni + '\'' +
+                ", HoraFin='" + HoraFin + '\'' +
+                ", Status='" + Status + '\'' +
+                ", responses=" + new ArrayList<>(responses).toString() +
+                ", uploaded=" + uploaded +
+                ", titulo_reporte=" + titulo_reporte +
+                '}';
     }
 }
