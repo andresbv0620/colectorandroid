@@ -181,7 +181,7 @@ public class Survey extends RealmObject {
         if (id == null || instanceAnswers == null) return null;
         for (IdValue item : instanceAnswers) {
             if (item.getId().equals(id)) {
-                return item.getValue();
+                return item.getValue().get(0).getValue();
             }
         }
         return null;
@@ -194,7 +194,8 @@ public class Survey extends RealmObject {
         List<String> listAnswers = new ArrayList<>();
         for (IdValue item : instanceAnswers) {
             if (item.getId().equals(id)) {
-                listAnswers.add(item.getValue());
+                for (AnswerValue answer : item.getValue())
+                    listAnswers.add(answer.getValue());
             }
         }
         return listAnswers;
@@ -214,5 +215,7 @@ public class Survey extends RealmObject {
                 this.instanceAnswers.equals(((Survey) o).instanceAnswers);
     }
 
-    public Long getTitulo_reporte(){ return titulo_reporte; }
+    public Long getTitulo_reporte() {
+        return titulo_reporte;
+    }
 }

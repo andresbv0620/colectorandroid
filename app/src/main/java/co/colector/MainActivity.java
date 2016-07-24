@@ -19,14 +19,12 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import co.colector.R;
 import co.colector.adapters.SurveyAdapter;
 import co.colector.database.DatabaseHelper;
 import co.colector.fragments.SurveyAvailable;
 import co.colector.helpers.PreferencesManager;
 import co.colector.listeners.OnDataBaseSave;
 import co.colector.listeners.OnUploadSurvey;
-import co.colector.model.IdValue;
 import co.colector.model.ImageRequest;
 import co.colector.model.ImageResponse;
 import co.colector.model.Survey;
@@ -50,8 +48,8 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     private ProgressDialog progressDialog;
     private Survey surveyToUpload;
     private SurveyAdapter adapter;
-    private ArrayList<IdValue> answersWithImages = new ArrayList<>();
-    private int generalIndex = 0;
+    private ArrayList<ImageRequest> answersWithImages;
+    private ImageRequest uploadingImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,8 +141,8 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      * If there is uploaded to the web service otherwise update local database
      */
     private void getImagesToUpload() {
-        generalIndex = 0;
-        answersWithImages = ImageRequest.getFileSurveys(surveyToUpload.getInstanceAnswers());
+        answersWithImages = new ArrayList<>();
+        answersWithImages = ImageRequest.getFileSurveys(surveyToUpload);
         if (!answersWithImages.isEmpty()) uploadImages();
         else uploadSurveySave();
     }
@@ -153,8 +151,8 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      * Upload Images with web service
      */
     private void uploadImages() {
-        ImageRequest fileToUpload = new ImageRequest(surveyToUpload, answersWithImages.get(generalIndex), this);
-        mBus.post(fileToUpload);
+        uploadingImage = answersWithImages.get(0);
+        mBus.post(uploadingImage);
     }
 
     /**
@@ -166,8 +164,8 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     @Subscribe
     public void onImageUploaded(ImageResponse response) {
         if (response.getResponseCode().equals("200")) {
-            generalIndex++;
-            if (generalIndex >= answersWithImages.size()) {
+            answersWithImages.remove(uploadingImage);
+            if (answersWithImages.isEmpty()) {
                 uploadSurveySave();
             } else uploadImages();
         } else showToastError(response.getResponseDescription());

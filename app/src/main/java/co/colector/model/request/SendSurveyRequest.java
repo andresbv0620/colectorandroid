@@ -8,6 +8,7 @@ import co.colector.R;
 import co.colector.model.IdInputValue;
 import co.colector.model.IdValue;
 import co.colector.model.Survey;
+import co.colector.model.AnswerValue;
 import co.colector.session.AppSession;
 import co.colector.utils.NetworkUtils;
 
@@ -50,16 +51,18 @@ public class SendSurveyRequest {
                 case 6:
                 case 14:
                 case 16:
-                    if (!item.getValue().equals("")) {
-                        int lastIndex = item.getValue().length();
-                        int slashIndex = item.getValue().lastIndexOf("/");
+                    for (AnswerValue answerValue : item.getValue())
+                    if (!answerValue.getValue().equals("")) {
+                        int lastIndex = answerValue.getValue().length();
+                        int slashIndex = answerValue.getValue().lastIndexOf("/");
                         responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,
                                 NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
-                                item.getValue().substring((slashIndex + 1), lastIndex))));
+                                answerValue.getValue().substring((slashIndex + 1), lastIndex))));
                     }
                     break;
                 default:
-                    responses.add(new IdInputValue(String.valueOf(item.getId()), item.getValue()));
+                    for (AnswerValue answerValue : item.getValue())
+                        responses.add(new IdInputValue(String.valueOf(item.getId()), answerValue.getValue()));
             }
 
         }

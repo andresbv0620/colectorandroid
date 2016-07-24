@@ -32,8 +32,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.File;
@@ -46,7 +44,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import co.colector.R;
 import co.colector.database.DatabaseHelper;
 import co.colector.fragments.DialogList;
 import co.colector.helpers.PreferencesManager;
@@ -122,19 +119,19 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void setupGPS() {
         //if (isGpsCanBeClicked) {
-            final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(getString(R.string.gps_alert))
-                        .setCancelable(false)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                            }
-                        });
-                final AlertDialog alert = builder.create();
-                alert.show();
-            }
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(getString(R.string.gps_alert))
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    });
+            final AlertDialog alert = builder.create();
+            alert.show();
+        }
         //}
     }
 
@@ -193,7 +190,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                             saveLocation();
                             saveSurvey();
                         } else {
-                            if (isSectionOfFirstFieldStored){
+                            if (isSectionOfFirstFieldStored) {
                                 sectionItemViewSelected.requestFocus();
                             }
                             showSnackNotification();
@@ -205,9 +202,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 .show();
     }
 
-    private void saveLocation(){
-        if (PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY,"").isEmpty() &&
-            PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY,"").isEmpty()) {
+    private void saveLocation() {
+        if (PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, "").isEmpty() &&
+                PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY, "").isEmpty()) {
             GPSTracker gps = new GPSTracker(SurveyActivity.this);
             if (gps.canGetLocation()) {
                 double latitude = gps.getLatitude();
@@ -228,7 +225,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         hideLoading();
     }
 
-    private void validateVisibilityRules(String value, Long idParentRule, SectionItemView sectionItemView){
+    private void validateVisibilityRules(String value, Long idParentRule, SectionItemView sectionItemView) {
         for (int child = 0; child < container.getChildCount(); child++) {
             View sectionItem = container.getChildAt(child);
             if (sectionItem instanceof SectionItemView) {
@@ -266,7 +263,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
                     fieldsValid = fieldsValid && fieldSectionValid;
 
-                    if (!fieldSectionValid && !isSectionOfFirstFieldStored){
+                    if (!fieldSectionValid && !isSectionOfFirstFieldStored) {
                         sectionItemViewSelected = sectionItemContainer
                                 .getChildAt(sectionItemIndex);
                         isSectionOfFirstFieldStored = true;
@@ -311,7 +308,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             buildQuestion(question, linear, sectionItemView);
         }
     }
-
 
 
     private void buildQuestion(final Question question, LinearLayout linear, SectionItemView sectionItemView) {
@@ -608,13 +604,13 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         else
             surveySave.setId(surveys.getInstanceId());
         try {
-            surveySave.setLatitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY,""));
-        }catch (NullPointerException e){
+            surveySave.setLatitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, ""));
+        } catch (NullPointerException e) {
             surveySave.setLatitude(String.valueOf(0.0f));
         }
         try {
-            surveySave.setLongitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY,""));
-        }catch (NullPointerException e){
+            surveySave.setLongitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY, ""));
+        } catch (NullPointerException e) {
             surveySave.setLongitude(String.valueOf(0.0f));
         }
         surveySave.setHoraIni(String.valueOf(timeStandIni));
@@ -631,10 +627,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     if (sectionView instanceof EditTextItemView)
                         surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
                     else if (sectionView instanceof MultipleItemViewContainer)
-                        surveySave.getResponses().addAll(((MultipleItemViewContainer)
+                        surveySave.getResponses().add(((MultipleItemViewContainer)
                                 sectionView).getResponses());
                     else if (sectionView instanceof PhotoItemViewContainer)
-                        surveySave.getResponses().addAll(((PhotoItemViewContainer)
+                        surveySave.getResponses().add(((PhotoItemViewContainer)
                                 sectionView).getResponses());
                     else if (sectionView instanceof EditTextDatePickerItemView)
                         surveySave.getResponses().add(((EditTextDatePickerItemView)
@@ -643,7 +639,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         surveySave.getResponses().add(((SignatureItemViewContainer)
                                 sectionView).getResponse());
                     else if (sectionView instanceof FileItemViewContainer)
-                        surveySave.getResponses().addAll(((FileItemViewContainer)
+                        surveySave.getResponses().add(((FileItemViewContainer)
                                 sectionView).getResponses());
                 }
             }

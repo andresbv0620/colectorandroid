@@ -17,6 +17,7 @@ import co.colector.R;
 import co.colector.listeners.OnAddFileListener;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
+import co.colector.model.AnswerValue;
 import io.realm.RealmList;
 
 /**
@@ -53,8 +54,9 @@ public class FileItemViewContainer extends LinearLayout {
 
     /**
      * Bind the basic information of the view
-     * @param question to be inflate
-     * @param callback to notify abut click actions
+     *
+     * @param question       to be inflate
+     * @param callback       to notify abut click actions
      * @param previewDefault value
      */
     public void bind(Question question, OnAddFileListener callback, @Nullable List<String> previewDefault) {
@@ -78,6 +80,7 @@ public class FileItemViewContainer extends LinearLayout {
 
     /**
      * Add image reference to the url file
+     *
      * @param url of file
      */
     public void addImagesFile(String url) {
@@ -95,16 +98,16 @@ public class FileItemViewContainer extends LinearLayout {
 
     /**
      * Get url responses
+     *
      * @return List of url responses
      */
-    public RealmList<IdValue> getResponses() {
-        RealmList<IdValue> responses = new RealmList<>();
-        if (photoContainer.getChildCount() > 0)
+    public IdValue getResponses() {
+        RealmList<AnswerValue> responses = new RealmList<>();
+        if (photoContainer.getChildCount() > 0) {
             for (int itemViewIndex = 0; itemViewIndex < photoContainer.getChildCount(); itemViewIndex++)
-                responses.add(new IdValue(id, ((PhotoItemView) photoContainer.getChildAt(itemViewIndex)).url,
-                        validation, mType));
-        else responses.add(new IdValue(id, "", validation, mType));
-        return responses;
+                responses.add(new AnswerValue(((PhotoItemView) photoContainer.getChildAt(itemViewIndex)).url));
+            return new IdValue(id, responses, validation, mType);
+        } else return new IdValue(id, new RealmList<>(new AnswerValue("")), validation, mType);
     }
 
     /**

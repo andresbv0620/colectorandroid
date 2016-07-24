@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -25,6 +24,7 @@ import co.colector.model.IdOptionValue;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.QuestionVisibilityRules;
+import co.colector.model.AnswerValue;
 import io.realm.RealmList;
 
 /**
@@ -60,7 +60,7 @@ public class EditTextItemView extends FrameLayout {
         init(context);
     }
 
-    public Long getIdentifier(){
+    public Long getIdentifier() {
         return id;
     }
 
@@ -146,7 +146,7 @@ public class EditTextItemView extends FrameLayout {
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
-           @Override
+            @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && !alreadyShow) {
                     alreadyShow = true;
@@ -156,7 +156,7 @@ public class EditTextItemView extends FrameLayout {
         });
     }
 
-    public void removeFocusability(){
+    public void removeFocusability() {
         label.setFocusable(false);
     }
 
@@ -186,7 +186,7 @@ public class EditTextItemView extends FrameLayout {
                 requestFocus(label);
             return false;
         } else {
-            if (mType == 1 || mType == 2){
+            if (mType == 1 || mType == 2) {
                 if (question.getMin() != null && question.getMax() != null) {
                     if (label.getText().toString().length() >= Integer.parseInt(question.getMin()) &&
                             label.getText().toString().length() <= Integer.parseInt(question.getMax())) {
@@ -196,19 +196,16 @@ public class EditTextItemView extends FrameLayout {
                         input.setError(String.format(activity.getString(R.string.required_error_lenght), question.getMin(), question.getMax()));
                         return false;
                     }
-                }
-                else {
+                } else {
                     input.setError(null);
                     return true;
                 }
-            }
-            else if (mType == 8 || mType == 15){
-                if (question.getMin() != null && question.getMax() != null){
-                    if (Long.parseLong(label.getText().toString()) > Long.parseLong(question.getMax())){
+            } else if (mType == 8 || mType == 15) {
+                if (question.getMin() != null && question.getMax() != null) {
+                    if (Long.parseLong(label.getText().toString()) > Long.parseLong(question.getMax())) {
                         input.setError(String.format(activity.getString(R.string.required_error_range), question.getMin(), question.getMax()));
                         return false;
-                    }
-                    else {
+                    } else {
                         if (Long.parseLong(label.getText().toString()) >= Long.parseLong(question.getMin()) &&
                                 Long.parseLong(label.getText().toString()) <= Long.parseLong(question.getMax())) {
                             input.setError(null);
@@ -218,13 +215,11 @@ public class EditTextItemView extends FrameLayout {
                             return false;
                         }
                     }
-                }
-                else {
+                } else {
                     input.setError(null);
                     return true;
                 }
-            }
-            else {
+            } else {
                 input.setError(null);
                 return true;
             }
@@ -233,18 +228,20 @@ public class EditTextItemView extends FrameLayout {
 
     public IdValue getResponse() {
         if (mType == 4) {
-            return new IdValue(id, getResponseId(), validation, mType);
-        } else
-            return new IdValue(id, label.getText().toString(), validation, mType);
+            return new IdValue(id, new RealmList<>(getResponseId()), validation, mType);
+        } else {
+            return new IdValue(id, new RealmList<>(new AnswerValue(label.getText().toString())),
+                    validation, mType);
+        }
     }
 
-    private String getResponseId() {
+    private AnswerValue getResponseId() {
         for (IdOptionValue item : response) {
             if (item.getValue().equals(label.getText().toString())) {
-                return String.valueOf(item.getId());
+                return new AnswerValue(String.valueOf(item.getId()));
             }
         }
-        return String.valueOf(response.get(0).getId());
+        return new AnswerValue(String.valueOf(response.get(0).getId()));
     }
 
 
@@ -257,16 +254,16 @@ public class EditTextItemView extends FrameLayout {
         return value;
     }
 
-    public void setVisibilityLabel(boolean isVisible){
+    public void setVisibilityLabel(boolean isVisible) {
         label.setVisibility(isVisible ? View.VISIBLE : View.GONE);
         input.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
-    public void setIsShow(){
+    public void setIsShow() {
         alreadyShow = false;
     }
 
-    public boolean getIsGoneByVisibilityRules(){
+    public boolean getIsGoneByVisibilityRules() {
         return isGoneByRules;
     }
 
