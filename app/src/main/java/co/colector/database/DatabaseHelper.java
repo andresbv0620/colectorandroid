@@ -6,9 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import co.colector.listeners.OnDataBaseSave;
+import co.colector.model.Question;
+import co.colector.model.ResponseComplex;
+import co.colector.model.ResponseItem;
+import co.colector.model.Section;
 import co.colector.model.Survey;
 import co.colector.model.SurveySave;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 /**
@@ -143,5 +148,31 @@ public class DatabaseHelper {
                 Realm.getDefaultInstance().deleteAll();
             }
         });
+    }
+
+    public String formHaveAnswerForOtherForm(Long associate_id, Long question_id){
+        RealmResults<Survey> results = realm.where(Survey.class).findAll();
+        for (Survey survey: results){
+            RealmList<Section> sections = survey.getSections();
+            for (Section section : sections){
+                RealmList<Question> questions = section.getInputs();
+                  for (Question question: questions){
+                      if (question.getType() == 10){
+                         if (question.getAsociate_form().get(0).getAssociate_id() == associate_id){
+                             RealmList<ResponseComplex> options = question.getOptions();
+                             for (ResponseComplex responseComplex: options){
+                                 RealmList<ResponseItem> responseItems = responseComplex.getResponses();
+                                 for (ResponseItem responseItem: responseItems){
+                                     if (String.valueOf(responseItem.getInput_id()).equals(String.valueOf(question_id))){
+                                         return responseItem.getValue();
+                                     }
+                                 }
+                             }
+                         }
+                      }
+                  }
+            }
+        }
+        return "";
     }
 }

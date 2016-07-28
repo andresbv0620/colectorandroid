@@ -19,12 +19,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.colector.R;
+import co.colector.database.DatabaseHelper;
 import co.colector.listeners.CallDialogListener;
 import co.colector.model.IdOptionValue;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.QuestionVisibilityRules;
 import co.colector.model.AnswerValue;
+import co.colector.session.AppSession;
 import io.realm.RealmList;
 
 /**
@@ -101,9 +103,12 @@ public class EditTextItemView extends FrameLayout {
     public void bind(Question question, @Nullable String previewDefault) {
         this.question = question;
         initValues(question);
+        DatabaseHelper helper = new DatabaseHelper();
         if (previewDefault != null) label.setText(previewDefault);
         else if (question.getDefecto() != null && !question.getDefecto().equals(""))
             label.setText(question.getDefecto());
+        String databaseValue = helper.formHaveAnswerForOtherForm(AppSession.getInstance().getCurrentSurvey().getForm_id(), question.getId());
+        if (!databaseValue.isEmpty()) label.setText(databaseValue);
         label.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
         isGoneByRules = question.getValorVisibility().isEmpty();
         visibilityRules = question.getValorVisibility();
