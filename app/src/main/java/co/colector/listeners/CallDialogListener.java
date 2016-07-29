@@ -3,6 +3,7 @@ package co.colector.listeners;
 import java.util.List;
 
 import co.colector.model.IdOptionValue;
+import co.colector.model.Question;
 import co.colector.views.SectionItemView;
 
 /**
@@ -17,4 +18,6 @@ public interface CallDialogListener {
      * @param type Single-option dialog or multiple-option
      */
     void callDialog(String title, List<IdOptionValue> response, Object parent, int type, SectionItemView sectionItemView);
+
+    void callDynamicDialog(String title, Question question, Object parent);
 }

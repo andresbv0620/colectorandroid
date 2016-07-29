@@ -50,6 +50,10 @@ public class EditTextItemView extends FrameLayout {
     private Question question;
     private SectionItemView sectionItemView;
 
+    public Question getQuestion(){
+        return question;
+    }
+
     public RealmList<QuestionVisibilityRules> getVisibilityRules() {
         return visibilityRules;
     }
@@ -107,8 +111,6 @@ public class EditTextItemView extends FrameLayout {
         if (previewDefault != null) label.setText(previewDefault);
         else if (question.getDefecto() != null && !question.getDefecto().equals(""))
             label.setText(question.getDefecto());
-        String databaseValue = helper.formHaveAnswerForOtherForm(AppSession.getInstance().getCurrentSurvey().getForm_id(), question.getId());
-        if (!databaseValue.isEmpty()) label.setText(databaseValue);
         label.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
         isGoneByRules = question.getValorVisibility().isEmpty();
         visibilityRules = question.getValorVisibility();
@@ -157,6 +159,19 @@ public class EditTextItemView extends FrameLayout {
                     alreadyShow = true;
                     listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView);
                 }
+            }
+        });
+    }
+
+    public void bind(final Question question){
+        this.question = question;
+        final CallDialogListener listener = (CallDialogListener) activity;
+        label.setFocusable(false);
+        label.setHint(question.getName());
+        label.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.callDynamicDialog(question.getName(), question, EditTextItemView.this);
             }
         });
     }
@@ -262,6 +277,10 @@ public class EditTextItemView extends FrameLayout {
     public void setVisibilityLabel(boolean isVisible) {
         label.setVisibility(isVisible ? View.VISIBLE : View.GONE);
         input.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setValue(String value){
+        label.setText(value);
     }
 
     public void setIsShow() {

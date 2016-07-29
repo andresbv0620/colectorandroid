@@ -21,11 +21,13 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -53,9 +55,13 @@ import co.colector.listeners.OnAddPhotoListener;
 import co.colector.listeners.OnAddSignatureListener;
 import co.colector.listeners.OnDataBaseSave;
 import co.colector.listeners.OnEditTextClickedOrFocused;
+import co.colector.model.Autollenar;
 import co.colector.model.IdOptionValue;
 import co.colector.model.Question;
+import co.colector.model.QuestionAsociateForm;
 import co.colector.model.QuestionVisibilityRules;
+import co.colector.model.ResponseComplex;
+import co.colector.model.ResponseItem;
 import co.colector.model.Section;
 import co.colector.model.Survey;
 import co.colector.model.SurveySave;
@@ -70,6 +76,7 @@ import co.colector.views.PhotoItemView;
 import co.colector.views.PhotoItemViewContainer;
 import co.colector.views.SectionItemView;
 import co.colector.views.SignatureItemViewContainer;
+import io.realm.RealmList;
 
 public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener,
         CallDialogListener {
@@ -355,8 +362,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 break;
 
             // dynamic form
-            case 10:
-                break;
+            case 10: EditTextItemView editTextDynamicView = new EditTextItemView(this, sectionItemView);
+                     editTextDynamicView.bind(question);
+                     linear.addView(editTextDynamicView);
+                     break;
 
             // GPS
             case 12:
@@ -472,6 +481,81 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             });
         }
         dialog.show(getFragmentManager(), title);
+    }
+
+    @Override
+    public void callDynamicDialog(String title, final Question question, final Object parent) {
+
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(SurveyActivity.this);
+        builderSingle.setTitle(title);
+
+        final ArrayAdapter<String> arrayAdapter = fillAdapter(question, new ArrayAdapter<String>(
+                SurveyActivity.this,
+                android.R.layout.select_dialog_singlechoice));
+
+        builderSingle.setNegativeButton(
+                getString(R.string.common_cancel),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+        builderSingle.setAdapter(
+                arrayAdapter,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final TextInputEditText input = ((EditTextItemView) parent).getLabel();
+                        input.setText(arrayAdapter.getItem(which));
+                        evaluateAnswers(question, which);
+                    }
+                });
+        builderSingle.create();
+        builderSingle.show();
+    }
+
+    private void evaluateAnswers(Question question, int which){
+        RealmList<ResponseItem> responseItems = question.getOptions().get(which).getResponses();
+        RealmList<Autollenar> autollenarRealmList = question.getAsociate_form().get(0).getAutollenar();
+        for (Autollenar autollenar: autollenarRealmList){
+            for (ResponseItem responseItem: responseItems){
+                if (String.valueOf(responseItem.getInput_id()).equals(String.valueOf(autollenar.getEntrada_fuente()))){
+                    autoFillValues(autollenar.getEntrada_destino(), responseItem.getValue());
+                    break;
+                }
+            }
+        }
+    }
+
+    private void autoFillValues(Long inputId, String value){
+        for (int child = 0; child < container.getChildCount(); child++) {
+            View sectionItem = container.getChildAt(child);
+            if (sectionItem instanceof SectionItemView) {
+                    ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
+                    for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                        if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView) {
+                            EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
+                            if (element.getQuestion().getId().equals(inputId)){
+                                element.setValue(value);
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    private ArrayAdapter<String> fillAdapter(Question question, ArrayAdapter<String> adapter){
+        RealmList<ResponseComplex> options = question.getOptions();
+        for (ResponseComplex responseComplex: options){
+            RealmList<ResponseItem> responseItems = responseComplex.getResponses();
+            String tag = "";
+            for (ResponseItem responseItem: responseItems)
+                tag = tag.isEmpty() ? responseItem.getValue() : tag +", "+responseItem.getValue();
+            adapter.add(tag);
+        }
+        return adapter;
     }
 
     @SuppressLint("ValidFragment")

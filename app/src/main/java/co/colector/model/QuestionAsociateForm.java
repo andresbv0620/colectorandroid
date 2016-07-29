@@ -1,5 +1,6 @@
 package co.colector.model;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 /**
@@ -13,6 +14,7 @@ public class QuestionAsociateForm extends RealmObject {
     private Boolean seleccionar_existentes;
     private Boolean seleccionar_multiples;
     private String description;
+    private RealmList<Autollenar> autollenar;
 
     public QuestionAsociateForm(){
         super();
@@ -20,7 +22,7 @@ public class QuestionAsociateForm extends RealmObject {
 
     public QuestionAsociateForm(Boolean actualizar_existente, String name,Long associate_id,
                                 Boolean crear_nuevo,Boolean seleccionar_existentes, Boolean seleccionar_multiples,
-                                String description) {
+                                String description, RealmList<Autollenar> autollenar) {
         super();
         this.associate_id = associate_id;
         this.actualizar_existente = actualizar_existente;
@@ -29,6 +31,7 @@ public class QuestionAsociateForm extends RealmObject {
         this.crear_nuevo = crear_nuevo;
         this.seleccionar_existentes = seleccionar_existentes;
         this.seleccionar_multiples = seleccionar_multiples;
+        this.autollenar = autollenar;
     }
 
     public Long getAssociate_id() {
@@ -88,4 +91,7 @@ public class QuestionAsociateForm extends RealmObject {
         this.seleccionar_multiples = seleccionar_multiples;
     }
 
+    public RealmList<Autollenar> getAutollenar() {
+        return autollenar;
+    }
 }
