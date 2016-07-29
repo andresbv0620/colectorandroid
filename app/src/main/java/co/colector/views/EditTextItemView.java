@@ -74,6 +74,8 @@ public class EditTextItemView extends FrameLayout {
         return label;
     }
 
+    public int getType(){ return mType; }
+
     public void setLabel(TextInputEditText label) {
         this.label = label;
     }
@@ -165,6 +167,10 @@ public class EditTextItemView extends FrameLayout {
 
     public void bind(final Question question){
         this.question = question;
+        this.validation = question.getValidacion();
+        this.id = question.getId();
+        this.required = question.getRequerido();
+        this.mType = question.getType();
         final CallDialogListener listener = (CallDialogListener) activity;
         label.setFocusable(false);
         label.setHint(question.getName());
@@ -253,6 +259,11 @@ public class EditTextItemView extends FrameLayout {
             return new IdValue(id, new RealmList<>(new AnswerValue(label.getText().toString())),
                     validation, mType);
         }
+    }
+
+    public IdValue getResponse(int indexValue) {
+         return new IdValue(id, new RealmList<>(new AnswerValue(question.getOptions().get(indexValue).getRecord_id())),
+                    validation, mType);
     }
 
     private AnswerValue getResponseId() {

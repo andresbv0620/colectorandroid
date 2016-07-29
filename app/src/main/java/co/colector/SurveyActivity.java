@@ -90,6 +90,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     private static final int REQUEST_TAKE_MAPSGPS = 2;
     private static final int REQUEST_TAKE_SIGNATURE = 3;
     private static final int REQUEST_PICKFILE_CODE = 4;
+    private int selectedOption = 0;
     private boolean isGpsCanBeClicked;
 
     @BindView(R.id.survey_container)
@@ -509,6 +510,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     public void onClick(DialogInterface dialog, int which) {
                         final TextInputEditText input = ((EditTextItemView) parent).getLabel();
                         input.setText(arrayAdapter.getItem(which));
+                        selectedOption = which;
                         evaluateAnswers(question, which);
                     }
                 });
@@ -708,8 +710,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
                     View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
 
-                    if (sectionView instanceof EditTextItemView)
-                        surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
+                    if (sectionView instanceof EditTextItemView) {
+                        if (((EditTextItemView) sectionView).getType() != 10) {
+                            surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
+                        }
+                        else {
+                            surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse(selectedOption));
+                        }
+                    }
                     else if (sectionView instanceof MultipleItemViewContainer)
                         surveySave.getResponses().add(((MultipleItemViewContainer)
                                 sectionView).getResponses());
