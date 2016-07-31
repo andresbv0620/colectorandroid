@@ -21,16 +21,20 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +50,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import co.colector.adapters.CustomAlertAdapter;
 import co.colector.database.DatabaseHelper;
 import co.colector.fragments.DialogList;
 import co.colector.helpers.PreferencesManager;
@@ -110,6 +115,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     private GoogleApiClient client;
     private boolean isSectionOfFirstFieldStored = false;
     private View sectionItemViewSelected = null;
+    private AlertDialog mAlertDialog;
 
 
     @Override
@@ -244,7 +250,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                             EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
                             if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()) {
                                 QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
-                                if (questionVisibilityRules.getElemento() == idParentRule) {
+                                if (questionVisibilityRules.getElemento().equals(idParentRule)) {
                                     if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase())) {
                                         element.setVisibilityLabel(true);
                                     } else {
@@ -487,7 +493,65 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     @Override
     public void callDynamicDialog(String title, final Question question, final Object parent) {
 
-        AlertDialog.Builder builderSingle = new AlertDialog.Builder(SurveyActivity.this);
+        AlertDialog.Builder myDialog = new AlertDialog.Builder(SurveyActivity.this);
+        myDialog.setTitle(title);
+        final EditText editText = new EditText(SurveyActivity.this);
+        final ListView listview=new ListView(SurveyActivity.this);
+        final ArrayList<String> arrayAdapter = fillAdapter(question, new ArrayList<String>());
+        final ArrayList<String> copyArrayAdapter = fillAdapter(question, new ArrayList<String>());
+        LinearLayout layout = new LinearLayout(SurveyActivity.this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(editText);
+        layout.addView(listview);
+        myDialog.setView(layout);
+        CustomAlertAdapter arraySearchAdapter = new CustomAlertAdapter(SurveyActivity.this, arrayAdapter);
+        listview.setAdapter(arraySearchAdapter);
+        editText.addTextChangedListener(new TextWatcher() {
+            public int textlength;
+
+            public void afterTextChanged(Editable s){
+
+            }
+            public void beforeTextChanged(CharSequence s,
+                                          int start, int count, int after){
+
+            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                textlength = editText.getText().length();
+                arrayAdapter.clear();
+                for (int i = 0; i < copyArrayAdapter.size(); i++) {
+                    if (textlength <= copyArrayAdapter.get(i).length()) {
+                        if(copyArrayAdapter.get(i).toLowerCase().contains(editText.getText().toString().toLowerCase().trim())) {
+                            arrayAdapter.add(copyArrayAdapter.get(i));
+                        }
+                    }
+                }
+                listview.setAdapter(new CustomAlertAdapter(SurveyActivity.this, arrayAdapter));
+            }
+        });
+        myDialog.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        mAlertDialog = myDialog.show();
+
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> inputParent, View view, int position, long id) {
+                final TextInputEditText input = ((EditTextItemView) parent).getLabel();
+                input.setText(arrayAdapter.get(position));
+                selectedOption = position;
+                evaluateAnswers(question, position);
+                mAlertDialog.dismiss();
+            }
+        });
+
+       /* AlertDialog.Builder builderSingle = new AlertDialog.Builder(SurveyActivity.this);
         builderSingle.setTitle(title);
 
         final ArrayAdapter<String> arrayAdapter = fillAdapter(question, new ArrayAdapter<String>(
@@ -515,7 +579,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     }
                 });
         builderSingle.create();
-        builderSingle.show();
+        builderSingle.show();*/
     }
 
     private void evaluateAnswers(Question question, int which){
@@ -549,6 +613,18 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     private ArrayAdapter<String> fillAdapter(Question question, ArrayAdapter<String> adapter){
+        RealmList<ResponseComplex> options = question.getOptions();
+        for (ResponseComplex responseComplex: options){
+            RealmList<ResponseItem> responseItems = responseComplex.getResponses();
+            String tag = "";
+            for (ResponseItem responseItem: responseItems)
+                tag = tag.isEmpty() ? responseItem.getValue() : tag +", "+responseItem.getValue();
+            adapter.add(tag);
+        }
+        return adapter;
+    }
+
+    private ArrayList<String> fillAdapter(Question question, ArrayList<String> adapter){
         RealmList<ResponseComplex> options = question.getOptions();
         for (ResponseComplex responseComplex: options){
             RealmList<ResponseItem> responseItems = responseComplex.getResponses();
