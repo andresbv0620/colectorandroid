@@ -235,6 +235,7 @@ public class MapsActivity extends AppCompatActivity implements
         mMap.addMarker(options);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
         mMap.setMyLocationEnabled(true);
+        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         progressBarLoader.setVisibility(View.GONE);
     }
 

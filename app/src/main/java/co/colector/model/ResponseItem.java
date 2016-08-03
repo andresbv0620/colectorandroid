@@ -24,6 +24,11 @@ public class ResponseItem extends RealmObject {
         this.label = label;
     }
 
+    public ResponseItem(Long input_id, String value) {
+        this.input_id = input_id;
+        this.value = value;
+    }
+
     public Long getInput_id() {
         return input_id;
     }
