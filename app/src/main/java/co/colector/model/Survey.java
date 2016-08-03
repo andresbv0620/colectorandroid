@@ -34,6 +34,7 @@ public class Survey extends RealmObject {
     private
     RealmList<IdValue> instanceAnswers = new RealmList<>();
     private boolean uploaded;
+    private String titulo_reporte2;
 
     public Survey() {
         super();
@@ -53,6 +54,7 @@ public class Survey extends RealmObject {
         horafin = answers.getHoraFin();
         uploaded = answers.isUploaded();
         titulo_reporte = answers.getTitulo_reporte();
+        titulo_reporte2 = answers.getTitulo_reporte2();
     }
 
     public Survey(Long form_id, String form_name, String form_description,//String precargado,
@@ -207,6 +209,14 @@ public class Survey extends RealmObject {
 
     public void setUploaded(boolean uploaded) {
         this.uploaded = uploaded;
+    }
+
+    public String getTitulo_reporte2() {
+        return titulo_reporte2;
+    }
+
+    public void setTitulo_reporte2(String titulo_reporte2) {
+        this.titulo_reporte2 = titulo_reporte2;
     }
 
     @Override

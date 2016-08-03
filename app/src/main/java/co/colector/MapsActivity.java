@@ -198,9 +198,22 @@ public class MapsActivity extends AppCompatActivity implements
 
     private void handleNewLocation(Location location) {
         Log.d(TAG, location.toString());
-        currentLatitude = location.getLatitude();
-        currentLongitude = location.getLongitude();
-        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+
+        LatLng latLng;
+        String lat = "0.0", lng = "0.0";
+        boolean isLocationSetted = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, "").isEmpty() &&
+                PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY, "").isEmpty();
+
+        if (!isLocationSetted) {
+            currentLatitude = location.getLatitude();
+            currentLongitude = location.getLongitude();
+            latLng = new LatLng(currentLatitude, currentLongitude);
+        }
+        else {
+            lat = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, "");
+            lng = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY, "");
+            latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+        }
 
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
@@ -233,7 +246,10 @@ public class MapsActivity extends AppCompatActivity implements
         });
 
         mMap.addMarker(options);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
+        if (!isLocationSetted)
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
+        else
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)), 15.0f));
         mMap.setMyLocationEnabled(true);
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         progressBarLoader.setVisibility(View.GONE);

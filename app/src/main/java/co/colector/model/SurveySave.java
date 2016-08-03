@@ -22,6 +22,7 @@ public class SurveySave extends RealmObject {
     private RealmList<IdValue> responses;
     private boolean uploaded = false;
     private Long titulo_reporte;
+    private String titulo_reporte2;
 
     public SurveySave() {
         super();
@@ -109,6 +110,14 @@ public class SurveySave extends RealmObject {
 
     public void setTitulo_reporte(Long titulo_reporte) {
         this.titulo_reporte = titulo_reporte;
+    }
+
+    public String getTitulo_reporte2() {
+        return titulo_reporte2;
+    }
+
+    public void setTitulo_reporte2(String titulo_reporte2) {
+        this.titulo_reporte2 = titulo_reporte2;
     }
 
     @Override

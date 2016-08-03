@@ -169,6 +169,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
         PreferencesManager.getInstance().setCoordinates("", "");
+        fillLocalOptions();
         showLoading();
         setUpToolbar(surveys.getForm_name());
         setupGPS();
@@ -542,8 +543,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         myDialog.setTitle(title);
         final EditText editText = new EditText(SurveyActivity.this);
         final ListView listview = new ListView(SurveyActivity.this);
-        final ArrayList<String> arrayAdapter = fillAdapter(question, new ArrayList<String>());
-        final ArrayList<String> copyArrayAdapter = fillAdapter(question, new ArrayList<String>());
+        final ArrayList<String> arrayAdapter = fillAdapter(question, new ArrayList<String>(), true);
+        final ArrayList<String> copyArrayAdapter = fillAdapter(question, new ArrayList<String>(), true);
+        final ArrayList<String> pivotAdapter = fillAdapter(question, new ArrayList<String>(), false);
         LinearLayout layout = new LinearLayout(SurveyActivity.this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.addView(editText);
@@ -591,10 +593,17 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 final TextInputEditText input = ((EditTextItemView) parent).getLabel();
                 input.setText(arrayAdapter.get(position));
                 selectedOption = findPositionInOptions(arrayAdapter.get(position), copyArrayAdapter);
+                setLocationForMaps(selectedOption, pivotAdapter);
                 evaluateAnswers(question, selectedOption);
                 mAlertDialog.dismiss();
             }
         });
+    }
+
+    private void setLocationForMaps(int selectedOption, ArrayList<String> pivotAdapter){
+        String[] selection = pivotAdapter.get(selectedOption).split(";");
+        PreferencesManager.getInstance().setCoordinates(selection[5], selection[4]);
+
     }
 
     private int findPositionInOptions(String value, ArrayList<String> copyArrayAdapter){
@@ -638,19 +647,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         }
     }
 
-    private ArrayAdapter<String> fillAdapter(Question question, ArrayAdapter<String> adapter){
-        RealmList<ResponseComplex> options = question.getOptions();
-        for (ResponseComplex responseComplex: options){
-            RealmList<ResponseItem> responseItems = responseComplex.getResponses();
-            String tag = "";
-            for (ResponseItem responseItem: responseItems)
-                tag = tag.isEmpty() ? responseItem.getValue() : tag +", "+responseItem.getValue();
-            adapter.add(tag);
-        }
-        return adapter;
-    }
-
-    private ArrayList<String> fillAdapter(Question question, ArrayList<String> adapter){
+    private void fillLocalOptions(){
         options = new RealmList<ResponseComplex>();
         options.addAll(StaticValues.getOptions());
         options.addAll(StaticSecondValues.getSecondPageOptions());
@@ -696,18 +693,32 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         options.addAll(StaticFourtyOneValues.getSecondPageOptions());
         options.addAll(StaticFourtyTwoValues.getSecondPageOptions());
         options.addAll(StaticFourtyThreeValues.getSecondPageOptions());
+    }
 
-
-
+    private ArrayList<String> fillAdapter(Question question, ArrayList<String> adapter, boolean needCorrectValue){
         for (ResponseComplex responseComplex: options){
             RealmList<ResponseItem> responseItems = responseComplex.getResponses();
             String tag = "";
             for (ResponseItem responseItem: responseItems)
-                tag = tag.isEmpty() ? responseItem.getValue() : tag +", "+responseItem.getValue();
-            adapter.add(tag);
+                tag = tag.isEmpty() ? responseItem.getValue() : tag +"; "+responseItem.getValue();
+            if (needCorrectValue)
+                adapter.add(getCorrectValue(tag));
+            else
+                adapter.add(tag);
         }
 
         return adapter;
+    }
+
+    private String getCorrectValue(String tagValue){
+        String[] tagValueArray = tagValue.split(";");
+        if (tagValueArray.length == 7){
+            return tagValueArray[2]+tagValueArray[3];
+        }
+        else if (tagValueArray.length == 6) {
+            return tagValueArray[2];
+        }
+        return tagValue;
     }
 
     @SuppressLint("ValidFragment")
@@ -852,6 +863,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         surveySave.setHoraIni(String.valueOf(timeStandIni));
         surveySave.setHoraFin(String.valueOf(System.currentTimeMillis() / 1000));
         surveySave.setTitulo_reporte(surveys.getTitulo_reporte());
+        surveySave.setTitulo_reporte2(surveys.getTitulo_reporte2());
         // Difficult Task
         for (int child = 0; child < container.getChildCount(); child++) {
             View sectionItem = container.getChildAt(child);
