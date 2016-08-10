@@ -29,8 +29,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 import co.colector.R;
+import co.colector.database.DatabaseHelper;
 import co.colector.helpers.PreferencesManager;
+import co.colector.model.Survey;
+import co.colector.session.AppSession;
 
 public class MapsActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -253,7 +258,21 @@ public class MapsActivity extends AppCompatActivity implements
         mMap.setMyLocationEnabled(true);
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setRotateGesturesEnabled(false);
+        addMarkersFromSurveySave();
         progressBarLoader.setVisibility(View.GONE);
+    }
+
+    private void addMarkersFromSurveySave(){
+        ArrayList<Survey> toUnion = DatabaseHelper.getInstance().getSurveysDone(
+                new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+
+        for (Survey survey: toUnion){
+            MarkerOptions options = new MarkerOptions()
+                    .position(new LatLng(Double.parseDouble(survey.getInstanceLatitude()), Double.parseDouble(survey.getInstanceLongitude())))
+                    .title("Im here!");
+            mMap.addMarker(options);
+        }
     }
 
     @Override
