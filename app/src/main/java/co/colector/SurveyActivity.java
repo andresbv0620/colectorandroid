@@ -20,6 +20,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -162,6 +163,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private RealmList<ResponseComplex> options;
 
+    private ArrayList<String> copyArrayAdapter = new ArrayList<String>();
+    private ArrayList<String> pivotAdapter = new ArrayList<String>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,6 +202,24 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             alert.show();
         }
         //}
+    }
+
+    public ArrayList<String> getCopyArrayAdapter(Question question) {
+        if (!copyArrayAdapter.isEmpty())
+            return copyArrayAdapter;
+        else {
+            copyArrayAdapter = fillAdapter(question, new ArrayList<String>(), true);
+            return copyArrayAdapter;
+        }
+    }
+
+    public ArrayList<String> getPivotAdapter(Question question) {
+        if (!pivotAdapter.isEmpty())
+            return pivotAdapter;
+        else {
+            pivotAdapter = fillAdapter(question, new ArrayList<String>(), false);
+            return pivotAdapter;
+        }
     }
 
     private void setUpToolbar(String title) {
@@ -543,56 +565,39 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     @Override
     public void callDynamicDialog(String title, final Question question, final Object parent) {
-
         AlertDialog.Builder myDialog = new AlertDialog.Builder(SurveyActivity.this);
         myDialog.setTitle(title);
-        final EditText editText = new EditText(SurveyActivity.this);
-        final ListView listview = new ListView(SurveyActivity.this);
-        final ArrayList<String> arrayAdapter = fillAdapter(question, new ArrayList<String>(), true);
-        final ArrayList<String> copyArrayAdapter = fillAdapter(question, new ArrayList<String>(), true);
-        final ArrayList<String> pivotAdapter = fillAdapter(question, new ArrayList<String>(), false);
-        LinearLayout layout = new LinearLayout(SurveyActivity.this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(editText);
-        layout.addView(listview);
-        myDialog.setView(layout);
-        CustomAlertAdapter arraySearchAdapter = new CustomAlertAdapter(SurveyActivity.this, arrayAdapter);
-        listview.setAdapter(arraySearchAdapter);
-        editText.addTextChangedListener(new TextWatcher() {
-            public int textlength;
 
-            public void afterTextChanged(Editable s){
+        final ArrayList<String> arrayAdapter = new ArrayList<String>();
+        copyArrayAdapter = getCopyArrayAdapter(question);
+        pivotAdapter = getPivotAdapter(question);
 
-            }
-            public void beforeTextChanged(CharSequence s,
-                                          int start, int count, int after){
+        View toplist = getLayoutInflater().inflate(R.layout.listdialog, null);
+        SearchView searchBar = (SearchView) toplist.findViewById(R.id.search_bar);
+        final ListView listitem = (ListView) toplist.findViewById(R.id.list_item_dialog);
+        listitem.setAdapter(null);
 
+        searchBar.setQueryHint(getString(R.string.buscar));
+        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
             }
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                textlength = editText.getText().length();
-                arrayAdapter.clear();
-                for (int i = 0; i < copyArrayAdapter.size(); i++) {
-                    if (textlength <= copyArrayAdapter.get(i).length()) {
-                        if(copyArrayAdapter.get(i).toLowerCase().contains(editText.getText().toString().toLowerCase().trim())) {
-                            arrayAdapter.add(copyArrayAdapter.get(i));
-                        }
-                    }
-                }
-                listview.setAdapter(new CustomAlertAdapter(SurveyActivity.this, arrayAdapter));
-            }
-        });
-        myDialog.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+            public boolean onQueryTextChange(String newText) {
+                arrayAdapter.clear();
+                for (int i = 0; i < copyArrayAdapter.size(); i++) {
+                    if(copyArrayAdapter.get(i).toLowerCase().contains(newText.toLowerCase().trim())) {
+                        arrayAdapter.add(copyArrayAdapter.get(i));
+                    }
+                }
+                listitem.setAdapter(new CustomAlertAdapter(SurveyActivity.this, arrayAdapter));
+                return false;
             }
         });
 
-        mAlertDialog = myDialog.show();
-
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listitem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> inputParent, View view, int position, long id) {
                 final TextInputEditText input = ((EditTextItemView) parent).getLabel();
@@ -603,6 +608,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 mAlertDialog.dismiss();
             }
         });
+
+        myDialog.setView(toplist);
+        mAlertDialog = myDialog.show();
     }
 
     private void setLocationForMaps(int selectedOption, ArrayList<String> pivotAdapter){
