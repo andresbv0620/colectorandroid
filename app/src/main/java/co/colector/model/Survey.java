@@ -34,7 +34,7 @@ public class Survey extends RealmObject {
     private
     RealmList<IdValue> instanceAnswers = new RealmList<>();
     private boolean uploaded;
-    private String titulo_reporte2;
+    private Long titulo_reporte2;
 
     public Survey() {
         super();
@@ -211,11 +211,11 @@ public class Survey extends RealmObject {
         this.uploaded = uploaded;
     }
 
-    public String getTitulo_reporte2() {
+    public Long getTitulo_reporte2() {
         return titulo_reporte2;
     }
 
-    public void setTitulo_reporte2(String titulo_reporte2) {
+    public void setTitulo_reporte2(Long titulo_reporte2) {
         this.titulo_reporte2 = titulo_reporte2;
     }
 

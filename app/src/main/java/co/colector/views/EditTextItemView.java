@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.QuestionVisibilityRules;
 import co.colector.model.AnswerValue;
+import co.colector.model.ResponseComplex;
 import co.colector.session.AppSession;
 import io.realm.RealmList;
 
@@ -118,15 +120,18 @@ public class EditTextItemView extends FrameLayout {
         visibilityRules = question.getValorVisibility();
         switch (question.getType()) {
             case 1:
+                setLenghtOfEditText(question, false);
                 break;
             case 2:
                 allowsMultilineEditText();
                 break;
             case 8:
                 label.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+                setLenghtOfEditText(question,true);
                 break;
             case 15:
                 label.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                setLenghtOfEditText(question, true);
                 break;
             default:
                 input.setHint(activity.getString(R.string.type_default, String.valueOf(question.getType())));
@@ -199,6 +204,17 @@ public class EditTextItemView extends FrameLayout {
         }
     }
 
+    private void setLenghtOfEditText(Question question, boolean isNumeric){
+        if (question.getMax() != null && !question.getMax().isEmpty()){
+            InputFilter[] filterArray = new InputFilter[1];
+            if (!isNumeric)
+                filterArray[0] = new InputFilter.LengthFilter(Integer.valueOf(question.getMax()));
+            else
+                filterArray[0] = new InputFilter.LengthFilter(Integer.valueOf(question.getMax().length()));
+            label.setFilters(filterArray);
+        }
+    }
+
     /**
      * Validate if the edit text on the View is filled
      *
@@ -261,8 +277,8 @@ public class EditTextItemView extends FrameLayout {
         }
     }
 
-    public IdValue getResponse(int indexValue) {
-         return new IdValue(id, new RealmList<>(new AnswerValue(question.getOptions().get(indexValue).getRecord_id())),
+    public IdValue getResponse(RealmList<ResponseComplex> options, int indexValue) {
+         return new IdValue(id, new RealmList<>(new AnswerValue(options.get(indexValue).getRecord_id())),
                     validation, mType);
     }
 

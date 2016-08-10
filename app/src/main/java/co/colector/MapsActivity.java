@@ -24,6 +24,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -204,10 +205,11 @@ public class MapsActivity extends AppCompatActivity implements
         boolean isLocationSetted = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, "").isEmpty() &&
                 PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY, "").isEmpty();
 
-        if (!isLocationSetted) {
+        if (isLocationSetted) {
             currentLatitude = location.getLatitude();
             currentLongitude = location.getLongitude();
             latLng = new LatLng(currentLatitude, currentLongitude);
+            PreferencesManager.getInstance().setCoordinates(String.valueOf(currentLatitude), String.valueOf(currentLongitude));
         }
         else {
             lat = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, "");
@@ -219,8 +221,6 @@ public class MapsActivity extends AppCompatActivity implements
                 .position(latLng)
                 .title("Im here!")
                 .draggable(true);
-
-        PreferencesManager.getInstance().setCoordinates(String.valueOf(currentLatitude), String.valueOf(currentLongitude));
 
         mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
@@ -246,12 +246,13 @@ public class MapsActivity extends AppCompatActivity implements
         });
 
         mMap.addMarker(options);
-        if (!isLocationSetted)
+        if (isLocationSetted)
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
         else
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)), 15.0f));
         mMap.setMyLocationEnabled(true);
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         progressBarLoader.setVisibility(View.GONE);
     }
 

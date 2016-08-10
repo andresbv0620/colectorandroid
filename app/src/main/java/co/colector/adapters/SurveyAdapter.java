@@ -76,7 +76,9 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
         if (idTab.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY))
             row_description.setText(item.getForm_description());
         else if (idTab.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
-            row_description.setText(item.getAnswer(item.getTitulo_reporte())+item.getTitulo_reporte2());
+            row_description.setText(item.getAnswer(item.getTitulo_reporte())+","+item.getAnswer(item.getTitulo_reporte2()));
+            //row_description.setText(item.getAnswer(item.getTitulo_reporte()));
+            //row_description.setText(item.getAnswer(item.getTitulo_reporte()));
             row_name.setText(item.getForm_name());
             configureDoneRow(item, position);
         }

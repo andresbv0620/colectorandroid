@@ -168,7 +168,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
-        PreferencesManager.getInstance().setCoordinates("", "");
+
+        if (surveys.getInstanceId() == null)
+            PreferencesManager.getInstance().setCoordinates("", "");
+        else
+            PreferencesManager.getInstance().setCoordinates(surveys.getInstanceLatitude(), surveys.getInstanceLongitude());
+
         fillLocalOptions();
         showLoading();
         setUpToolbar(surveys.getForm_name());
@@ -603,7 +608,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     private void setLocationForMaps(int selectedOption, ArrayList<String> pivotAdapter){
         String[] selection = pivotAdapter.get(selectedOption).split(";");
         PreferencesManager.getInstance().setCoordinates(selection[5], selection[4]);
-
     }
 
     private int findPositionInOptions(String value, ArrayList<String> copyArrayAdapter){
@@ -650,7 +654,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     private void fillLocalOptions(){
         options = new RealmList<ResponseComplex>();
         options.addAll(StaticValues.getOptions());
-        options.addAll(StaticSecondValues.getSecondPageOptions());
         options.addAll(StaticSecondValues.getSecondPageOptions());
         options.addAll(StaticThirdValues.getOptions());
         options.addAll(StaticFourValues.getSecondPageOptions());
@@ -846,10 +849,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     private void saveSurvey() {
         SurveySave surveySave = new SurveySave();
         surveySave.setInstanceId(surveys.getForm_id());
+        boolean isFromEdit = false;
         if (surveys.getInstanceId() == null)
             surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex());
-        else
+        else {
+            isFromEdit = true;
             surveySave.setId(surveys.getInstanceId());
+        }
+
         try {
             surveySave.setLatitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, ""));
         } catch (NullPointerException e) {
@@ -860,6 +867,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         } catch (NullPointerException e) {
             surveySave.setLongitude(String.valueOf(0.0f));
         }
+
         surveySave.setHoraIni(String.valueOf(timeStandIni));
         surveySave.setHoraFin(String.valueOf(System.currentTimeMillis() / 1000));
         surveySave.setTitulo_reporte(surveys.getTitulo_reporte());
@@ -877,7 +885,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                             surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
                         }
                         else {
-                            surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse(selectedOption));
+                            surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse(options,selectedOption));
                         }
                     }
                     else if (sectionView instanceof MultipleItemViewContainer)
