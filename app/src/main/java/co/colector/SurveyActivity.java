@@ -22,16 +22,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -45,7 +41,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -65,7 +60,6 @@ import co.colector.listeners.OnEditTextClickedOrFocused;
 import co.colector.model.Autollenar;
 import co.colector.model.IdOptionValue;
 import co.colector.model.Question;
-import co.colector.model.QuestionAsociateForm;
 import co.colector.model.QuestionVisibilityRules;
 import co.colector.model.ResponseComplex;
 import co.colector.model.ResponseItem;
@@ -75,48 +69,6 @@ import co.colector.model.SurveySave;
 import co.colector.session.AppSession;
 import co.colector.utils.GPSTracker;
 import co.colector.utils.PathUtils;
-import co.colector.utils.StaticEightValues;
-import co.colector.utils.StaticEighteenValues;
-import co.colector.utils.StaticElevenValues;
-import co.colector.utils.StaticFifteenValues;
-import co.colector.utils.StaticFifthValues;
-import co.colector.utils.StaticFourValues;
-import co.colector.utils.StaticFourteenValues;
-import co.colector.utils.StaticFourtyOneValues;
-import co.colector.utils.StaticFourtyThreeValues;
-import co.colector.utils.StaticFourtyTwoValues;
-import co.colector.utils.StaticFourtyValues;
-import co.colector.utils.StaticNineValues;
-import co.colector.utils.StaticSecondValues;
-import co.colector.utils.StaticSevenValues;
-import co.colector.utils.StaticSeventeenValues;
-import co.colector.utils.StaticSixValues;
-import co.colector.utils.StaticSixteenValues;
-import co.colector.utils.StaticTenValues;
-import co.colector.utils.StaticThirdValues;
-import co.colector.utils.StaticThirteenValues;
-import co.colector.utils.StaticThirtyEightValues;
-import co.colector.utils.StaticThirtyFiveValues;
-import co.colector.utils.StaticThirtyFourValues;
-import co.colector.utils.StaticThirtyNineValues;
-import co.colector.utils.StaticThirtyOneValues;
-import co.colector.utils.StaticThirtySevenValues;
-import co.colector.utils.StaticThirtySixValues;
-import co.colector.utils.StaticThirtyThreeValues;
-import co.colector.utils.StaticThirtyTwoValues;
-import co.colector.utils.StaticThirtyValues;
-import co.colector.utils.StaticTwelveValues;
-import co.colector.utils.StaticTwentyEightValues;
-import co.colector.utils.StaticTwentyFiveValues;
-import co.colector.utils.StaticTwentyFourValues;
-import co.colector.utils.StaticTwentyNineValues;
-import co.colector.utils.StaticTwentyOneValues;
-import co.colector.utils.StaticTwentySevenValues;
-import co.colector.utils.StaticTwentySixValues;
-import co.colector.utils.StaticTwentyTreeValues;
-import co.colector.utils.StaticTwentyTwoValues;
-import co.colector.utils.StaticTwentyValues;
-import co.colector.utils.StaticValues;
 import co.colector.views.EditTextDatePickerItemView;
 import co.colector.views.EditTextItemView;
 import co.colector.views.FileItemViewContainer;
@@ -568,6 +520,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         AlertDialog.Builder myDialog = new AlertDialog.Builder(SurveyActivity.this);
         myDialog.setTitle(title);
 
+        options = question.getOptions();
+
         final ArrayList<String> arrayAdapter = new ArrayList<String>();
         copyArrayAdapter = getCopyArrayAdapter(question);
         pivotAdapter = getPivotAdapter(question);
@@ -615,7 +569,11 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void setLocationForMaps(int selectedOption, ArrayList<String> pivotAdapter){
         String[] selection = pivotAdapter.get(selectedOption).split(";");
-        PreferencesManager.getInstance().setCoordinates(selection[5], selection[4]);
+        try {
+            PreferencesManager.getInstance().setCoordinates(selection[5], selection[4]);
+        } catch (ArrayIndexOutOfBoundsException e){
+
+        }
     }
 
     private int findPositionInOptions(String value, ArrayList<String> copyArrayAdapter){
@@ -661,49 +619,6 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void fillLocalOptions(){
         options = new RealmList<ResponseComplex>();
-        options.addAll(StaticValues.getOptions());
-        options.addAll(StaticSecondValues.getSecondPageOptions());
-        options.addAll(StaticThirdValues.getOptions());
-        options.addAll(StaticFourValues.getSecondPageOptions());
-        options.addAll(StaticFifthValues.getSecondPageOptions());
-        options.addAll(StaticSixValues.getSecondPageOptions());
-        options.addAll(StaticSevenValues.getSecondPageOptions());
-        options.addAll(StaticEightValues.getSecondPageOptions());
-        options.addAll(StaticNineValues.getSecondPageOptions());
-        options.addAll(StaticTenValues.getSecondPageOptions());
-        options.addAll(StaticElevenValues.getSecondPageOptions());
-        options.addAll(StaticTwelveValues.getSecondPageOptions());
-        options.addAll(StaticThirteenValues.getSecondPageOptions());
-        options.addAll(StaticFourteenValues.getSecondPageOptions());
-        options.addAll(StaticFifteenValues.getSecondPageOptions());
-        options.addAll(StaticSixteenValues.getSecondPageOptions());
-        options.addAll(StaticSeventeenValues.getSecondPageOptions());
-        options.addAll(StaticEighteenValues.getSecondPageOptions());
-        options.addAll(StaticTwentyValues.getSecondPageOptions());
-        options.addAll(StaticTwentyOneValues.getSecondPageOptions());
-        options.addAll(StaticTwentyTwoValues.getSecondPageOptions());
-        options.addAll(StaticTwentyTreeValues.getSecondPageOptions());
-        options.addAll(StaticTwentyFourValues.getSecondPageOptions());
-        options.addAll(StaticTwentyFiveValues.getSecondPageOptions());
-        options.addAll(StaticTwentySixValues.getSecondPageOptions());
-        options.addAll(StaticTwentySevenValues.getSecondPageOptions());
-        options.addAll(StaticTwentyEightValues.getSecondPageOptions());
-        options.addAll(StaticTwentyEightValues.getSecondPageOptions());
-        options.addAll(StaticTwentyNineValues.getSecondPageOptions());
-        options.addAll(StaticThirtyValues.getSecondPageOptions());
-        options.addAll(StaticThirtyOneValues.getSecondPageOptions());
-        options.addAll(StaticThirtyTwoValues.getSecondPageOptions());
-        options.addAll(StaticThirtyThreeValues.getSecondPageOptions());
-        options.addAll(StaticThirtyFourValues.getSecondPageOptions());
-        options.addAll(StaticThirtyFiveValues.getSecondPageOptions());
-        options.addAll(StaticThirtySixValues.getSecondPageOptions());
-        options.addAll(StaticThirtySevenValues.getSecondPageOptions());
-        options.addAll(StaticThirtyEightValues.getSecondPageOptions());
-        options.addAll(StaticThirtyNineValues.getSecondPageOptions());
-        options.addAll(StaticFourtyValues.getSecondPageOptions());
-        options.addAll(StaticFourtyOneValues.getSecondPageOptions());
-        options.addAll(StaticFourtyTwoValues.getSecondPageOptions());
-        options.addAll(StaticFourtyThreeValues.getSecondPageOptions());
     }
 
     private ArrayList<String> fillAdapter(Question question, ArrayList<String> adapter, boolean needCorrectValue){

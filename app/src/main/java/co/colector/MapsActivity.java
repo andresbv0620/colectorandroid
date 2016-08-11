@@ -256,9 +256,9 @@ public class MapsActivity extends AppCompatActivity implements
         else
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)), 15.0f));
         mMap.setMyLocationEnabled(true);
-        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        //mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.getUiSettings().setRotateGesturesEnabled(false);
+        //mMap.getUiSettings().setRotateGesturesEnabled(false);
         addMarkersFromSurveySave();
         progressBarLoader.setVisibility(View.GONE);
     }
