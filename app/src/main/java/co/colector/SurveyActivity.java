@@ -893,6 +893,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 container.removeView(view);
             }
         });
+        alert.setNeutralButton(getString(R.string.ver_photo), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                 Intent intent = new Intent(SurveyActivity.this, SeeImageActivity.class);
+                 intent.putExtra("uriImage",view.url);
+                 startActivity(intent);
+            }
+        });
         alert.show();
     }
 

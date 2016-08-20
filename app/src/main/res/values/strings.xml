@@ -40,7 +40,7 @@
     <string name="login_sign_in">INGRESAR</string>
     <string name="survey_surveys">FORMULARIOS DISPONIBLES</string>
     <string name="survey_survyes_done">FORMULARIOS DILIGENCIADOS</string>
-    <string name="survey_delete_dialog_title">Desea Eliminar la Imagen?</string>
+    <string name="survey_delete_dialog_title">Acciones para la imagen</string>
     <string name="common_erase">Eliminar</string>
     <string name="title_activity_maps">Mapa</string>
     <string name="common_clear">Limpiar</string>
@@ -92,5 +92,6 @@
     <string name="informacion_title">Información</string>
     <string name="informacion_photo_body">Indique el nombre de la fotografía a almacenar</string>
     <string name="must_be_select_name">Debes seleccionar un nombre para la fotografia a tomar</string>
+    <string name="ver_photo">Ver imagen</string>
 
 </resources>

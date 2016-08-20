@@ -30,7 +30,7 @@
     <string name="login_user">User</string>
     <string name="survey_survyes_done">SURVYES DONE</string>
     <string name="survey_surveys">SURVYES</string>
-    <string name="survey_delete_dialog_title">Deleting Picture</string>
+    <string name="survey_delete_dialog_title">Picture actions</string>
     <string name="common_erase">Erase</string>
     <string name="common_clear">Clear</string>
     <string name="common_save">Save</string>
@@ -83,5 +83,6 @@
     <string name="informacion_title">Information</string>
     <string name="informacion_photo_body">Indicate the name of photography store</string>
     <string name="must_be_select_name">You must select a name for the picture taking</string>
+    <string name="ver_photo">View picture</string>
 
 </resources>
