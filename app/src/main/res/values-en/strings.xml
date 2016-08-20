@@ -80,4 +80,8 @@
     <string name="required_error_lenght">Must have between %1$s and %2$s characters</string>
     <string name="required_error_range">Must be between %1$s and %2$s</string>
 
+    <string name="informacion_title">Information</string>
+    <string name="informacion_photo_body">Indicate the name of photography store</string>
+    <string name="must_be_select_name">You must select a name for the picture taking</string>
+
 </resources>

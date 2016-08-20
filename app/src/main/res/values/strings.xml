@@ -89,5 +89,8 @@
     <string name="click_agregar"> (clic aquí para agregar)</string>
     <string name="gps_alert">Este formulario posee una entrada gps, para continuar deberá activarlo</string>
     <string name="location">Localización</string>
+    <string name="informacion_title">Información</string>
+    <string name="informacion_photo_body">Indique el nombre de la fotografía a almacenar</string>
+    <string name="must_be_select_name">Debes seleccionar un nombre para la fotografia a tomar</string>
 
 </resources>

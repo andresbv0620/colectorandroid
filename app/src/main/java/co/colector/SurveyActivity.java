@@ -22,6 +22,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -694,22 +695,45 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        final Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                final EditText edittext = new EditText(this);
+                edittext.setSingleLine(true);
+                edittext.setMaxLines(1);
+                alert.setMessage(getString(R.string.informacion_photo_body));
+                alert.setTitle(getString(R.string.informacion_title));
+                alert.setView(edittext);
+                alert.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String result = edittext.getText().toString();
+                        if (!result.isEmpty()) {
+                            try {
+                                final File photoFile = createImageFile(result);
+                                // Continue only if the File was successfully created
+                                if (photoFile != null) {
+                                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                                            Uri.fromFile(photoFile));
+                                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                                }
+                            } catch (IOException e) {
 
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
+                            }
+                        } else {
+                            Toast.makeText(SurveyActivity.this, getString(R.string.must_be_select_name), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                alert.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                    }
+                });
+
+                alert.show();
         }
     }
 
@@ -717,12 +741,13 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      * Create file to take a picture
      *
      * @return New File address
+     * @param photo Photo name
      * @throws IOException
      */
-    private File createImageFile() throws IOException {
+    private File createImageFile(String photo) throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = photo + "_JPEG_" + timeStamp + "_";
         String storageDir = Environment.getExternalStorageDirectory() + "/collector";
         File dir = new File(storageDir);
         if (!dir.exists()) {
