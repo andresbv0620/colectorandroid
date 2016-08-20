@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import co.colector.listeners.OnUploadSurvey;
 import co.colector.model.Survey;
 import co.colector.session.AppSession;
 import co.colector.settings.AppSettings;
+import co.colector.utils.Utilities;
 
 /**
  * Created by dherrera on 11/10/15.
@@ -128,7 +130,12 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
             imageButtonNotSync.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
-                    callback.onUploadClicked(item, SurveyAdapter.this);
+                    if (Utilities.isNetworkConnected(context)) {
+                        callback.onUploadClicked(item, SurveyAdapter.this);
+                    }
+                    else {
+                        Toast.makeText(context, context.getString(R.string.common_internet_not_available),Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
             configureContainerClickListener(position);

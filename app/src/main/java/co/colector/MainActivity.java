@@ -35,6 +35,7 @@ import co.colector.model.response.SendSurveyResponse;
 import co.colector.network.BusProvider;
 import co.colector.session.AppSession;
 import co.colector.settings.AppSettings;
+import co.colector.utils.Utilities;
 
 public class MainActivity extends AppCompatActivity implements OnDataBaseSave, OnUploadSurvey {
 
@@ -89,8 +90,13 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
                         .setPositiveButton(getString(R.string.common_ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
+                            dialog.dismiss();
+                            if (Utilities.isNetworkConnected(MainActivity.this)) {
                                 uploadSurveyDone();
+                            }
+                            else {
+                                Toast.makeText(MainActivity.this, getString(R.string.common_internet_not_available),Toast.LENGTH_SHORT).show();
+                            }
                             }
                         })
                         .setNegativeButton(getString(R.string.common_cancel), null)
