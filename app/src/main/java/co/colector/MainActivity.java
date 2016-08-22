@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
             itsIncompleteDownload = false;
             getImagesToUpload();
         }
-        else if (response.getResponseCode().equals(201l)){
+        else if (response.getResponseCode().equals(202l)){
             itsIncompleteDownload = true;
             uploadSurveySave();
         }
