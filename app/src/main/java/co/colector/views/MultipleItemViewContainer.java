@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -37,6 +38,8 @@ public class MultipleItemViewContainer extends LinearLayout {
     TextView show;
     @BindView(R.id.collapse)
     TextView collapse;
+    @BindView(R.id.editTextResults)
+    EditText editTextResults;
     private Long id;
     private String validation;
     private int mType;
@@ -115,21 +118,20 @@ public class MultipleItemViewContainer extends LinearLayout {
                 PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay + totalResults);
             }
             finalResult = resultToDisplay;
-            TextView textView = new TextView(getContext());
-            textView.setText(resultToDisplay);
-            container.addView(textView);
+            editTextResults.setText("");
+            editTextResults.setText(resultToDisplay);
         }
     }
 
     private void setOnClickListeners(final String title, final List<IdOptionValue> response) {
         final CallDialogListener listener = (CallDialogListener) activity;
-        label.setOnClickListener(new OnClickListener() {
+        editTextResults.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
             }
         });
-        label.setOnFocusChangeListener(new OnFocusChangeListener() {
+        editTextResults.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus)

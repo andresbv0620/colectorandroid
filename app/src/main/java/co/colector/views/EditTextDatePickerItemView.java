@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import java.util.Calendar;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.colector.R;
@@ -76,12 +78,22 @@ public class EditTextDatePickerItemView extends FrameLayout {
         initValues(question);
         if (previewDefault != null) label.setText(previewDefault);
         label.setFocusable(false);
-        label.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                callback.onEditTextAction(EditTextDatePickerItemView.this);
-            }
-        });
+        if (question.getType() == 7) {
+            label.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callback.onEditTextAction(EditTextDatePickerItemView.this);
+                }
+            });
+        }
+        else if (question.getType() == 17){
+            label.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callback.onEditTextTimePickerAction(EditTextDatePickerItemView.this);
+                }
+            });
+        }
     }
 
     private void requestFocus(View view) {
@@ -110,7 +122,7 @@ public class EditTextDatePickerItemView extends FrameLayout {
 
     public IdValue getResponse() {
         return new IdValue(id, new RealmList<>(new AnswerValue(label.getText().toString())),
-                validation, mType);
+            validation, mType);
     }
 
 

@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +36,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -381,13 +384,20 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 photoItemViewContainer.bind(question, this, surveys.getListAnswers(question.getId()));
                 linear.addView(photoItemViewContainer);
                 break;
-            // date
+            // date and time
+            case 17:
             case 7:
                 EditTextDatePickerItemView editTextDatePickerItemView = new EditTextDatePickerItemView(this);
                 editTextDatePickerItemView.bind(question, surveys.getAnswer(question.getId()), new OnEditTextClickedOrFocused() {
                     @Override
                     public void onEditTextAction(EditTextDatePickerItemView view) {
                         DialogFragment newFragment = new TimePickerFragment(view.getLabel());
+                        newFragment.show(SurveyActivity.this.getFragmentManager(), "timePicker");
+                    }
+
+                    @Override
+                    public void onEditTextTimePickerAction(EditTextDatePickerItemView view) {
+                        DialogFragment newFragment = new TimePickerDialogFragment(view.getLabel());
                         newFragment.show(SurveyActivity.this.getFragmentManager(), "timePicker");
                     }
                 });
@@ -674,6 +684,35 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
             toPrint.setText(day + "/" + month + "/" + year);
+        }
+    }
+    @SuppressLint("ValidFragment")
+    public static class TimePickerDialogFragment extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+        private EditText toPrint;
+
+        private TimePickerDialogFragment(EditText toPrint) {
+            super();
+            this.toPrint = toPrint;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current time as the default values for the picker
+            final Calendar c = Calendar.getInstance();
+            int hour = c.get(Calendar.HOUR_OF_DAY);
+            int minute = c.get(Calendar.MINUTE);
+
+            // Create a new instance of TimePickerDialog and return it
+            return new TimePickerDialog(getActivity(), this, hour, minute, true);
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            if (String.valueOf(minute).length() > 1)
+                toPrint.setText(String.valueOf(hourOfDay)+":"+String.valueOf(minute));
+            else
+                toPrint.setText(String.valueOf(hourOfDay)+":0"+String.valueOf(minute));
         }
     }
 

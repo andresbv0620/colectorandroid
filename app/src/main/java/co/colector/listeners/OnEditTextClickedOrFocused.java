@@ -9,8 +9,14 @@ import co.colector.views.EditTextDatePickerItemView;
 public interface OnEditTextClickedOrFocused {
 
     /**
-     * Ntify the activity to show the date Picker
+     * Notify the activity to show the date Picker
      * @param view clicked
      */
     void onEditTextAction(EditTextDatePickerItemView view);
+
+    /**
+     * Notify the activity to show the time Picker
+     * @param view clicked
+     */
+    void onEditTextTimePickerAction(EditTextDatePickerItemView view);
 }
