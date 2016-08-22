@@ -125,7 +125,6 @@ public class EditTextDatePickerItemView extends FrameLayout {
             validation, mType);
     }
 
-
     private class EditTextWatcher implements TextWatcher {
 
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {

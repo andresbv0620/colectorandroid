@@ -709,10 +709,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            if (String.valueOf(minute).length() > 1)
+            if (String.valueOf(hourOfDay).length() > 1 && String.valueOf(minute).length() > 1)
                 toPrint.setText(String.valueOf(hourOfDay)+":"+String.valueOf(minute));
-            else
+            else if (String.valueOf(hourOfDay).length() > 1 && String.valueOf(minute).length() == 1)
                 toPrint.setText(String.valueOf(hourOfDay)+":0"+String.valueOf(minute));
+            else if (String.valueOf(hourOfDay).length() == 1 && String.valueOf(minute).length() > 1)
+                toPrint.setText("0"+String.valueOf(hourOfDay)+":"+String.valueOf(minute));
+            else
+                toPrint.setText("0"+String.valueOf(hourOfDay)+":0"+String.valueOf(minute));
         }
     }
 

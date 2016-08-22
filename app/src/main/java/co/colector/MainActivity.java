@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     private SurveyAdapter adapter;
     private ArrayList<ImageRequest> answersWithImages;
     private ImageRequest uploadingImage;
+    private boolean itsIncompleteDownload = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,8 +139,17 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      */
     @Subscribe
     public void onSuccessUploadSurvey(SendSurveyResponse response) {
-        if (response.getResponseCode().equals(200l)) getImagesToUpload();
-        else showToastError(response.getResponseDescription());
+        if (response.getResponseCode().equals(200l)) {
+            itsIncompleteDownload = false;
+            getImagesToUpload();
+        }
+        else if (response.getResponseCode().equals(201l)){
+            itsIncompleteDownload = true;
+            uploadSurveySave();
+        }
+        else {
+            showToastError(response.getResponseDescription());
+        }
     }
 
     /**
@@ -182,7 +192,10 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      * After upload the survey to remote update local database
      */
     private void uploadSurveySave() {
-        DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
+        if (!itsIncompleteDownload)
+            DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
+        else
+            onSuccess();
     }
 
     @Override
@@ -201,7 +214,8 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     public void onSuccess() {
         progressDialog.hide();
         if (adapter != null) {
-            surveyToUpload.setUploaded(true);
+            if (!itsIncompleteDownload)
+                surveyToUpload.setUploaded(true);
             adapter.notifyDataSetChanged();
         }
         if (!surveysDone.isEmpty()) {
@@ -215,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     }
 
     private void showToastError(String error) {
+        progressDialog.hide();
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
