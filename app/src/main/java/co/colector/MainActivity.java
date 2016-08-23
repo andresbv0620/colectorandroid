@@ -111,8 +111,6 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
                 break;
 
             case R.id.logout:
-                DatabaseHelper databaseHelper = new DatabaseHelper();
-                databaseHelper.deleteDatabase();
                 PreferencesManager.getInstance().logoutAccount();
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();

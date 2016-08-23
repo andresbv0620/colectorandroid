@@ -20,6 +20,7 @@ import com.crashlytics.android.Crashlytics;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -30,6 +31,7 @@ import co.colector.helpers.PreferencesManager;
 import co.colector.http.ResourceNetwork;
 import co.colector.listeners.OnDataBaseSave;
 import co.colector.model.Survey;
+import co.colector.model.User;
 import co.colector.model.request.GetSurveysRequest;
 import co.colector.model.request.LoginRequest;
 import co.colector.model.response.GetSurveysResponse;
@@ -37,6 +39,7 @@ import co.colector.model.response.LoginResponse;
 import co.colector.network.BusProvider;
 import co.colector.session.AppSession;
 import co.colector.settings.AppSettings;
+import co.colector.utils.PrefsUtils;
 import co.colector.utils.Utilities;
 import io.fabric.sdk.android.Fabric;
 
@@ -93,20 +96,41 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
         mBus.unregister(this);
     }
 
-    public void offlineWorkVal(final List<Survey> offlineSurvey) {
+    public void offlineWorkVal(final String name, final String password) {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setMessage(R.string.login_offline_message)
                 .setPositiveButton(getString(R.string.login_offline_ok), new DialogInterface.OnClickListener() {
-
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        AppSession.getInstance().setSurveyAvailable(offlineSurvey);
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                        List<User> users = PrefsUtils.getInstance().getUserList();
+                        boolean foundIt = false;
+                        User userFound = null;
+                        if (!users.isEmpty()){
+                            for (User u: users){
+                                if (u.getUser().equals(name) && u.getPassword().equals(password)) {
+                                    foundIt = true;
+                                    userFound = u;
+                                    break;
+                                }
+                            }
+                            if (foundIt && userFound != null){
+                                PreferencesManager.getInstance().storeResponseData(userFound.getResponseData());
+                                AppSession.getInstance().setUser(userFound.getResponseData());
+                                AppSession.getInstance().setSurveyAvailable(userFound.getSurveyList());
+                                PreferencesManager.getInstance().setActiveAccount();
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                            else {
+                                offlineWorkDen();
+                            }
+                        }
+                        else {
+                            offlineWorkDen();
+                        }
                     }
-
                 })
                 .setNegativeButton(getString(R.string.common_cancel), null)
                 .show();
@@ -122,10 +146,15 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
     public void doLogin(View view) {
         if (!etUsername.getText().toString().isEmpty() && !etPassword.getText().toString().isEmpty()) {
-            LoginRequest toSend = new LoginRequest(etUsername.getText().toString(), etPassword.getText().toString());
-            toSend.setTabletId(UUID);
-            progressDialogLogin.show();
-            mBus.post(toSend);
+            if (Utilities.isNetworkConnected(this)) {
+                LoginRequest toSend = new LoginRequest(etUsername.getText().toString(), etPassword.getText().toString());
+                toSend.setTabletId(UUID);
+                progressDialogLogin.show();
+                mBus.post(toSend);
+            }
+            else {
+                offlineWorkVal(etUsername.getText().toString(), etPassword.getText().toString());
+            }
         } else {
             Toast.makeText(this, getString(R.string.login_error_empty), Toast.LENGTH_SHORT).show();
         }
@@ -164,6 +193,10 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     @Subscribe
     public void onSuccessSurveysResponse(GetSurveysResponse response){
         AppSession.getInstance().setSurveyAvailable(response.getResponseData());
+        List<User> users = PrefsUtils.getInstance().getUserList();
+        users.add(new User(etUsername.getText().toString(), etPassword.getText().toString(),
+                            AppSession.getInstance().getUser(), response.getResponseData()));
+        PrefsUtils.getInstance().updateList(users);
         DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(),
                 LoginActivity.this); //Save on Realm
     }
