@@ -219,7 +219,9 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     public void onSuccess() {
         progressDialog.hide();
         surveysToUpload--;
+        boolean isInAdapter = false;
         if (adapter != null) {
+            isInAdapter = true;
             if (!itsIncompleteDownload) {
                 surveyToUpload.setUploaded(true);
             }
@@ -227,6 +229,10 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
         }
         if (!surveysDone.isEmpty() && surveysToUpload != 0) {
             uploadSurveyDone();
+        }
+        else {
+            if (!isInAdapter)
+                uploadSurveysAvailable();
         }
     }
 
@@ -245,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
             surveysDone = DatabaseHelper.getInstance().getSurveysDone(
                     new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
             if (!surveysDone.isEmpty()) {
-                uploadSurveyRemote(surveysDone.get(0));
+                uploadSurveyRemote(surveysDone.get(surveysToUpload-1));
             } else uploadSurveysAvailable();
         }
         else {
