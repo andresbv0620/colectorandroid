@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     private ArrayList<ImageRequest> answersWithImages;
     private ImageRequest uploadingImage;
     private boolean itsIncompleteDownload = false;
+    private int surveysToUpload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +94,10 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
                             public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                             if (Utilities.isNetworkConnected(MainActivity.this)) {
+                                surveysDone = DatabaseHelper.getInstance().getSurveysDone(
+                                        new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+                                itsIncompleteDownload = false;
+                                surveysToUpload = surveysDone.size();
                                 uploadSurveyDone();
                             }
                             else {
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     @Override
     public void onUploadClicked(Survey survey, SurveyAdapter adapter) {
         this.adapter = adapter;
-        uploadSurveyRemote(survey);
+        uploadSingleRemoteSurvey(survey);
     }
 
     /**
@@ -213,12 +218,14 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     @Override
     public void onSuccess() {
         progressDialog.hide();
+        surveysToUpload--;
         if (adapter != null) {
-            if (!itsIncompleteDownload)
+            if (!itsIncompleteDownload) {
                 surveyToUpload.setUploaded(true);
+            }
             adapter.notifyDataSetChanged();
         }
-        if (!surveysDone.isEmpty()) {
+        if (!surveysDone.isEmpty() && surveysToUpload != 0) {
             uploadSurveyDone();
         }
     }
@@ -234,13 +241,27 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     }
 
     private void uploadSurveyDone() {
-        surveysDone = DatabaseHelper.getInstance().getSurveysDone(
-                new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
-        if (!surveysDone.isEmpty()) uploadSurveyRemote(surveysDone.get(0));
-        else uploadSurveysAvailable();
+        if (surveysToUpload != 0) {
+            surveysDone = DatabaseHelper.getInstance().getSurveysDone(
+                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+            if (!surveysDone.isEmpty()) {
+                uploadSurveyRemote(surveysDone.get(0));
+            } else uploadSurveysAvailable();
+        }
+        else {
+            uploadSurveysAvailable();
+        }
     }
 
     private void uploadSurveyRemote(Survey survey) {
+        surveyToUpload = survey;
+        progressDialog.show();
+        SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
+        mBus.post(uploadSurvey);
+    }
+
+    private void uploadSingleRemoteSurvey(Survey survey){
+        surveysToUpload = 1;
         surveyToUpload = survey;
         progressDialog.show();
         SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);

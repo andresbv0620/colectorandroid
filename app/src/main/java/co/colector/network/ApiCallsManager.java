@@ -95,7 +95,8 @@ public class ApiCallsManager {
                     .getToken()).enqueue(new Callback<SendSurveyResponse>() {
                 @Override
                 public void onResponse(Call<SendSurveyResponse> call, Response<SendSurveyResponse> response) {
-                    if (response.isSuccessful()) mBus.post(response.body());
+                    if (response.isSuccessful())
+                        mBus.post(response.body());
                 }
 
                 @Override
