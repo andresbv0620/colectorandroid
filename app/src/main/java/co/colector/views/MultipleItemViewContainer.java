@@ -79,7 +79,7 @@ public class MultipleItemViewContainer extends LinearLayout {
         } else label.setText(question.getName());
 
         //Adding extra text info, to notify the user the action to make.
-        label.setText(label.getText() + " " + getContext().getString(R.string.click_agregar));
+        label.setText(label.getText());
         //Bind the show and hide buttons
         bindShowButton();
         bindCollapseButton(collapse);
