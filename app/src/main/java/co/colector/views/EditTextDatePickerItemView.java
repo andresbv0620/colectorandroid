@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import java.util.Calendar;
 
@@ -21,6 +22,7 @@ import co.colector.listeners.OnEditTextClickedOrFocused;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.AnswerValue;
+import co.colector.model.QuestionVisibilityRules;
 import io.realm.RealmList;
 
 /**
@@ -38,6 +40,16 @@ public class EditTextDatePickerItemView extends FrameLayout {
     private Long id;
     private boolean required;
     private int mType;
+    @BindView(R.id.container)
+    FrameLayout container;
+    private boolean isGoneByRules;
+
+    public RealmList<QuestionVisibilityRules> getVisibilityRules() {
+        return visibilityRules;
+    }
+
+    private RealmList<QuestionVisibilityRules> visibilityRules;
+
 
     public TextInputEditText getLabel() {
         return label;
@@ -60,6 +72,9 @@ public class EditTextDatePickerItemView extends FrameLayout {
         this.required = question.getRequerido();
         this.mType = question.getType();
         input.setHint(question.getName());
+        container.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
+        isGoneByRules = question.getValorVisibility().isEmpty();
+        visibilityRules = question.getValorVisibility();
         if (question.getoculto()) this.setVisibility(GONE);
         if (required) {
             label.addTextChangedListener(new EditTextDatePickerItemView.EditTextWatcher());
@@ -77,6 +92,8 @@ public class EditTextDatePickerItemView extends FrameLayout {
     public void bind(Question question, @Nullable String previewDefault, final OnEditTextClickedOrFocused callback) {
         initValues(question);
         if (previewDefault != null) label.setText(previewDefault);
+        if (Boolean.parseBoolean(question.getSoloLectura()))
+            label.setEnabled(false);
         label.setFocusable(false);
         if (question.getType() == 7) {
             label.setOnClickListener(new OnClickListener() {
@@ -136,6 +153,11 @@ public class EditTextDatePickerItemView extends FrameLayout {
         public void afterTextChanged(Editable editable) {
             validateField();
         }
+    }
+
+    public void setVisibilityLabel(boolean isVisible) {
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 }
 

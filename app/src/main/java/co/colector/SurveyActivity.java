@@ -288,6 +288,71 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                                 }
                             }
                         }
+                        else if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextDatePickerItemView) {
+                            EditTextDatePickerItemView element = (EditTextDatePickerItemView) sectionItemContainer.getChildAt(sectionItemIndex);
+                            if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()) {
+                                QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
+                                if (questionVisibilityRules.getElemento().equals(idParentRule)) {
+                                    if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase())) {
+                                        element.setVisibilityLabel(true);
+                                    } else {
+                                        element.setVisibilityLabel(false);
+                                    }
+                                }
+                            }
+                        }
+                        else if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof FileItemViewContainer) {
+                            FileItemViewContainer element = (FileItemViewContainer) sectionItemContainer.getChildAt(sectionItemIndex);
+                            if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()) {
+                                QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
+                                if (questionVisibilityRules.getElemento().equals(idParentRule)) {
+                                    if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase())) {
+                                        element.setVisibilityLabel(true);
+                                    } else {
+                                        element.setVisibilityLabel(false);
+                                    }
+                                }
+                            }
+                        }
+                        else if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof MultipleItemViewContainer) {
+                            MultipleItemViewContainer element = (MultipleItemViewContainer) sectionItemContainer.getChildAt(sectionItemIndex);
+                            if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()) {
+                                QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
+                                if (questionVisibilityRules.getElemento().equals(idParentRule)) {
+                                    if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase())) {
+                                        element.setVisibilityLabel(true);
+                                    } else {
+                                        element.setVisibilityLabel(false);
+                                    }
+                                }
+                            }
+                        }
+                        else if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof PhotoItemViewContainer) {
+                            PhotoItemViewContainer element = (PhotoItemViewContainer) sectionItemContainer.getChildAt(sectionItemIndex);
+                            if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()) {
+                                QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
+                                if (questionVisibilityRules.getElemento().equals(idParentRule)) {
+                                    if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase())) {
+                                        element.setVisibilityLabel(true);
+                                    } else {
+                                        element.setVisibilityLabel(false);
+                                    }
+                                }
+                            }
+                        }
+                        else if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof SignatureItemViewContainer) {
+                            SignatureItemViewContainer element = (SignatureItemViewContainer) sectionItemContainer.getChildAt(sectionItemIndex);
+                            if (element.getVisibilityRules() != null && !element.getVisibilityRules().isEmpty()) {
+                                QuestionVisibilityRules questionVisibilityRules = element.getVisibilityRules().first();
+                                if (questionVisibilityRules.getElemento().equals(idParentRule)) {
+                                    if (questionVisibilityRules.getValor().toUpperCase().equals(value.toUpperCase())) {
+                                        element.setVisibilityLabel(true);
+                                    } else {
+                                        element.setVisibilityLabel(false);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -576,6 +641,11 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
         myDialog.setView(toplist);
         mAlertDialog = myDialog.show();
+    }
+
+    @Override
+    public void callDynamicVisibilityRules(String value, Long idParentRule, SectionItemView sectionItemView) {
+        validateVisibilityRules(value,idParentRule,sectionItemView);
     }
 
     private void setLocationForMaps(int selectedOption, ArrayList<String> pivotAdapter){

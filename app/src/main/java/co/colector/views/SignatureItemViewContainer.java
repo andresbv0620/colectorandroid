@@ -17,6 +17,7 @@ import co.colector.listeners.OnAddSignatureListener;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.AnswerValue;
+import co.colector.model.QuestionVisibilityRules;
 import io.realm.RealmList;
 
 /**
@@ -26,6 +27,8 @@ import io.realm.RealmList;
 
 public class SignatureItemViewContainer extends LinearLayout {
 
+    @BindView(R.id.container)
+    LinearLayout container;
     @BindView(R.id.label)
     TextView label;
     @BindView(R.id.button)
@@ -37,6 +40,13 @@ public class SignatureItemViewContainer extends LinearLayout {
     private OnAddSignatureListener internalCallback;
     private boolean required;
     private int mType;
+
+    private boolean isGoneByRules;
+    public RealmList<QuestionVisibilityRules> getVisibilityRules() {
+        return visibilityRules;
+    }
+
+    private RealmList<QuestionVisibilityRules> visibilityRules;
 
     public SignatureItemViewContainer(Context context) {
         super(context);
@@ -56,6 +66,9 @@ public class SignatureItemViewContainer extends LinearLayout {
         validation = question.getValidacion();
         label.setText(question.getName());
         button.setText(question.getName());
+        container.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
+        isGoneByRules = question.getValorVisibility().isEmpty();
+        visibilityRules = question.getValorVisibility();
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,8 +92,6 @@ public class SignatureItemViewContainer extends LinearLayout {
             return new IdValue(id, new RealmList<>(new AnswerValue(((SignatureItemView)
                     signatureContainer.getChildAt(0)).url)), validation, mType);
         else return new IdValue(id, new RealmList<>(new AnswerValue("")), validation, mType);
-
-
     }
 
     public boolean validateField() {
@@ -91,6 +102,11 @@ public class SignatureItemViewContainer extends LinearLayout {
         }
         label.setTextColor(ContextCompat.getColor(getContext(), R.color.red_label_error_color));
         return false;
+    }
+
+    public void setVisibilityLabel(boolean isVisible) {
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
 }

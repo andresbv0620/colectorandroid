@@ -18,6 +18,7 @@ import co.colector.listeners.OnAddFileListener;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.AnswerValue;
+import co.colector.model.QuestionVisibilityRules;
 import io.realm.RealmList;
 
 /**
@@ -27,6 +28,8 @@ import io.realm.RealmList;
 
 public class FileItemViewContainer extends LinearLayout {
 
+    @BindView(R.id.container)
+    LinearLayout container;
     @BindView(R.id.label)
     TextView label;
     @BindView(R.id.button)
@@ -41,6 +44,13 @@ public class FileItemViewContainer extends LinearLayout {
     public final static int ERROR_PATH = 0x00;
     private final static int IMAGE_PATH = 0x01;
     private final static int PDF_PATH = 0x02;
+
+    private boolean isGoneByRules;
+    public RealmList<QuestionVisibilityRules> getVisibilityRules() {
+        return visibilityRules;
+    }
+
+    private RealmList<QuestionVisibilityRules> visibilityRules;
 
     public FileItemViewContainer(Context context) {
         super(context);
@@ -66,6 +76,9 @@ public class FileItemViewContainer extends LinearLayout {
         mType = question.getType();
         validation = question.getValidacion();
         label.setText(question.getName());
+        container.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
+        isGoneByRules = question.getValorVisibility().isEmpty();
+        visibilityRules = question.getValorVisibility();
         button.setText(question.getName());
         button.setOnClickListener(new OnClickListener() {
             @Override
@@ -150,4 +163,8 @@ public class FileItemViewContainer extends LinearLayout {
         return url.substring((slashIndex + 1), dotIndex);
     }
 
+    public void setVisibilityLabel(boolean isVisible) {
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
 }

@@ -22,6 +22,7 @@ import co.colector.model.IdOptionValue;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.AnswerValue;
+import co.colector.model.QuestionVisibilityRules;
 import io.realm.RealmList;
 
 /**
@@ -50,7 +51,20 @@ public class MultipleItemViewContainer extends LinearLayout {
     private String finalResult = "";
 
     private ArrayList<String> selectedResults = new ArrayList<>();
+
+    private Question question;
     private SectionItemView sectionItemView;
+
+    public Question getQuestion(){
+        return question;
+    }
+
+    private boolean isGoneByRules;
+    public RealmList<QuestionVisibilityRules> getVisibilityRules() {
+        return visibilityRules;
+    }
+
+    private RealmList<QuestionVisibilityRules> visibilityRules;
 
     public MultipleItemViewContainer(Context context, SectionItemView sectionItemView) {
         super(context);
@@ -67,11 +81,17 @@ public class MultipleItemViewContainer extends LinearLayout {
     public void bind(ArrayList<IdOptionValue> response, Question question,
                      @Nullable List<String> previewDefault) {
         if (response.isEmpty()) return;
+        if (Boolean.parseBoolean(question.getSoloLectura()))
+            container.setEnabled(false);
         this.mType = question.getType();
         this.id = question.getId();
         this.validation = question.getValidacion();
         required = question.getRequerido();
         this.options = response;
+        container.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
+        isGoneByRules = question.getValorVisibility().isEmpty();
+        visibilityRules = question.getValorVisibility();
+        this.question = question;
         setOnClickListeners(question.getName(), response);
         //Bind the title
         if (required) {
@@ -203,5 +223,10 @@ public class MultipleItemViewContainer extends LinearLayout {
             }
         }
         fillData(values);
+    }
+
+    public void setVisibilityLabel(boolean isVisible) {
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 }

@@ -20,4 +20,6 @@ public interface CallDialogListener {
     void callDialog(String title, List<IdOptionValue> response, Object parent, int type, SectionItemView sectionItemView);
 
     void callDynamicDialog(String title, Question question, Object parent);
+
+    void callDynamicVisibilityRules(String value, Long idParentRule, SectionItemView sectionItemView);
 }

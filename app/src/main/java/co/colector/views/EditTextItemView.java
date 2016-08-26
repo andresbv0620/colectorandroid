@@ -97,7 +97,7 @@ public class EditTextItemView extends FrameLayout {
         input.setHint(question.getName());
         if (question.getoculto()) this.setVisibility(GONE);
         if (required) {
-            label.addTextChangedListener(new EditTextWatcher());
+            label.addTextChangedListener(new EditTextWatcher(activity, question.getId(), sectionItemView));
             input.setHint(activity.getString(R.string.required_field, question.getName()));
         }
     }
@@ -111,7 +111,8 @@ public class EditTextItemView extends FrameLayout {
     public void bind(Question question, @Nullable String previewDefault) {
         this.question = question;
         initValues(question);
-        DatabaseHelper helper = new DatabaseHelper();
+        if (Boolean.parseBoolean(question.getSoloLectura()))
+            label.setEnabled(false);
         if (previewDefault != null) label.setText(previewDefault);
         else if (question.getDefecto() != null && !question.getDefecto().equals(""))
             label.setText(question.getDefecto());
@@ -142,6 +143,8 @@ public class EditTextItemView extends FrameLayout {
     public void bind(final Question question, final List<IdOptionValue> response,
                      @Nullable String previewDefault) {
         initValues(question);
+        if (Boolean.parseBoolean(question.getSoloLectura()))
+            label.setEnabled(false);
         this.response = response;
         if (previewDefault != null)
             if (mType != 4) {
@@ -319,6 +322,15 @@ public class EditTextItemView extends FrameLayout {
     }
 
     private class EditTextWatcher implements TextWatcher {
+        private Activity activity;
+        private Long idParentRule;
+        private SectionItemView sectionItemView;
+
+        public EditTextWatcher(Activity activity, Long idParentRule, SectionItemView sectionItemView){
+            this.activity = activity;
+            this.idParentRule = idParentRule;
+            this.sectionItemView = sectionItemView;
+        }
 
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         }
@@ -328,6 +340,8 @@ public class EditTextItemView extends FrameLayout {
 
         public void afterTextChanged(Editable editable) {
             validateField();
+            final CallDialogListener listener = (CallDialogListener) activity;
+            listener.callDynamicVisibilityRules(editable.toString(), idParentRule, sectionItemView);
         }
     }
 }
