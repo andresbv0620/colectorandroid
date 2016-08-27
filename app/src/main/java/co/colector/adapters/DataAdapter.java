@@ -27,11 +27,13 @@ public class DataAdapter extends ArrayAdapter<String> implements Filterable {
     private List<String> opciones;
     private List<String> filteredData;
     private List<String> mSelected = new ArrayList<>();
+    private String valuesSelected;
 
-    public DataAdapter(Context context, int resource, List<String> objects) {
+    public DataAdapter(Context context, int resource, List<String> objects, String valuesSelected) {
         super(context, resource, objects);
         opciones = objects;
         filteredData = objects;
+        this.valuesSelected = valuesSelected;
     }
 
     public List<String> getItemsSelected() {
@@ -116,6 +118,12 @@ public class DataAdapter extends ArrayAdapter<String> implements Filterable {
         if (!PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS,"").isEmpty()){
             if (PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS,"").contains(filteredData.get(position))){
                 holder.checkBox.setChecked(true);
+            }
+        }
+
+        if (valuesSelected != null && !valuesSelected.isEmpty()){
+            if (valuesSelected.contains(filteredData.get(position))){
+                  holder.checkBox.setChecked(true);
             }
         }
 

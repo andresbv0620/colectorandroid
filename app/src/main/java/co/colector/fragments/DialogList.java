@@ -38,6 +38,7 @@ public class DialogList extends DialogFragment {
     private static int type;
     private ArrayAdapter<String> arrayAdapter;
     public static Question question;
+    public static String defaultValues;
 
     public static DialogList newInstance(Activity context, String title, ArrayList<IdOptionValue> itms,
                                          int type_dialog) {
@@ -48,6 +49,21 @@ public class DialogList extends DialogFragment {
 
         Bundle args = new Bundle();
         
+        DialogList fragment = new DialogList();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static DialogList newInstance(Activity context, String title, ArrayList<IdOptionValue> itms,
+                                         int type_dialog, String defaultValuesString) {
+        activity = context;
+        items = itms;
+        titulo = title;
+        type = type_dialog;
+        defaultValues = defaultValuesString;
+
+        Bundle args = new Bundle();
+
         DialogList fragment = new DialogList();
         fragment.setArguments(args);
         return fragment;
@@ -99,7 +115,7 @@ public class DialogList extends DialogFragment {
                 }
             });
         } else {
-            arrayAdapter = new DataAdapter(activity, R.layout.itemdialog, options);
+            arrayAdapter = new DataAdapter(activity, R.layout.itemdialog, options, defaultValues);
             listitem.setAdapter(arrayAdapter);
             // Set the action buttons
             builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {

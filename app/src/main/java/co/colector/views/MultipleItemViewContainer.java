@@ -60,6 +60,7 @@ public class MultipleItemViewContainer extends LinearLayout {
     }
 
     private boolean isGoneByRules;
+    private String deafultValues;
     public RealmList<QuestionVisibilityRules> getVisibilityRules() {
         return visibilityRules;
     }
@@ -103,8 +104,12 @@ public class MultipleItemViewContainer extends LinearLayout {
         //Bind the show and hide buttons
         bindShowButton();
         bindCollapseButton(collapse);
-        if (previewDefault != null) {
+        if (previewDefault != null && ! previewDefault.isEmpty()) {
             bindDefaultSelected(previewDefault);
+        }
+        else {
+            deafultValues = !question.getDefecto().isEmpty() ? question.getDefecto() : "";
+            editTextResults.setText(deafultValues);
         }
         if (question.getoculto()) this.setVisibility(GONE);
     }
@@ -119,9 +124,6 @@ public class MultipleItemViewContainer extends LinearLayout {
                 finalResult = finalResult.isEmpty() ? result : finalResult + ", " + result;
                 resultToDisplay = resultToDisplay.isEmpty() ? result : resultToDisplay + ", " + result;
             }
-            //FinalResult = "mazda,hola,como"
-            //result = "hola,como"
-
             String[] wordsToDelete = finalResult.split(",");
             ArrayList<String> wordsToRealDelete = new ArrayList<String>();
 
@@ -148,14 +150,14 @@ public class MultipleItemViewContainer extends LinearLayout {
         editTextResults.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
+                listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView, deafultValues);
             }
         });
         editTextResults.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus)
-                    listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView);
+                    listener.callDialog(title, response, MultipleItemViewContainer.this, 1, sectionItemView, deafultValues);
             }
         });
     }

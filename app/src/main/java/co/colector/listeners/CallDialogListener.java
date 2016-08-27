@@ -17,7 +17,7 @@ public interface CallDialogListener {
      * @param parent object that called the dialog
      * @param type Single-option dialog or multiple-option
      */
-    void callDialog(String title, List<IdOptionValue> response, Object parent, int type, SectionItemView sectionItemView);
+    void callDialog(String title, List<IdOptionValue> response, Object parent, int type, SectionItemView sectionItemView, String defaultValue);
 
     void callDynamicDialog(String title, Question question, Object parent);
 

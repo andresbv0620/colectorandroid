@@ -561,9 +561,9 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     @Override
-    public void callDialog(String title, List<IdOptionValue> response, final Object parent, int type, final SectionItemView sectionItemView) {
+    public void callDialog(String title, List<IdOptionValue> response, final Object parent, int type, final SectionItemView sectionItemView, String defaultValue) {
         DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
-                new ArrayList<>(response), type);
+                new ArrayList<>(response), type, defaultValue);
         dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
         if (parent instanceof EditTextItemView) {
             final TextInputEditText input = ((EditTextItemView) parent).getLabel();

@@ -51,6 +51,7 @@ public class EditTextItemView extends FrameLayout {
     private boolean isGoneByRules;
     private Question question;
     private SectionItemView sectionItemView;
+    private String defaultValue;
 
     public Question getQuestion(){
         return question;
@@ -151,7 +152,14 @@ public class EditTextItemView extends FrameLayout {
                 label.setText(previewDefault);
             } else {
                 label.setText(getResponseValue(previewDefault));
+        }
+        else {
+            if (question.getDefecto() != null && !question.getDefecto().isEmpty()) {
+                label.setFocusable(false);
+                defaultValue = !question.getDefecto().isEmpty() ? question.getDefecto() : "";
+                label.setText(defaultValue);
             }
+        }
         label.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
         isGoneByRules = question.getValorVisibility().isEmpty();
         visibilityRules = question.getValorVisibility();
@@ -159,7 +167,7 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView);
+                listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView, defaultValue);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -167,7 +175,7 @@ public class EditTextItemView extends FrameLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && !alreadyShow) {
                     alreadyShow = true;
-                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView);
+                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView, defaultValue);
                 }
             }
         });
