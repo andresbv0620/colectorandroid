@@ -76,12 +76,20 @@ public class SurveyAdapter extends ArrayAdapter<Survey> {
         row_name.setText(item.getForm_name());
 
         if (idTab.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY))
+        {
             row_description.setText(item.getForm_description());
-        else if (idTab.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
-            row_description.setText(item.getAnswer(item.getTitulo_reporte())+","+item.getAnswer(item.getTitulo_reporte2()));
+        }
+        else if (idTab.equals(AppSettings.TAB_ID_DONE_SURVEY))
+        {
+            String titulo1 = item.getAnswer(item.getTitulo_reporte());
+            titulo1 = titulo1 == null? "": titulo1;
+            String titulo2 = item.getAnswer(item.getTitulo_reporte2());
+            titulo2 = titulo2 == null ? "": titulo2;
+
             //row_description.setText(item.getAnswer(item.getTitulo_reporte()));
             //row_description.setText(item.getAnswer(item.getTitulo_reporte()));
-            row_name.setText(item.getForm_name());
+            row_name.setText(titulo1+", "+titulo2);
+            row_description.setText(item.getForm_name());
             configureDoneRow(item, position);
         }
 

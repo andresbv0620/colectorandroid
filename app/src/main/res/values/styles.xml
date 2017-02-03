@@ -6,6 +6,7 @@
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="android:textColor">@color/text_color</item>
+        <item name="textColorError">@color/text_color</item>
     </style>
 
     <!--Circular ProgressView-->
@@ -79,5 +80,9 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
+    <!--Colors for repeatable sections-->
+    <color name="pair_option">#ffffff</color>
+    <color name="odd_option">#dddddd</color>
 
 </resources>

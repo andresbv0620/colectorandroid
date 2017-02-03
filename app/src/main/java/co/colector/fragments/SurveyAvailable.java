@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,19 +80,24 @@ public class SurveyAvailable extends Fragment {
     }
 
     private void setupTabs() {
-        if (idTabs.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY)) {
+        if (idTabs.equals(AppSettings.TAB_ID_AVAILABLE_SURVEY))
+        {
             AppSession.getInstance().cleanSurveyAvailable();
             toPrint = new ArrayList<>(AppSession.getInstance().getSurveyAvailable());
-        } else if (idTabs.equals(AppSettings.TAB_ID_DONE_SURVEY)) {
-
+        }
+        else if (idTabs.equals(AppSettings.TAB_ID_DONE_SURVEY))
+        {
             ArrayList<Survey> toUnion = DatabaseHelper.getInstance().getSurveysDone(
-                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable())
+            );
 
             toPrint = DatabaseHelper.getInstance().getSurveysUploaded(
-                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable())
+            );
 
             for (Survey survey : toUnion)
                 toPrint.add(survey);
+            Collections.sort(toPrint, new DateComparator());
         }
     }
 
@@ -106,4 +114,14 @@ public class SurveyAvailable extends Fragment {
             }
         });
     }
+
+    private class DateComparator implements Comparator<Survey>
+    {
+        @Override
+        public int compare(Survey survey, Survey t1) {
+            return t1.getInstanceHoraFin().compareTo(survey.getInstanceHoraFin());
+        }
+    }
 }
+
+

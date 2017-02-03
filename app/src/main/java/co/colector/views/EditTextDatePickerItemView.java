@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.Calendar;
 
@@ -35,14 +37,17 @@ public class EditTextDatePickerItemView extends FrameLayout {
     TextInputEditText label;
     @BindView(R.id.input_edit_text)
     TextInputLayout input;
+
+
     private Activity activity;
     private String validation;
     private Long id;
     private boolean required;
     private int mType;
     @BindView(R.id.container)
-    FrameLayout container;
+    RelativeLayout container;
     private boolean isGoneByRules;
+    private int sectionCount;
 
     public RealmList<QuestionVisibilityRules> getVisibilityRules() {
         return visibilityRules;
@@ -158,6 +163,18 @@ public class EditTextDatePickerItemView extends FrameLayout {
     public void setVisibilityLabel(boolean isVisible) {
         container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
         container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setSectionCount(int sectionCount) {
+        this.sectionCount = sectionCount;
+        if(sectionCount%2==0)
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.pair_option));
+        }
+        else
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.odd_option));
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,10 +7,18 @@
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_view_hint"
+        android:textColor="@color/primary"
+        />
+
     <android.support.design.widget.TextInputLayout
         android:id="@+id/input_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_hint"
         app:errorEnabled="true">
 
         <android.support.design.widget.TextInputEditText
@@ -19,8 +27,10 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             android:textSize="@dimen/regular_text_size"
-            tools:hint="Numero de documento"
+
+            tools:hint="a\na"
+
             tools:text="12345678" />
 
     </android.support.design.widget.TextInputLayout>
-</FrameLayout>
+</RelativeLayout>

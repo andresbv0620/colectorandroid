@@ -6,14 +6,21 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
+
+import com.bumptech.glide.load.resource.bitmap.ImageVideoBitmapDecoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +40,11 @@ public class DialogList extends DialogFragment {
     private static String titulo;
     private ListView listitem;
     private SearchView searchBar;
+
+    private TextInputLayout otherTextLayout;
+    private TextInputEditText otherEditText;
+    private ImageButton buttonOk;
+
     private ListSelectorDialogListener listener;
     private ListMultipleSelectorListener listener_multiple;
     private static int type;
@@ -102,9 +114,18 @@ public class DialogList extends DialogFragment {
         searchBar = (SearchView) toplist.findViewById(R.id.search_bar);
         listitem = (ListView) toplist.findViewById(R.id.list_item_dialog);
 
+        otherTextLayout = (TextInputLayout) toplist.findViewById(R.id.other_text_layout);
+        otherEditText = (TextInputEditText) toplist.findViewById(R.id.other_edit_text);
+
+        otherTextLayout.setHint(activity.getString(R.string.other_field));
+
+        buttonOk = (ImageButton) toplist.findViewById(R.id.button_ok);
+
         List<String> options = populateDialog();
 
-        if (type == 0){
+        if (type == 0)
+        {
+            // type == 0 Implica que es una pregunta de selección múltiple con única respuesta
             arrayAdapter = new ArrayAdapter<>(activity, R.layout.itemdialog, R.id.textOpcion, options);
             listitem.setAdapter(arrayAdapter);
             listitem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -114,7 +135,17 @@ public class DialogList extends DialogFragment {
                     dismiss();
                 }
             });
-        } else {
+            buttonOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (listener != null) listener.setItemSelected(otherEditText.getText().toString());
+                    dismiss();
+                }
+            });
+        }
+        else
+        {
+            // type != 1 (usualmente 1) Implica que es una pregunta de selección múltiple con múltiples respuestas
             arrayAdapter = new DataAdapter(activity, R.layout.itemdialog, options, defaultValues);
             listitem.setAdapter(arrayAdapter);
             // Set the action buttons
@@ -123,14 +154,21 @@ public class DialogList extends DialogFragment {
                 public void onClick(DialogInterface dialog, int id) {
                     // User clicked OK, so save the mSelectedItems results somewhere
                     // or return them to the component that opened the dialog
-                    if (listener_multiple != null) listener_multiple.setItemsSelected(
-                            ((DataAdapter) arrayAdapter).getItemsSelected(), question);
+                    if (listener_multiple != null) addOtherToListResponses();
                     dismiss();
                 }
             })
             .setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
+                    dismiss();
+                }
+            });
+
+            buttonOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (listener_multiple != null) addOtherToListResponses();
                     dismiss();
                 }
             });
@@ -158,7 +196,9 @@ public class DialogList extends DialogFragment {
     public List<String> populateDialog(){
         ArrayList<String> list = new ArrayList<>();
         for (IdOptionValue item: items)
+        {
             list.add(item.getValue());
+        }
         return list;
     }
 
@@ -175,5 +215,17 @@ public class DialogList extends DialogFragment {
 
     public interface ListMultipleSelectorListener {
         void setItemsSelected(List<String> items, Question question);
+    }
+
+    private void addOtherToListResponses()
+    {
+        List<String> itemsSelected =((DataAdapter) arrayAdapter).getItemsSelected();
+        if (!otherEditText.getText().toString().isEmpty())
+        {
+            itemsSelected.add(otherEditText.getText().toString());
+        }
+        listener_multiple.setItemsSelected(
+                itemsSelected, question
+        );
     }
 }

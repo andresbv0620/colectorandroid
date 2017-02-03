@@ -12,33 +12,34 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.colector.R;
-import co.colector.database.DatabaseHelper;
 import co.colector.listeners.CallDialogListener;
+import co.colector.model.AnswerValue;
 import co.colector.model.IdOptionValue;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.QuestionVisibilityRules;
-import co.colector.model.AnswerValue;
 import co.colector.model.ResponseComplex;
-import co.colector.session.AppSession;
+import co.colector.utils.Parser;
 import io.realm.RealmList;
 
 /**
  * @author Gabriel Rodriguez
  * @version 1.0
  */
-public class EditTextItemView extends FrameLayout {
+public class FormulaItemView extends FrameLayout {
 
     @BindView(R.id.label_edit_text)
     TextInputEditText label;
@@ -60,6 +61,9 @@ public class EditTextItemView extends FrameLayout {
     private String defaultValue;
     private int sectionCount;
 
+    Parser parser;
+    TextWatcher textWatcher;
+
     public Question getQuestion(){
         return question;
     }
@@ -70,10 +74,11 @@ public class EditTextItemView extends FrameLayout {
 
     private RealmList<QuestionVisibilityRules> visibilityRules;
 
-    public EditTextItemView(Context context, SectionItemView sectionItemView) {
+    public FormulaItemView(Context context, SectionItemView sectionItemView) {
         super(context);
         this.sectionItemView = sectionItemView;
         init(context);
+        Log.i("Class", "This is a Formula View");
     }
 
     public Long getIdentifier() {
@@ -171,6 +176,8 @@ public class EditTextItemView extends FrameLayout {
                 }
                 break;
         }
+        addListeners();
+        evalFormula();
     }
 
     public void bind(final Question question, final List<IdOptionValue> response,
@@ -199,7 +206,7 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView, defaultValue);
+                listener.callDialog(question.getName(), response, FormulaItemView.this, 0, sectionItemView, defaultValue);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -207,7 +214,7 @@ public class EditTextItemView extends FrameLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && !alreadyShow) {
                     alreadyShow = true;
-                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView, defaultValue);
+                    listener.callDialog(question.getName(), response, FormulaItemView.this, 0, sectionItemView, defaultValue);
                 }
             }
         });
@@ -233,9 +240,10 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDynamicDialog(question.getName(), question, EditTextItemView.this);
+                listener.callDynamicDialog(question.getName(), question, FormulaItemView.this);
             }
         });
+
     }
 
     public void removeFocusability() {
@@ -321,7 +329,6 @@ public class EditTextItemView extends FrameLayout {
     }
 
     public IdValue getResponse() {
-        // Closed Question one answer
         if (mType == 4)
         {
             IdValue idValue = new IdValue(id, new RealmList<>(getResponseId()), validation, mType);
@@ -340,14 +347,8 @@ public class EditTextItemView extends FrameLayout {
     }
 
     public IdValue getResponse(RealmList<ResponseComplex> options, int indexValue) {
-        try {
-            return new IdValue(id, new RealmList<>(new AnswerValue(options.get(indexValue).getRecord_id())),
+         return new IdValue(id, new RealmList<>(new AnswerValue(options.get(indexValue).getRecord_id())),
                     validation, mType);
-        }catch (IndexOutOfBoundsException ioe)
-        {
-            // Patch for Dynamic question in case options lenght is 0
-            return null;
-        }
     }
 
     private AnswerValue getResponseId() {
@@ -422,13 +423,112 @@ public class EditTextItemView extends FrameLayout {
         }
     }
 
-    public String getInputText()
+    private void addListeners()
     {
-        return label.getText()+"";
+        textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                evalFormula();
+            }
+        };
+        ViewGroup sectionItemContainer = sectionItemView.sectionItemsContainer;
+        parser = new Parser();
+        String expression = getQuestion().getDescription();
+        Log.i("Expression of Formula", expression);
+        LinkedList <String> variables = parser.extractVariables(expression);
+        for (String var: variables)
+        {
+            for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
+                // Text
+                if (sectionView instanceof EditTextItemView)
+                {
+                    long question_id = ((EditTextItemView) sectionView).getQuestion().getId();
+                    if (Long.parseLong(var) == question_id)
+                    {
+                        Log.i("Added Listener", ((question_id + "")));
+                        ((EditTextItemView) sectionView).addTextListenerToInput(textWatcher);
+                        break;
+                    }
+                }
+                else if (sectionView instanceof FormulaItemView)
+                {
+                    long question_id = ((FormulaItemView) sectionView).getQuestion().getId();
+                    if (Long.parseLong(var) == question_id)
+                    {
+                        Log.i("Added Listener", ((question_id + "")));
+                        ((FormulaItemView) sectionView).addTextListenerToInput(textWatcher);
+                        break;
+                    }
+                }
+            }
+        }
     }
+
+    private void evalFormula()
+    {
+//        Log.i("The Formula is", getQuestion().getDescription());
+        ViewGroup sectionItemContainer = sectionItemView.sectionItemsContainer;
+        parser = new Parser();
+        String expression = getQuestion().getDescription();
+        Log.i("Expression", expression);
+        LinkedList <String> variables = parser.extractVariables(expression);
+
+        for (String var: variables)
+        {
+            for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
+                // Text
+                if (sectionView instanceof EditTextItemView)
+                {
+                    long question_id = ((EditTextItemView) sectionView).getQuestion().getId();
+//                    Log.i("Question", ((question_id + "")));
+                    if (Long.parseLong(var) == question_id)
+                    {
+                        expression = expression.replace("#"+var, ((EditTextItemView) sectionView).getInputText());
+                        break;
+                    }
+
+                }
+                else if (sectionView instanceof FormulaItemView)
+                {
+                    long question_id = ((FormulaItemView) sectionView).getQuestion().getId();
+//                    Log.i("Question", ((question_id + "")));
+                    if (Long.parseLong(var) == question_id)
+                    {
+                        expression = expression.replace("#"+var, ((FormulaItemView) sectionView).getInputText());
+                        break;
+                    }
+
+                }
+            }
+        }
+        Log.i("Modified Expression", expression);
+        parser.setExpression(expression);
+        DecimalFormat df = new DecimalFormat("0.00");
+        label.setText(df.format(parser.eval())+"");
+    }
+
 
     public void addTextListenerToInput(TextWatcher tw)
     {
         label.addTextChangedListener(tw);
     }
+
+    public String getInputText()
+    {
+        return label.getText()+"";
+    }
+
 }
+

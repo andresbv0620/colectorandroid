@@ -34,6 +34,8 @@ public class SendSurveyRequest {
         this.horaini = survey.getInstanceHoraIni();
         this.horafin = survey.getInstanceHoraFin();
         this.setResponsesData(survey.getInstanceAnswers());
+
+
     }
 
     public List<IdInputValue> getResponses() {
@@ -45,24 +47,40 @@ public class SendSurveyRequest {
     }
 
     private void setResponsesData(List<IdValue> responsesData) {
+
         responses = new ArrayList<>();
-        for (IdValue item : responsesData) {
+        for (IdValue item : responsesData)
+        {
             switch (item.getmType()) {
                 case 6:
                 case 14:
                 case 16:
                     for (AnswerValue answerValue : item.getValue())
-                    if (!answerValue.getValue().equals("")) {
-                        int lastIndex = answerValue.getValue().length();
-                        int slashIndex = answerValue.getValue().lastIndexOf("/");
-                        responses.add(new IdInputValue(String.valueOf(item.getId()), ColectorApplication.getInstance().getString(R.string.image_name_format,
-                                NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
-                                answerValue.getValue().substring((slashIndex + 1), lastIndex))));
+                    {
+
+                        if (!answerValue.getValue().equals(""))
+                        {
+                            int lastIndex = answerValue.getValue().length();
+                            int slashIndex = answerValue.getValue().lastIndexOf("/");
+                            responses.add(new IdInputValue(
+                                    String.valueOf(item.getIdQuestion()),
+                                    ColectorApplication.getInstance().getString(R.string.image_name_format,
+                                    NetworkUtils.getAndroidID(ColectorApplication.getInstance()),
+                                    answerValue.getValue().substring((slashIndex + 1), lastIndex)),
+                                    item.getSectionId())
+                            );
+                        }
                     }
                     break;
                 default:
                     for (AnswerValue answerValue : item.getValue())
-                        responses.add(new IdInputValue(String.valueOf(item.getId()), answerValue.getValue()));
+                    {
+                        responses.add(new IdInputValue(
+                                String.valueOf(item.getIdQuestion()),
+                                answerValue.getValue(),
+                                item.getSectionId())
+                        );
+                    }
             }
 
         }

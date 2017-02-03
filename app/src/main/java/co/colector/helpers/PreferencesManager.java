@@ -16,6 +16,7 @@ public class PreferencesManager {
     public static final String LATITUDE_SURVEY = "colector.co.com.collector.LATITUDE_SURVEY";
     public static final String LONGITUDE_SURVEY = "colector.co.com.collector.LONGITUDE_SURVEY";
     public static final String OPTIONS_SELECTEDS = "colector.co.com.collector.OPTIONS_SELECTEDS";
+    public static final String AVAILABLE_SURVEYS = "colector.co.com.collector.AVAILABLE_SURVEYS";
     private static final String PREF_NAME = "colector.co.com.collector.COLECTOR_PREFERENCES";
     private static PreferencesManager sInstance;
     private final SharedPreferences mPreferences;
@@ -82,6 +83,13 @@ public class PreferencesManager {
         edit.putString(LATITUDE_SURVEY, "0.0");
         edit.putString(LONGITUDE_SURVEY, "0.0");
         edit.commit();
+    }
+
+    public void setAvailableSurveys(String availableSurveys)
+    {
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString(AVAILABLE_SURVEYS, availableSurveys);
+        edit.apply();
     }
 
     public SharedPreferences.Editor getEditor() {

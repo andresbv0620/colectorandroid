@@ -6,15 +6,17 @@ package co.colector.model;
 public class IdInputValue {
     private String input_id;
     private String value;
+    private String section;
 
     public IdInputValue(){
         super();
     }
 
-    public IdInputValue(String input_id, String value) {
+    public IdInputValue(String input_id, String value, int sectionId) {
         super();
         this.input_id = input_id;
         this.value = value;
+;        this.section = sectionId+"";
     }
 
     public String getId() {
@@ -31,5 +33,13 @@ public class IdInputValue {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "IdInputValue{" +
+                "input_id=" + input_id +
+                ", value='" + value + '\''+
+                '}';
     }
 }

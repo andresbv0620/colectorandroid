@@ -17,4 +17,6 @@
     <dimen name="loading_size">48dp</dimen>
     <!--Photo Dimensions-->
     <dimen name="photo_dimensions">64dp</dimen>
+    <!--Dialog Dimensions-->
+    <dimen name="dialog_height">200dp</dimen>
 </resources>

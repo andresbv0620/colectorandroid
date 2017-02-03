@@ -46,6 +46,7 @@ public class FileItemViewContainer extends LinearLayout {
     private final static int PDF_PATH = 0x02;
 
     private boolean isGoneByRules;
+    private int sectionCount;
     public RealmList<QuestionVisibilityRules> getVisibilityRules() {
         return visibilityRules;
     }
@@ -166,5 +167,17 @@ public class FileItemViewContainer extends LinearLayout {
     public void setVisibilityLabel(boolean isVisible) {
         container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
         container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setSectionCount(int sectionCount) {
+        this.sectionCount = sectionCount;
+        if(sectionCount%2==0)
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.pair_option));
+        }
+        else
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.odd_option));
+        }
     }
 }

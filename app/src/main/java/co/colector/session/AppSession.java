@@ -1,6 +1,10 @@
 package co.colector.session;
 
+import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import co.colector.database.DatabaseHelper;
 import co.colector.helpers.PreferencesManager;
@@ -28,7 +32,8 @@ public class AppSession {
      *
      * @return
      */
-    public static synchronized AppSession getInstance() {
+    public static synchronized AppSession getInstance()
+    {
         if (singletonObject == null) {
             singletonObject = new AppSession();
         }
@@ -40,12 +45,57 @@ public class AppSession {
     }
 
 
-    public List<Survey> getSurveyAvailable() {
-        return surveyAvailable == null ? DatabaseHelper.getInstance().getSurveys() : surveyAvailable;
+    public List<Survey> getSurveyAvailable()
+    {
+        // Patch to fix issue when there is not Surveys Available
+        if(surveyAvailable == null)
+        {
+            surveyAvailable = new ArrayList<Survey>();
+            List<Survey> allSurveys = DatabaseHelper.getInstance().getSurveys();
+            String surveyIds = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.AVAILABLE_SURVEYS, "");
+            StringTokenizer st = new StringTokenizer(surveyIds, ",");
+            while(st.hasMoreTokens())
+            {
+                String stringSurveyId = st.nextToken();
+                try{
+                    long surveyId = Long.parseLong(stringSurveyId);
+                    boolean added = false;
+                    for(Survey s: allSurveys)
+                    {
+                        if(s.getForm_id() == surveyId)
+                        {
+                            surveyAvailable.add(s);
+                            added = true;
+                            break;
+                        }
+                    }
+                    if(!added)
+                    {
+                        Log.i("SurveyID Not added", "Survey id "+ stringSurveyId+ "Does not exists");
+                    }
+                }catch (NumberFormatException nfe)
+                {
+                    Log.i("converting Survey Id", stringSurveyId+" Is not a Number");
+                }
+            }
+        }
+        return surveyAvailable;
+//        return surveyAvailable == null ? DatabaseHelper.getInstance().getSurveys() : surveyAvailable;
     }
 
-    public void setSurveyAvailable(List<Survey> surveyAvailable) {
+    public void setSurveyAvailable(List<Survey> surveyAvailable)
+    {
         this.surveyAvailable = surveyAvailable;
+
+        // Store IDs Survey
+        String surveysAvailableIds = "";
+        int i=0;
+        for (Survey s: surveyAvailable)
+        {
+            surveysAvailableIds += s.getForm_id()+",";
+            i++;
+        }
+        PreferencesManager.getInstance().setAvailableSurveys(surveysAvailableIds);
     }
 
     public ResponseData getUser() {
@@ -87,10 +137,17 @@ public class AppSession {
     }
 
     public void cleanSurveyAvailable() {
-        if (surveyAvailable != null && !surveyAvailable.isEmpty()) {
-            for (Survey survey : surveyAvailable) {
-                survey.setInstanceId(null);
-                survey.setInstanceAnswer(null);
+        if (surveyAvailable != null && !surveyAvailable.isEmpty())
+        {
+            try {
+                for (Survey survey : surveyAvailable) {
+                    Log.i("Cleaning Survey", survey.getForm_name());
+                    survey.setInstanceId(null);
+                    survey.setInstanceAnswer(null);
+                }
+            } catch (IllegalStateException ise)
+            {
+                Log.i("Realm Exception", "Changing Realm data can only be done from inside a transaction.");
             }
         }
     }

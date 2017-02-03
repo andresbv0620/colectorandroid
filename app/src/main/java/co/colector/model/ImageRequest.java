@@ -71,7 +71,7 @@ public class ImageRequest {
                 case 16:
                     for (AnswerValue answerValue : answer.getValue())
                         if (!answerValue.getValue().equals(""))
-                            answerWithImages.add(new ImageRequest(survey, answerValue, answer.getId()));
+                            answerWithImages.add(new ImageRequest(survey, answerValue, answer.getIdQuestion()));
                     break;
                 default:
                     break;

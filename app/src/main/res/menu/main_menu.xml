@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+        <!--<item-->
+            <!--android:id="@+id/mSaveFile"-->
+            <!--android:icon="@drawable/ic_reupload"-->
+            <!--app:showAsAction="ifRoom"-->
+            <!--android:title="Save">-->
+        <!--</item>-->
         <item
             android:id="@+id/mSyncronize"
             android:icon="@drawable/ic_sync"
@@ -14,7 +20,13 @@
             android:title="Menu">
                 <menu>
                         <group android:id="@+id/dogsGroup">
+                                <item
+                                    android:id="@+id/mSaveFile"
+                                    android:title="@string/send_db_email"
+                                    android:titleCondensed="@string/send_db_short">
+                                </item>
                                 <item android:titleCondensed="@string/logout" android:title="@string/logout" android:id="@+id/logout"></item>
+
                         </group>
                 </menu>
         </item>

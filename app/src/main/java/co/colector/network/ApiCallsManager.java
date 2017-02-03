@@ -11,6 +11,7 @@ import co.colector.model.ImageResponse;
 import co.colector.model.request.GetSurveysRequest;
 import co.colector.model.request.LoginRequest;
 import co.colector.model.request.SendSurveyRequest;
+import co.colector.model.response.ErrorResponse;
 import co.colector.model.response.GetSurveysResponse;
 import co.colector.model.response.LoginResponse;
 import co.colector.model.response.SendSurveyResponse;
@@ -62,8 +63,10 @@ public class ApiCallsManager {
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onFailure(Call<LoginResponse> call, Throwable t)
+            {
                 Log.d(TAG, "Failure do Login");
+                mBus.post(new ErrorResponse(0, ""));
             }
         });
     }
@@ -82,6 +85,7 @@ public class ApiCallsManager {
 
                 @Override
                 public void onFailure(Call<GetSurveysResponse> call, Throwable t) {
+                    mBus.post(new ErrorResponse(0, ""));
                     Log.d(TAG, "Failure do surveys");
                 }
             });
@@ -91,8 +95,11 @@ public class ApiCallsManager {
     @Subscribe
     public void uploadSurveys(SendSurveyRequest uploadSurvey) {
         if (AppSession.getInstance().getUser() != null) {
-            mApiClient.uploadSurveys(uploadSurvey, AppSession.getInstance().getUser()
-                    .getToken()).enqueue(new Callback<SendSurveyResponse>() {
+            mApiClient.uploadSurveys(
+                    uploadSurvey,
+                    AppSession.getInstance().getUser().getToken()
+            ).enqueue(new Callback<SendSurveyResponse>()
+            {
                 @Override
                 public void onResponse(Call<SendSurveyResponse> call, Response<SendSurveyResponse> response) {
                     if (response.isSuccessful())

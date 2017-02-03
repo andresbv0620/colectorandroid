@@ -1,6 +1,7 @@
 package co.colector.model;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,9 @@ public class Survey extends RealmObject {
         super();
     }
 
-    public Survey(Survey survey, SurveySave answers) {
+    public Survey(Survey survey, SurveySave answers)
+    {
+        Log.i("Respuestas", new ArrayList<>(answers.getResponses()).toString());
         form_id = survey.getForm_id();
         form_name = survey.getForm_name();
         form_description = survey.getForm_description();
@@ -182,7 +185,7 @@ public class Survey extends RealmObject {
     String getAnswer(@Nullable Long id) {
         if (id == null || instanceAnswers == null) return null;
         for (IdValue item : instanceAnswers) {
-            if (item.getId().equals(id)) {
+            if (item.getIdQuestion().equals(id)) {
                 return item.getValue().get(0).getValue();
             }
         }
@@ -194,10 +197,14 @@ public class Survey extends RealmObject {
     List<String> getListAnswers(Long id) {
         if (instanceAnswers == null) return null;
         List<String> listAnswers = new ArrayList<>();
-        for (IdValue item : instanceAnswers) {
-            if (item.getId().equals(id)) {
+        for (IdValue item : instanceAnswers)
+        {
+            if (item.getIdQuestion().equals(id))
+            {
                 for (AnswerValue answer : item.getValue())
+                {
                     listAnswers.add(answer.getValue());
+                }
             }
         }
         return listAnswers;

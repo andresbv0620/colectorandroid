@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -54,6 +55,7 @@ public class MultipleItemViewContainer extends LinearLayout {
 
     private Question question;
     private SectionItemView sectionItemView;
+    private int sectionCount;
 
     public Question getQuestion(){
         return question;
@@ -117,7 +119,8 @@ public class MultipleItemViewContainer extends LinearLayout {
     public void fillData(List<String> results) {
         // Bind the items
         container.removeAllViews();
-        if (!results.isEmpty()) {
+        if (!results.isEmpty())
+        {
             selectedResults = new ArrayList<>(results);
             String resultToDisplay = "";
             for (String result : selectedResults) {
@@ -132,9 +135,13 @@ public class MultipleItemViewContainer extends LinearLayout {
                     wordsToRealDelete.add(wordsToDelete[i]);
             }
             String totalResults = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.OPTIONS_SELECTEDS, "");
-            if (totalResults.isEmpty()) {
+            if (totalResults.isEmpty())
+            {
+                Log.i("TAG", resultToDisplay);
                 PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay);
-            } else {
+            }
+            else
+            {
                 for (String s : wordsToRealDelete)
                     totalResults = totalResults.replace(s, "");
                 PreferencesManager.getInstance().storeOptionsSelecteds(resultToDisplay + totalResults);
@@ -200,7 +207,9 @@ public class MultipleItemViewContainer extends LinearLayout {
         RealmList<AnswerValue> responses = new RealmList<>();
         if (!selectedResults.isEmpty())
             for (String item : selectedResults)
+            {
                 responses.add(getSelectedId(item));
+            }
         return new IdValue(id, responses, validation, mType);
     }
 
@@ -230,5 +239,17 @@ public class MultipleItemViewContainer extends LinearLayout {
     public void setVisibilityLabel(boolean isVisible) {
         container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
         container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setSectionCount(int sectionCount) {
+        this.sectionCount = sectionCount;
+        if(sectionCount%2==0)
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.pair_option));
+        }
+        else
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.odd_option));
+        }
     }
 }

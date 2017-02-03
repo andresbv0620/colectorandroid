@@ -10,6 +10,8 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -25,6 +27,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,7 +45,10 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,8 +67,10 @@ import co.colector.listeners.OnAddPhotoListener;
 import co.colector.listeners.OnAddSignatureListener;
 import co.colector.listeners.OnDataBaseSave;
 import co.colector.listeners.OnEditTextClickedOrFocused;
+import co.colector.model.AnswerValue;
 import co.colector.model.Autollenar;
 import co.colector.model.IdOptionValue;
+import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.QuestionVisibilityRules;
 import co.colector.model.ResponseComplex;
@@ -76,6 +84,7 @@ import co.colector.utils.PathUtils;
 import co.colector.views.EditTextDatePickerItemView;
 import co.colector.views.EditTextItemView;
 import co.colector.views.FileItemViewContainer;
+import co.colector.views.FormulaItemView;
 import co.colector.views.MultipleItemViewContainer;
 import co.colector.views.PhotoItemView;
 import co.colector.views.PhotoItemViewContainer;
@@ -85,7 +94,6 @@ import io.realm.RealmList;
 
 public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave, OnAddPhotoListener,
         CallDialogListener {
-
     private Survey surveys = AppSession.getInstance().getCurrentSurvey();
     private PhotoItemViewContainer activePhotoContainer;
     private FileItemViewContainer activeFileContainer;
@@ -137,7 +145,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         fillLocalOptions();
         showLoading();
         setUpToolbar(surveys.getForm_name());
-        setupGPS();
+        // setupGPS();
         configureInitTime();
         buildSurvey();
     }
@@ -402,13 +410,36 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void buildSurvey() {
         container.removeAllViews();
-        for (Section section : surveys.getSections()) {
+        int i = 0;
+        for ( Section section : surveys.getSections())
+        {
             SectionItemView sectionItem = new SectionItemView(this);
-            sectionItem.bind(section.getName());
+            // sectionItem.bind(section.getName());
+            // Added for binding an id to a section
+            sectionItem.bind(section.getName(), i);
+            sectionItem.setRepetible(section.isRepetible());
             buildSection(section, sectionItem.sectionItemsContainer, sectionItem);
             container.addView(sectionItem);
+            // Add answers to a section
+            sectionItem.sectionItemsAddOther.setTag(i);
+            sectionItem.sectionItemsAddOther.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // buildSection(section, sectionItem.sectionItemsContainer, sectionItem);
+                    intermetiateBuildSectionFunction((int)(view.getTag()));
+                }
+            });
+            i++;
         }
         hideLoading();
+    }
+
+    private void intermetiateBuildSectionFunction(int pos)
+    {
+        Section section = surveys.getSections().get(pos);
+        SectionItemView sectionItem = (SectionItemView) container.getChildAt(pos);
+        sectionItem.increaseSectionCount();
+        buildSection(section, sectionItem.sectionItemsContainer, sectionItem);
     }
 
     private void buildSection(Section section, LinearLayout linear, SectionItemView sectionItemView) {
@@ -419,7 +450,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
 
     private void buildQuestion(final Question question, LinearLayout linear, SectionItemView sectionItemView) {
-        switch (question.getType()) {
+        switch (question.getType())
+        {
             // Input Text
             case 1:
             case 2:
@@ -427,6 +459,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             default:
                 EditTextItemView editItemView = new EditTextItemView(this, sectionItemView);
                 editItemView.bind(question, surveys.getAnswer(question.getId()));
+                editItemView.setSectionCount(sectionItemView.getSectionCount());
                 linear.addView(editItemView);
                 break;
             // Option Spinner
@@ -434,6 +467,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             case 4:
                 EditTextItemView editTextItemView = new EditTextItemView(this, sectionItemView);
                 editTextItemView.bind(question, question.getResponses(), surveys.getAnswer(question.getId()));
+                editTextItemView.setSectionCount(sectionItemView.getSectionCount());
                 linear.addView(editTextItemView);
                 break;
             //Multiple opcion
@@ -441,12 +475,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 MultipleItemViewContainer multipleItemViewContainer = new MultipleItemViewContainer(this, sectionItemView);
                 multipleItemViewContainer.bind(new ArrayList<>(question.getResponses()), question,
                         surveys.getListAnswers(question.getId()));
+                multipleItemViewContainer.setSectionCount(sectionItemView.getSectionCount());
                 linear.addView(multipleItemViewContainer);
                 break;
             // picture
             case 6:
                 PhotoItemViewContainer photoItemViewContainer = new PhotoItemViewContainer(this);
                 photoItemViewContainer.bind(question, this, surveys.getListAnswers(question.getId()));
+                photoItemViewContainer.setSectionCount(sectionItemView.getSectionCount());
                 linear.addView(photoItemViewContainer);
                 break;
             // date and time
@@ -466,18 +502,22 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         newFragment.show(SurveyActivity.this.getFragmentManager(), "timePicker");
                     }
                 });
+                editTextDatePickerItemView.setSectionCount(sectionItemView.getSectionCount());
                 linear.addView(editTextDatePickerItemView);
                 break;
 
             // dynamic form
-            case 10: EditTextItemView editTextDynamicView = new EditTextItemView(this, sectionItemView);
-                     editTextDynamicView.bind(question);
-                     linear.addView(editTextDynamicView);
-                     break;
+            case 10:
+                EditTextItemView editTextDynamicView = new EditTextItemView(this, sectionItemView);
+                editTextDynamicView.bind(question);
+                editTextDynamicView.setSectionCount(sectionItemView.getSectionCount());
+                linear.addView(editTextDynamicView);
+                break;
 
             // GPS
             case 12:
                 isGpsCanBeClicked = true;
+                setupGPS();
                 break;
 
             // signature
@@ -491,6 +531,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         dispatchTakeSignatureIntent(question.getId());
                     }
                 });
+                signatureItemViewContainer.setSectionCount(sectionItemView.getSectionCount());
                 linear.addView(signatureItemViewContainer);
                 break;
             // File
@@ -509,7 +550,15 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         showAlertDialog(container, view);
                     }
                 }, surveys.getListAnswers(question.getId()));
+                fileItemViewContainer.setSectionCount(sectionItemView.getSectionCount());
                 linear.addView(fileItemViewContainer);
+                break;
+            // Formula
+            case 13:
+                FormulaItemView formulaItemView = new FormulaItemView(this, sectionItemView);
+                formulaItemView.bind(question, surveys.getAnswer(question.getId()));
+                formulaItemView.setSectionCount(sectionItemView.getSectionCount());
+                linear.addView(formulaItemView);
                 break;
 
         }
@@ -565,7 +614,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
                 new ArrayList<>(response), type, defaultValue);
         dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
-        if (parent instanceof EditTextItemView) {
+        if (parent instanceof EditTextItemView)
+        {
             final TextInputEditText input = ((EditTextItemView) parent).getLabel();
             dialog.setListDialogListener(new DialogList.ListSelectorDialogListener() {
                 @Override
@@ -577,7 +627,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                         ((EditTextItemView) parent).setIsShow();
                 }
             });
-        } else if (parent instanceof MultipleItemViewContainer) {
+        }
+        else if (parent instanceof MultipleItemViewContainer) {
 //            final LinearLayout container = ((MultipleItemViewContainer) parent).getContainer();
             final MultipleItemViewContainer view = ((MultipleItemViewContainer) parent);
             dialog.setListener_multiple(new DialogList.ListMultipleSelectorListener() {
@@ -598,14 +649,17 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
         options = question.getOptions();
 
-        final ArrayList<String> arrayAdapter = new ArrayList<String>();
+
+
+//        final ArrayList<String> arrayAdapter = getCopyArrayAdapter(question);
         copyArrayAdapter = getCopyArrayAdapter(question);
+        final ArrayList<String> arrayAdapter = new ArrayList<String>(copyArrayAdapter);
         pivotAdapter = getPivotAdapter(question);
 
         View toplist = getLayoutInflater().inflate(R.layout.listdialog, null);
         SearchView searchBar = (SearchView) toplist.findViewById(R.id.search_bar);
         final ListView listitem = (ListView) toplist.findViewById(R.id.list_item_dialog);
-        listitem.setAdapter(null);
+        listitem.setAdapter(new CustomAlertAdapter(SurveyActivity.this, arrayAdapter));
 
         searchBar.setQueryHint(getString(R.string.buscar));
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -617,8 +671,11 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             @Override
             public boolean onQueryTextChange(String newText) {
                 arrayAdapter.clear();
+                Log.i("ArrayAdapter size", ""+arrayAdapter.size());
+                Log.i("ArrayAdaptercopy size", ""+copyArrayAdapter.size());
                 for (int i = 0; i < copyArrayAdapter.size(); i++) {
                     if(copyArrayAdapter.get(i).toLowerCase().contains(newText.toLowerCase().trim())) {
+                        Log.i("Adapter", copyArrayAdapter.get(i));
                         arrayAdapter.add(copyArrayAdapter.get(i));
                     }
                 }
@@ -650,7 +707,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private void setLocationForMaps(int selectedOption, ArrayList<String> pivotAdapter){
         String[] selection = pivotAdapter.get(selectedOption).split(";");
-        try {
+        try
+        {
             PreferencesManager.getInstance().setCoordinates(selection[5], selection[4]);
         } catch (ArrayIndexOutOfBoundsException e){
 
@@ -659,8 +717,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
     private int findPositionInOptions(String value, ArrayList<String> copyArrayAdapter){
         int counter = 0;
-        for (String s: copyArrayAdapter){
-            if (s.equals(value)){
+        for (String s: copyArrayAdapter)
+        {
+            if (s.equals(value))
+            {
                 return counter;
             }
             counter++;
@@ -671,9 +731,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     private void evaluateAnswers(Question question, int which){
         RealmList<ResponseItem> responseItems = options.get(which).getResponses();
         RealmList<Autollenar> autollenarRealmList = question.getAsociate_form().get(0).getAutollenar();
-        for (Autollenar autollenar: autollenarRealmList){
-            for (ResponseItem responseItem: responseItems){
-                if (String.valueOf(responseItem.getInput_id()).equals(String.valueOf(autollenar.getEntrada_fuente()))){
+        for (Autollenar autollenar: autollenarRealmList)
+        {
+            for (ResponseItem responseItem: responseItems)
+            {
+                if (String.valueOf(responseItem.getInput_id()).equals(String.valueOf(autollenar.getEntrada_fuente())))
+                {
                     autoFillValues(autollenar.getEntrada_destino(), responseItem.getValue());
                     break;
                 }
@@ -682,18 +745,23 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     private void autoFillValues(Long inputId, String value){
-        for (int child = 0; child < container.getChildCount(); child++) {
+        for (int child = 0; child < container.getChildCount(); child++)
+        {
             View sectionItem = container.getChildAt(child);
-            if (sectionItem instanceof SectionItemView) {
-                    ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
-                    for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
-                        if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView) {
-                            EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
-                            if (element.getQuestion().getId().equals(inputId)){
-                                element.setValue(value);
-                            }
+            if (sectionItem instanceof SectionItemView)
+            {
+                ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++)
+                {
+                    if (sectionItemContainer.getChildAt(sectionItemIndex) instanceof EditTextItemView)
+                    {
+                        EditTextItemView element = (EditTextItemView) sectionItemContainer.getChildAt(sectionItemIndex);
+                        if (element.getQuestion().getId().equals(inputId))
+                        {
+                            element.setValue(value);
                         }
                     }
+                }
             }
         }
     }
@@ -753,7 +821,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
-            toPrint.setText(day + "/" + month + "/" + year);
+            toPrint.setText(day + "/" + (month+1) + "/" + year);
         }
     }
     @SuppressLint("ValidFragment")
@@ -822,21 +890,27 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 alert.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String result = edittext.getText().toString();
-                        if (!result.isEmpty()) {
+//                        Commented to allow empty tags
+//                        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//                        String imageFileName = "JPEG_" + timeStamp + "_";
+//                        result = result;
+//                        if (!result.isEmpty()) {
                             try {
                                 final File photoFile = createImageFile(result);
                                 // Continue only if the File was successfully created
                                 if (photoFile != null) {
-                                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                            Uri.fromFile(photoFile));
+                                    takePictureIntent.putExtra(
+                                            MediaStore.EXTRA_OUTPUT,
+                                            Uri.fromFile(photoFile)
+                                    );
                                     startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
                                 }
                             } catch (IOException e) {
 
                             }
-                        } else {
-                            Toast.makeText(SurveyActivity.this, getString(R.string.must_be_select_name), Toast.LENGTH_SHORT).show();
-                        }
+//                        } else {
+//                            Toast.makeText(SurveyActivity.this, getString(R.string.must_be_select_name), Toast.LENGTH_SHORT).show();
+//                        }
                     }
                 });
 
@@ -858,15 +932,57 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
      * @throws IOException
      */
     private File createImageFile(String photo) throws IOException {
+        String sdcard_location = "";
+        if (Build.VERSION.SDK_INT > 18)
+        {
+            File[] extenalfiledirs = getExternalFilesDirs(null);
+            for (File f: extenalfiledirs)
+            {
+//                boolean is_read_only = android.os.Environment.getStorageState(f). equals(Environment.MEDIA_MOUNTED_READ_ONLY);
+                Log.i("Flies Writable", f.getAbsolutePath()+ " ");
+                if (f.getAbsolutePath().contains("sdcard"))
+                {
+                    sdcard_location = f.getAbsolutePath();
+                    break;
+                }
+            }
+        }
+
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = photo + "_JPEG_" + timeStamp + "_";
-        String storageDir = Environment.getExternalStorageDirectory() + "/collector";
-        File dir = new File(storageDir);
-        if (!dir.exists()) {
-            dir.mkdir();
+//        String storageDir = Environment.getExternalStorageDirectory() + "/collector";
+//        Log.i("Storage", storageDir);
+//        File dir = new File(storageDir);
+        File dir = null;
+        try{
+            if (sdcard_location.isEmpty())
+            {
+                String secStore = System.getenv("SECONDARY_STORAGE");
+                if (secStore.isEmpty())
+                {
+                    throw new IOException();
+                }
+                dir = new File(secStore, "/colector");
+            }
+            else
+            {
+                dir = new File(sdcard_location);
+            }
         }
-        File image = new File(storageDir + "/" + imageFileName + ".jpg");
+        catch (IOException ioe)
+        {
+            dir = Environment.getExternalStoragePublicDirectory("/colector");
+        }
+        Log.i("Directory", dir.getAbsolutePath());
+        if (!dir.exists()) {
+            Log.i("Dir not exist", "Creating");
+            boolean  created = dir.mkdir();
+            Log.i("created:", created+"");
+        }
+//        File image = new File(storageDir + "/" + imageFileName + ".jpg");
+        File image = new File(dir, imageFileName + ".jpg");
+        Log.i("Storage Externa", image.getAbsolutePath());
         AppSession.getInstance().setCurrentPhotoPath(image.getAbsolutePath());
         return image;
     }
@@ -876,6 +992,53 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             switch (requestCode) {
                 case REQUEST_TAKE_PHOTO:
                     // Photo Request
+                    // Compress the image
+                    if(data!=null)
+                    {
+                        try {
+                            InputStream inputStream = getContentResolver().openInputStream(data.getData());
+                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                            FileOutputStream out = new FileOutputStream(
+                                new File(
+                                    AppSession.getInstance().getCurrentPhotoPath()
+                                )
+                            );
+                            boolean success = bitmap.compress(Bitmap.CompressFormat.JPEG, 50, out);
+                            Log.i("Compression success", "Success: "+success);
+                            out.flush();
+                            out.close();
+
+                        } catch (IOException ioe) {
+                            ioe.printStackTrace();
+                        }
+                    }
+                    else
+                    {
+                        Log.i("DATA Null", "Data Null");
+                        try {
+                            InputStream inputStream = new FileInputStream(
+                                    AppSession.getInstance().getCurrentPhotoPath()
+                            );
+                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                            String compressed_image_path = AppSession.getInstance().getCurrentPhotoPath()+"compressed.jpg";
+                            FileOutputStream out = new FileOutputStream(
+                                    new File(
+                                            compressed_image_path
+                                    )
+                            );
+                            boolean success = bitmap.compress(Bitmap.CompressFormat.JPEG, 50, out);
+                            Log.i("Compression success", "Success: "+success);
+                            if (success)
+                            {
+                                AppSession.getInstance().setCurrentPhotoPath(compressed_image_path);
+                            }
+                            out.flush();
+                            out.close();
+
+                        } catch (IOException ioe) {
+                            ioe.printStackTrace();
+                        }
+                    }
                     try {
                         activePhotoContainer.addImages(AppSession.getInstance().getCurrentPhotoPath());
                     } catch (Exception e) {
@@ -918,14 +1081,18 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             surveySave.setId(surveys.getInstanceId());
         }
 
-        try {
+        try
+        {
             surveySave.setLatitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LATITUDE_SURVEY, ""));
-        } catch (NullPointerException e) {
+        } catch (NullPointerException e)
+        {
             surveySave.setLatitude(String.valueOf(0.0f));
         }
-        try {
+        try
+        {
             surveySave.setLongitude(PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.LONGITUDE_SURVEY, ""));
-        } catch (NullPointerException e) {
+        } catch (NullPointerException e)
+        {
             surveySave.setLongitude(String.valueOf(0.0f));
         }
 
@@ -936,40 +1103,81 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         // Difficult Task
         for (int child = 0; child < container.getChildCount(); child++) {
             View sectionItem = container.getChildAt(child);
-            if (sectionItem instanceof SectionItemView) {
+            if (sectionItem instanceof SectionItemView)
+            {
                 ViewGroup sectionItemContainer = ((SectionItemView) sectionItem).sectionItemsContainer;
-                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++) {
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++)
+                {
                     View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
-
-                    if (sectionView instanceof EditTextItemView) {
-                        if (((EditTextItemView) sectionView).getType() != 10) {
+                    // Text
+                    if (sectionView instanceof EditTextItemView)
+                    {
+                        if (((EditTextItemView) sectionView).getType() != 10)
+                        {
                             surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse());
                         }
-                        else {
-                            surveySave.getResponses().add(((EditTextItemView) sectionView).getResponse(options,selectedOption));
+                        else
+                        {
+
+                            IdValue response = ((EditTextItemView) sectionView).getResponse(options,selectedOption);
+                            if (response != null)
+                            {
+                                surveySave.getResponses().add(response);
+                            }
                         }
                     }
+                    // Multiple option
                     else if (sectionView instanceof MultipleItemViewContainer)
-                        surveySave.getResponses().add(((MultipleItemViewContainer)
-                                sectionView).getResponses());
+                    {
+                        surveySave.getResponses().add(
+                                ((MultipleItemViewContainer)sectionView).getResponses()
+                        );
+                    }
+                    // Photos
                     else if (sectionView instanceof PhotoItemViewContainer)
-                        surveySave.getResponses().add(((PhotoItemViewContainer)
-                                sectionView).getResponses());
+                    {
+                        surveySave.getResponses().add(
+                                ((PhotoItemViewContainer)sectionView).getResponses()
+                        );
+                    }
+                    // Dates
                     else if (sectionView instanceof EditTextDatePickerItemView)
-                        surveySave.getResponses().add(((EditTextDatePickerItemView)
-                                sectionView).getResponse());
+                    {
+                        surveySave.getResponses().add(
+                                ((EditTextDatePickerItemView)sectionView).getResponse()
+                        );
+                    }
+                    // Signatures
                     else if (sectionView instanceof SignatureItemViewContainer)
-                        surveySave.getResponses().add(((SignatureItemViewContainer)
-                                sectionView).getResponse());
+                    {
+                        surveySave.getResponses().add(
+                                ((SignatureItemViewContainer)sectionView).getResponse()
+                        );
+                    }
+                    // Files
                     else if (sectionView instanceof FileItemViewContainer)
-                        surveySave.getResponses().add(((FileItemViewContainer)
-                                sectionView).getResponses());
+                    {
+                        surveySave.getResponses().add(
+                                ((FileItemViewContainer)sectionView).getResponses()
+                        );
+                    }
                 }
             }
         }
-        // Save on DataBase
+
+        // Borrar
+
+        for (IdValue idValue: surveySave.getResponses())
+        {
+            Log.i("Pregunta", idValue.toString() );
+        }
+        Log.i("SurveySave", surveySave.toString());
+        // End Borrar
         PreferencesManager.getInstance().storeOptionsSelecteds("");
+
         DatabaseHelper.getInstance().addSurvey(surveySave, this);
+
+
     }
 
 
@@ -1020,6 +1228,14 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     @Override
     public void onSuccess() {
         hideLoading();
+        Log.i("Last Saved", "Survey Save");
+        SurveySave lastSavedSurveySave = DatabaseHelper.getInstance().getLastSurveySaveSaved();
+        for (IdValue idValue: lastSavedSurveySave.getResponses())
+        {
+            Log.i("Pregunta", idValue.toString() );
+        }
+        Log.i("SurveySave", lastSavedSurveySave.toString());
+
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

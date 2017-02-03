@@ -41,6 +41,7 @@ public class PhotoItemViewContainer extends LinearLayout {
     private OnAddPhotoListener callback;
     private boolean required;
     private int mType;
+    private int sectionCount;
 
     private boolean isGoneByRules;
     public RealmList<QuestionVisibilityRules> getVisibilityRules() {
@@ -118,4 +119,15 @@ public class PhotoItemViewContainer extends LinearLayout {
         container.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
+    public void setSectionCount(int sectionCount) {
+        this.sectionCount = sectionCount;
+        if(sectionCount%2==0)
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.pair_option));
+        }
+        else
+        {
+            this.setBackgroundColor(getContext().getResources().getColor(R.color.odd_option));
+        }
+    }
 }

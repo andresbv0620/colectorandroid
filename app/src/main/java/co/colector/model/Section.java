@@ -13,18 +13,21 @@ public class Section extends RealmObject {
     private Long section_id;
     private String name;
     private String description;
+    private boolean repetible;
+
     private RealmList<Question> inputs;
 
     public Section(){
         super();
     }
 
-    public Section(Long id,String name, String description, RealmList<Question> inputs) {
+    public Section(Long id,String name, String description, RealmList<Question> inputs, boolean repetible) {
         super();
         this.section_id=id;
         this.name = name;
         this.description = description;
         this.inputs = inputs;
+        this.repetible = repetible;
     }
 
     public Long getId() {
@@ -60,5 +63,21 @@ public class Section extends RealmObject {
 
     public void setInputs(RealmList<Question> inputs) {
         this.inputs = inputs;
+    }
+
+    public Long getSection_id() {
+        return section_id;
+    }
+
+    public void setSection_id(Long section_id) {
+        this.section_id = section_id;
+    }
+
+    public boolean isRepetible() {
+        return repetible;
+    }
+
+    public void setRepetible(boolean repetible) {
+        this.repetible = repetible;
     }
 }

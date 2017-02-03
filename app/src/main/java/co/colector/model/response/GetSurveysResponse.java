@@ -31,10 +31,12 @@ public class GetSurveysResponse {
 
     public List<Survey> getResponseData() {
         //SET PRECARGADOS
-        for (int i=0 ; response_data.size()> i; i++){
-            for (Section section : response_data.get(i).getSections()) {
-                for (Question question : section.getInputs()) {
-
+        for (int i=0 ; response_data.size()> i; i++)
+        {
+            for (Section section : response_data.get(i).getSections())
+            {
+                for (Question question : section.getInputs())
+                {
                     if (question.getDefectoPrevio())
                         response_data.get(i).setForm_precargados(true);
                 }

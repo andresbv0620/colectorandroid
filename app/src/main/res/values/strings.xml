@@ -94,4 +94,12 @@
     <string name="must_be_select_name">Debes seleccionar un nombre para la fotografia a tomar</string>
     <string name="ver_photo">Ver imagen</string>
 
+    <string name="other_field">Otro</string>
+
+    <string name="send_db_email">Enviar Datos a un Email</string>
+    <string name="send_db_short">Enviar Datos</string>
+    <string name="add_other_section">Nuevo</string>
+
+    <string name="error_connecting_server">Error conectándose al servidor</string>
+
 </resources>

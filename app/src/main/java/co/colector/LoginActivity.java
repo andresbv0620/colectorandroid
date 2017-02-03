@@ -34,6 +34,7 @@ import co.colector.model.Survey;
 import co.colector.model.User;
 import co.colector.model.request.GetSurveysRequest;
 import co.colector.model.request.LoginRequest;
+import co.colector.model.response.ErrorResponse;
 import co.colector.model.response.GetSurveysResponse;
 import co.colector.model.response.LoginResponse;
 import co.colector.network.BusProvider;
@@ -191,17 +192,39 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
     }
 
     @Subscribe
+    public void onErrorLoginResponse(ErrorResponse response)
+    {
+        if (progressDialogLogin!=null)
+        {
+            if (progressDialogLogin.isShowing())
+            {
+                progressDialogLogin.dismiss();
+                Toast.makeText(this, getString(R.string.error_connecting_server), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Subscribe
     public void onSuccessSurveysResponse(GetSurveysResponse response){
         AppSession.getInstance().setSurveyAvailable(response.getResponseData());
         List<User> users = PrefsUtils.getInstance().getUserList();
-        users.add(new User(etUsername.getText().toString(), etPassword.getText().toString(),
-                            AppSession.getInstance().getUser(), response.getResponseData()));
+        users.add(
+                new User(
+                        etUsername.getText().toString(),
+                        etPassword.getText().toString(),
+                        AppSession.getInstance().getUser(),
+                        response.getResponseData()
+                )
+        );
         PrefsUtils.getInstance().updateList(users);
-        DatabaseHelper.getInstance().addSurveyAvailable(response.getResponseData(),
-                LoginActivity.this); //Save on Realm
+        DatabaseHelper.getInstance().addSurveyAvailable(
+                response.getResponseData(),
+                LoginActivity.this
+        ); //Save on Realm
     }
 
-    private void checkPermissions(){
+    private void checkPermissions()
+    {
         if (!checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))
             requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_EXTERNAL_STORAGE);
     }
@@ -217,7 +240,7 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
     private void requestPermission(String permission, int request_code){
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)){
-            Toast.makeText(this,getString(R.string.permission_gps_notice),Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.permission_gps_notice),Toast.LENGTH_LONG).show();
         } else {
             ActivityCompat.requestPermissions(this, new String[]{permission}, request_code);
         }

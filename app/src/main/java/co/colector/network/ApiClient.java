@@ -29,8 +29,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by Jose Rodriguez on 11/06/2016.
  */
 public class ApiClient {
+    // Servidor de producción
+     private static final String BASE_URL = "http://web.colector.co/";
 
-    private static final String BASE_URL = "http://web.colector.co/";
+    // Servidor Local
+//     private static final String BASE_URL = "http://192.168.0.101:8000/";
+//     private static final String BASE_URL = "http://192.168.1.6:8000/";
+//    private static final String BASE_URL = "http://192.168.1.31:8000/";
     private static ApiClient mApiClient;
     private static Retrofit retrofitAdapter;
     private static HttpLoggingInterceptor interceptor;

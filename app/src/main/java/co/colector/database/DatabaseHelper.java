@@ -35,6 +35,12 @@ public class DatabaseHelper {
         return instance;
     }
 
+    public SurveySave getLastSurveySaveSaved()
+    {
+        RealmResults<SurveySave> results = realm.where(SurveySave.class).findAll();
+        return results.get(results.size()-1);
+    }
+
     public void addSurvey(final SurveySave surveySave, final OnDataBaseSave callback) {
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
@@ -60,14 +66,18 @@ public class DatabaseHelper {
     }
 
     public void addSurveyAvailable(final List<Survey> surveys, final OnDataBaseSave callback) {
-        realm.executeTransactionAsync(new Realm.Transaction() {
+        realm.executeTransactionAsync(new Realm.Transaction()
+        {
             @Override
-            public void execute(Realm realm) {
+            public void execute(Realm realm)
+            {
                 for (Survey survey : surveys) realm.copyToRealmOrUpdate(survey);
             }
-        }, new Realm.Transaction.OnSuccess() {
+        }, new Realm.Transaction.OnSuccess()
+        {
             @Override
-            public void onSuccess() {
+            public void onSuccess()
+            {
                 callback.onSuccess();
             }
         }, new Realm.Transaction.OnError() {
@@ -80,11 +90,17 @@ public class DatabaseHelper {
 
     public ArrayList<Survey> getSurveysDone(ArrayList<Survey> surveys) {
         ArrayList<Survey> surveyFilled = new ArrayList<>();
-        for (Survey survey : surveys) {
-            RealmResults<SurveySave> results = realm.where(SurveySave.class)
-                    .equalTo("instanceId", survey.getForm_id()).findAll().where()
-                    .equalTo("uploaded", false).findAll();
-            for (SurveySave surveySave : results) {
+        for (Survey survey : surveys)
+        {
+            RealmResults<SurveySave> results = realm.where(SurveySave.class).equalTo(
+                    "instanceId",
+                    survey.getForm_id()
+            ).findAll().where().equalTo(
+                    "uploaded",
+                    false
+            ).findAll();
+            for (SurveySave surveySave : results)
+            {
                 Survey surveyWithAnswer = new Survey(survey, surveySave);
                 surveyFilled.add(surveyWithAnswer);
             }
@@ -128,7 +144,8 @@ public class DatabaseHelper {
             RealmResults<SurveySave> results = realm.where(SurveySave.class)
                     .equalTo("instanceId", survey.getForm_id()).findAll().where()
                     .equalTo("uploaded", true).findAll();
-            for (SurveySave surveySave : results) {
+            for (SurveySave surveySave : results)
+            {
                 Survey surveyWithAnswer = new Survey(survey, surveySave);
                 surveyFilled.add(surveyWithAnswer);
             }

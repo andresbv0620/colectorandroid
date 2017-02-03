@@ -85,4 +85,11 @@
     <string name="must_be_select_name">You must select a name for the picture taking</string>
     <string name="ver_photo">View picture</string>
 
+    <string name="other_field">Other</string>
+    <string name="send_db_email">Send DB to an Email</string>
+    <string name="send_db_short">Send DB</string>
+    <string name="add_other_section">New</string>
+
+
+    <string name="error_connecting_server">Error connecting to server</string>
 </resources>

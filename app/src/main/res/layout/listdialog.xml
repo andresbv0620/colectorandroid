@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
@@ -8,14 +10,58 @@
     <android.support.v7.widget.SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/search_bar"/>
+        android:id="@+id/search_bar"
+        />
+
 
     <ListView
         android:id="@+id/list_item_dialog"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="200dp"
+
         android:clipToPadding="false"
         android:divider="@android:color/transparent"
         android:drawSelectorOnTop="true" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/layout_other"
+        android:animateLayoutChanges="true"
+        android:visibility="gone"
+        >
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/common_ok"
+            android:foregroundGravity="center"
+            android:background="@drawable/ic_done"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/common_ok"
+            android:id="@+id/button_ok"
+            />
 
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/other_text_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/button_ok"
+            android:layout_toStartOf="@id/button_ok"
+            app:errorEnabled="true">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/other_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:textSize="@dimen/regular_text_size"
+                android:maxLines="1"
+                tools:hint="@string/other_field"
+                 />
+
+        </android.support.design.widget.TextInputLayout>
+
+
+    </RelativeLayout>
 </LinearLayout>
