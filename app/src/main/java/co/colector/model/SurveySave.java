@@ -1,6 +1,7 @@
 package co.colector.model;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -23,6 +24,7 @@ public class SurveySave extends RealmObject {
     private boolean uploaded = false;
     private Long titulo_reporte;
     private Long titulo_reporte2;
+    private String record_id;
 
     public SurveySave() {
         super();
@@ -118,6 +120,14 @@ public class SurveySave extends RealmObject {
 
     public void setTitulo_reporte2(Long titulo_reporte2) {
         this.titulo_reporte2 = titulo_reporte2;
+    }
+
+    public String getRecord_id() {
+        return record_id;
+    }
+
+    public void setRecord_id(String record_id) {
+        this.record_id = record_id;
     }
 
     @Override

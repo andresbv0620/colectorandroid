@@ -47,7 +47,10 @@ public class ApiCallsManager {
             }
 
             @Override
-            public void onFailure(Call<ImageResponse> call, Throwable t) {
+            public void onFailure(Call<ImageResponse> call, Throwable t)
+            {
+                mBus.post(new ErrorResponse(0, ""));
+                Log.d(TAG, "Failure do surveys");
 
             }
         });

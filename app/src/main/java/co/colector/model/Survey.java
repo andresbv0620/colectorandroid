@@ -27,6 +27,7 @@ public class Survey extends RealmObject {
     private String horaini;
     private String horafin;
 
+
     private RealmList<Section> sections;
     private
     @Nullable
@@ -34,6 +35,7 @@ public class Survey extends RealmObject {
     private String instanceDate;
     private
     RealmList<IdValue> instanceAnswers = new RealmList<>();
+    private String record_id;
     private boolean uploaded;
     private Long titulo_reporte2;
 
@@ -43,7 +45,7 @@ public class Survey extends RealmObject {
 
     public Survey(Survey survey, SurveySave answers)
     {
-        Log.i("Respuestas", new ArrayList<>(answers.getResponses()).toString());
+//        Log.i("Respuestas", new ArrayList<>(answers.getResponses()).toString());
         form_id = survey.getForm_id();
         form_name = survey.getForm_name();
         form_description = survey.getForm_description();
@@ -58,6 +60,8 @@ public class Survey extends RealmObject {
         uploaded = answers.isUploaded();
         titulo_reporte = answers.getTitulo_reporte();
         titulo_reporte2 = answers.getTitulo_reporte2();
+        record_id = answers.getRecord_id();
+        Log.i("Record ID:", "RECORD ID: " + record_id);
     }
 
     public Survey(Long form_id, String form_name, String form_description,//String precargado,
@@ -234,5 +238,18 @@ public class Survey extends RealmObject {
 
     public Long getTitulo_reporte() {
         return titulo_reporte;
+    }
+
+
+    public String getInstanceRecord_id() {
+        if (record_id == null)
+        {
+            return "";
+        }
+        return record_id;
+    }
+
+    public void setInstanceRecord_id(String record_id) {
+        this.record_id = record_id;
     }
 }

@@ -49,6 +49,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -138,9 +139,13 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         ButterKnife.bind(this);
 
         if (surveys.getInstanceId() == null)
+        {
             PreferencesManager.getInstance().setCoordinates("", "");
+        }
         else
+        {
             PreferencesManager.getInstance().setCoordinates(surveys.getInstanceLatitude(), surveys.getInstanceLongitude());
+        }
 
         fillLocalOptions();
         showLoading();
@@ -443,7 +448,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     private void buildSection(Section section, LinearLayout linear, SectionItemView sectionItemView) {
-        for (Question question : section.getInputs()) {
+        for (Question question : section.getInputs())
+        {
             buildQuestion(question, linear, sectionItemView);
         }
     }
@@ -935,6 +941,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         String sdcard_location = "";
         if (Build.VERSION.SDK_INT > 18)
         {
+            Log.i("Shoing", " in SDK > 18");
             File[] extenalfiledirs = getExternalFilesDirs(null);
             for (File f: extenalfiledirs)
             {
@@ -946,6 +953,10 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     break;
                 }
             }
+        }
+        else
+        {
+            Log.i("Not Shoing", " in SDK < 18");
         }
 
         // Create an image file name
@@ -970,10 +981,13 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 dir = new File(sdcard_location);
             }
         }
-        catch (IOException ioe)
+        catch (IOException | NullPointerException ioe)
         {
-            dir = Environment.getExternalStoragePublicDirectory("/colector");
+            String storageDir = Environment.getExternalStorageDirectory() + "/collector";
+            Log.i("Storage", storageDir);
+            dir = new File(storageDir);
         }
+
         Log.i("Directory", dir.getAbsolutePath());
         if (!dir.exists()) {
             Log.i("Dir not exist", "Creating");
@@ -1075,10 +1089,16 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         surveySave.setInstanceId(surveys.getForm_id());
         boolean isFromEdit = false;
         if (surveys.getInstanceId() == null)
+        {
             surveySave.setId(DatabaseHelper.getInstance().getNewSurveyIndex());
-        else {
+            Log.i("New Survey", "Saving a new Sorvey");
+        }
+        else
+        {
             isFromEdit = true;
             surveySave.setId(surveys.getInstanceId());
+            surveySave.setRecord_id(surveys.getInstanceRecord_id());
+            Log.i("Edited Survey", "Saving a edited Survey" + surveys.getInstanceRecord_id());
         }
 
         try

@@ -92,4 +92,5 @@
 
 
     <string name="error_connecting_server">Error connecting to server</string>
+    <string name="error">We\'re sorry, an error has occurred</string>
 </resources>

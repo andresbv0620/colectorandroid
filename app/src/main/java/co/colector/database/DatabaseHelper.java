@@ -118,12 +118,15 @@ public class DatabaseHelper {
         });
     }
 
-    public void updateRealmSurveySave(final Long id, final OnDataBaseSave callback) {
+    public void updateRealmSurveySave(final Long id, final String record_id , final OnDataBaseSave callback) {
+        Log.i("Saving survey RID", record_id);
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 SurveySave result = realm.where(SurveySave.class).equalTo("id", id).findFirst();
                 result.setUploaded(true);
+                result.setRecord_id(record_id);
+                realm.copyToRealmOrUpdate(result);
             }
         }, new Realm.Transaction.OnSuccess() {
             @Override

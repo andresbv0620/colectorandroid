@@ -5,10 +5,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import butterknife.ButterKnife;
 import co.colector.adapters.SurveyAdapter;
 import co.colector.database.DatabaseHelper;
 import co.colector.fragments.SurveyAvailable;
+import co.colector.fragments.UploadSurveysDialog;
 import co.colector.helpers.PreferencesManager;
 import co.colector.listeners.OnDataBaseSave;
 import co.colector.listeners.OnUploadSurvey;
@@ -45,6 +48,7 @@ import io.realm.Realm;
 public class MainActivity extends AppCompatActivity implements OnDataBaseSave, OnUploadSurvey {
 
     private FragmentTabHost mTabHost;
+    private static final String TAG_UPLOAD_SURVEY_DIALOG = "upload_survey_diaog";
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -52,12 +56,16 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     private ArrayList<Survey> surveysDone = new ArrayList<>();
     private Bus mBus = BusProvider.getBus();
     private ProgressDialog progressDialog;
+    private UploadSurveysDialog uploadSurveysDialog;
+
     private Survey surveyToUpload;
     private SurveyAdapter adapter;
     private ArrayList<ImageRequest> answersWithImages;
     private ImageRequest uploadingImage;
     private boolean itsIncompleteDownload = false;
     private int surveysToUpload;
+    private int totalSurveysToLoad;
+    private String record_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.sync_data));
         progressDialog.setCancelable(false);
+
+        uploadSurveysDialog = new UploadSurveysDialog();
+
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
         setUpToolbar();
@@ -98,11 +109,13 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                            if (Utilities.isNetworkConnected(MainActivity.this)) {
+                            if (Utilities.isNetworkConnected(MainActivity.this))
+                            {
                                 surveysDone = DatabaseHelper.getInstance().getSurveysDone(
                                         new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
                                 itsIncompleteDownload = false;
                                 surveysToUpload = surveysDone.size();
+                                totalSurveysToLoad = surveysToUpload;
                                 uploadSurveyDone();
                             }
                             else {
@@ -130,14 +143,25 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     // PATCH TO SAVE DATABASE
     public void exportDatabase() {
 
+        boolean send_mail = false;
+
         // init realm
         Realm realm = Realm.getDefaultInstance();
 
         File exportRealmFile = null;
         try {
             // get or create an "export.realm" file
-            exportRealmFile = new File(this.getExternalCacheDir(), "export.realm");
-
+            String storageDir = Environment.getExternalStorageDirectory() + "/colector";
+            Log.i("Storage", storageDir);
+            File dir = new File(storageDir);
+            Log.i("Directory", dir.getAbsolutePath());
+            if (!dir.exists()) {
+                Log.i("Dir not exist", "Creating");
+                boolean  created = dir.mkdir();
+                Log.i("created:", created+"");
+            }
+            exportRealmFile = new File(dir, "export.realm");
+            Log.i("Location of", exportRealmFile.toString());
             // if "export.realm" already exists, delete
             exportRealmFile.delete();
 
@@ -148,24 +172,28 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
             e.printStackTrace();
         }
         realm.close();
+        if (send_mail)
+        {
 
         // init email intent and add export.realm as attachment
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("plain/text");
-        intent.putExtra(Intent.EXTRA_EMAIL, "YOUR MAIL");
-        intent.putExtra(Intent.EXTRA_SUBJECT, "YOUR SUBJECT");
-        intent.putExtra(Intent.EXTRA_TEXT, "YOUR TEXT");
-        Uri u = Uri.fromFile(exportRealmFile);
-        intent.putExtra(Intent.EXTRA_STREAM, u);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("plain/text");
+            intent.putExtra(Intent.EXTRA_EMAIL, "YOUR MAIL");
+            intent.putExtra(Intent.EXTRA_SUBJECT, "YOUR SUBJECT");
+            intent.putExtra(Intent.EXTRA_TEXT, "YOUR TEXT");
+            Uri u = Uri.fromFile(exportRealmFile);
+            intent.putExtra(Intent.EXTRA_STREAM, u);
 
-        // start email intent
-        startActivity(Intent.createChooser(intent, "YOUR CHOOSER TITLE"));
+            // start email intent
+            startActivity(Intent.createChooser(intent, "YOUR CHOOSER TITLE"));
+        }
     }
 
     private void buildTabs() {
         mTabHost.addTab(
                 mTabHost.newTabSpec(
-                        AppSettings.TAB_ID_AVAILABLE_SURVEY).setIndicator(
+                        AppSettings.TAB_ID_AVAILABLE_SURVEY
+                ).setIndicator(
                             getResources().getString(R.string.survey_surveys),
                             null
                 ),
@@ -173,7 +201,8 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
         );
         mTabHost.addTab(
                 mTabHost.newTabSpec(
-                        AppSettings.TAB_ID_DONE_SURVEY).setIndicator(
+                        AppSettings.TAB_ID_DONE_SURVEY
+                ).setIndicator(
                         getResources().getString(R.string.survey_survyes_done),
                         null
                 ),
@@ -195,11 +224,14 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      */
     @Subscribe
     public void onSuccessUploadSurvey(SendSurveyResponse response) {
-        if (response.getResponseCode().equals(200l)) {
+        this.record_id = response.getRecord_id();
+        if (response.getResponseCode().equals(200l))
+        {
             itsIncompleteDownload = false;
             getImagesToUpload();
         }
-        else if (response.getResponseCode().equals(202l)){
+        else if (response.getResponseCode().equals(202l))
+        {
             itsIncompleteDownload = true;
             uploadSurveySave();
         }
@@ -254,12 +286,21 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      */
     @Subscribe
     public void onImageUploaded(ImageResponse response) {
-        if (response.getResponseCode().equals("200")) {
+        if (response.getResponseCode().equals("200"))
+        {
             answersWithImages.remove(uploadingImage);
-            if (answersWithImages.isEmpty()) {
+            if (answersWithImages.isEmpty())
+            {
                 uploadSurveySave();
-            } else uploadImages();
-        } else showToastError(response.getResponseDescription());
+            }
+            else
+            {
+                uploadImages();
+            }
+        } else
+        {
+            showToastError(response.getResponseDescription());
+        }
 
     }
 
@@ -268,9 +309,17 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
      */
     private void uploadSurveySave() {
         if (!itsIncompleteDownload)
-            DatabaseHelper.getInstance().updateRealmSurveySave(surveyToUpload.getInstanceId(), this);
+        {
+            DatabaseHelper.getInstance().updateRealmSurveySave(
+                    surveyToUpload.getInstanceId(),
+                    this.record_id,
+                    this
+            );
+        }
         else
+        {
             onSuccess();
+        }
     }
 
     @Override
@@ -289,30 +338,59 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     public void onSuccess() {
         progressDialog.hide();
         surveysToUpload--;
+        if (uploadSurveysDialog!=null && uploadSurveysDialog.isVisible())
+        {
+            if(totalSurveysToLoad!=0)
+            {
+                int progress = (totalSurveysToLoad - surveysToUpload)*100/totalSurveysToLoad;
+                uploadSurveysDialog.setPercetageValue(progress);
+            }
+        }
         boolean isInAdapter = false;
-        if (adapter != null) {
+        if (adapter != null)
+        {
             isInAdapter = true;
-            if (!itsIncompleteDownload) {
+            if (!itsIncompleteDownload)
+            {
                 surveyToUpload.setUploaded(true);
             }
             adapter.notifyDataSetChanged();
         }
-        if (!surveysDone.isEmpty() && surveysToUpload != 0) {
+        if (!surveysDone.isEmpty() && surveysToUpload != 0)
+        {
             uploadSurveyDone();
         }
         else {
             if (!isInAdapter)
                 uploadSurveysAvailable();
         }
+        if(surveysToUpload == 0)
+        {
+            if(uploadSurveysDialog!=null && uploadSurveysDialog.isVisible())
+            {
+                uploadSurveysDialog.dismiss();
+            }
+        }
     }
 
     @Override
     public void onError() {
-        progressDialog.hide();
+        if (progressDialog != null && progressDialog.isShowing())
+        {
+            progressDialog.hide();
+        }
+        if (uploadSurveysDialog != null && uploadSurveysDialog.isVisible())
+        {
+            uploadSurveysDialog.dismiss();
+        }
+        Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 
     private void showToastError(String error) {
-        progressDialog.hide();
+        if (progressDialog != null && progressDialog.isShowing())
+        {
+            progressDialog.hide();
+        }
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
@@ -321,13 +399,21 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
         if (surveysToUpload != 0)
         {
             surveysDone = DatabaseHelper.getInstance().getSurveysDone(
-                    new ArrayList<>(AppSession.getInstance().getSurveyAvailable()));
+                    new ArrayList<>(
+                            AppSession.getInstance().getSurveyAvailable()
+                    )
+            );
             if (!surveysDone.isEmpty())
             {
                 uploadSurveyRemote(surveysDone.get(surveysToUpload-1));
-            } else uploadSurveysAvailable();
+            }
+            else
+            {
+                uploadSurveysAvailable();
+            }
         }
-        else {
+        else
+        {
             uploadSurveysAvailable();
         }
     }
@@ -335,7 +421,12 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     private void uploadSurveyRemote(Survey survey)
     {
         surveyToUpload = survey;
-        progressDialog.show();
+
+//        progressDialog.show();
+        if (!uploadSurveysDialog.isVisible())
+        {
+            uploadSurveysDialog.show(getFragmentManager(), TAG_UPLOAD_SURVEY_DIALOG);
+        }
         SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
         mBus.post(uploadSurvey);
     }
@@ -343,18 +434,30 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     private void uploadSingleRemoteSurvey(Survey survey){
         surveysToUpload = 1;
         surveyToUpload = survey;
-        progressDialog.show();
+//        progressDialog.show();
+        if (!uploadSurveysDialog.isVisible())
+        {
+            uploadSurveysDialog.show(getFragmentManager(), TAG_UPLOAD_SURVEY_DIALOG);
+        }
         SendSurveyRequest uploadSurvey = new SendSurveyRequest(survey);
         mBus.post(uploadSurvey);
     }
 
     private void uploadSurveysAvailable() {
-        progressDialog.show();
+//        progressDialog.show();
+        if (!uploadSurveysDialog.isVisible())
+        {
+            uploadSurveysDialog.show(getFragmentManager(), TAG_UPLOAD_SURVEY_DIALOG);
+        }
         GetSurveysRequest toSend = new GetSurveysRequest(AppSession.getInstance().getUser()
                 .getColector_id());
         mBus.post(toSend);
     }
 
+    /**
+     * Callback que se obtiene al obtener todas las encuestas
+     * @param response
+     */
     @Subscribe
     public void onSuccessSurveysResponse(GetSurveysResponse response)
     {

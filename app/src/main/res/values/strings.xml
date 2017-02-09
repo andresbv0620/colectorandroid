@@ -101,5 +101,6 @@
     <string name="add_other_section">Nuevo</string>
 
     <string name="error_connecting_server">Error conectándose al servidor</string>
+    <string name="error">Lo sentimos, ha ocurrido un error</string>
 
 </resources>

@@ -7,6 +7,7 @@ public class SendSurveyResponse {
 
     private Long response_code;
     private String response_description;
+    private String record_id;
 
     public SendSurveyResponse() {
         super();
@@ -27,5 +28,13 @@ public class SendSurveyResponse {
 
     public void setResponse_description(String response_description) {
         this.response_description = response_description;
+    }
+
+    public String getRecord_id() {
+        return record_id;
+    }
+
+    public void setRecord_id(String record_id) {
+        this.record_id = record_id;
     }
 }

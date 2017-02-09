@@ -1,5 +1,7 @@
 package co.colector.model.request;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class SendSurveyRequest {
     private String latitud;
     private String horaini;
     private String horafin;
+    private String record_id;
     private List<IdInputValue> responses;
 
 
@@ -33,6 +36,8 @@ public class SendSurveyRequest {
         this.latitud = survey.getInstanceLatitude();
         this.horaini = survey.getInstanceHoraIni();
         this.horafin = survey.getInstanceHoraFin();
+        this.record_id = survey.getInstanceRecord_id();
+        Log.i("RECORD ID", "RECORD ID"+this.record_id);
         this.setResponsesData(survey.getInstanceAnswers());
 
 

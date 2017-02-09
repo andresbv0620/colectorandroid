@@ -52,7 +52,12 @@ public class AppSession {
         {
             surveyAvailable = new ArrayList<Survey>();
             List<Survey> allSurveys = DatabaseHelper.getInstance().getSurveys();
-            String surveyIds = PreferencesManager.getInstance().getPrefs().getString(PreferencesManager.AVAILABLE_SURVEYS, "");
+
+            String surveyIds = PreferencesManager.getInstance().getPrefs().getString(
+                    PreferencesManager.AVAILABLE_SURVEYS,
+                    ""
+            );
+
             StringTokenizer st = new StringTokenizer(surveyIds, ",");
             while(st.hasMoreTokens())
             {
@@ -141,7 +146,7 @@ public class AppSession {
         {
             try {
                 for (Survey survey : surveyAvailable) {
-                    Log.i("Cleaning Survey", survey.getForm_name());
+
                     survey.setInstanceId(null);
                     survey.setInstanceAnswer(null);
                 }

@@ -96,7 +96,9 @@ public class SurveyAvailable extends Fragment {
             );
 
             for (Survey survey : toUnion)
+            {
                 toPrint.add(survey);
+            }
             Collections.sort(toPrint, new DateComparator());
         }
     }
