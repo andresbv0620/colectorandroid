@@ -9,3 +9,5 @@
 .idea
 signature
 app/app-release.apk
+java_pid*
+export.realm*
