@@ -41,20 +41,32 @@ public class Question extends RealmObject {
     private String solo_lectura;
     private Boolean oculto;
     private String orden;
-
+    private Boolean filtrar;
 
     public Question() {
         super();
     }
 
-    public Question(Long id, int type, RealmList<IdOptionValue> responses, RealmList<QuestionVisibilityRules> valorvisibility,
-                    RealmList<QuestionAsociateForm> asociate_form,
-                    RealmList<ResponseComplex> options, RealmList<ResponseAttribute> atributos,
-                    String name, String description,
-                    String minimo, String maximo,
-                    String defecto, Boolean requerido,
-                    String validacion,
-                    Boolean defecto_previo, String solo_lectura, Boolean oculto, String orden) {
+    public Question(
+            Long id,
+            int type,
+            RealmList<IdOptionValue> responses,
+            RealmList<QuestionVisibilityRules> valorvisibility,
+            RealmList<QuestionAsociateForm> asociate_form,
+            RealmList<ResponseComplex> options,
+            RealmList<ResponseAttribute> atributos,
+            String name, String description,
+            String minimo, String maximo,
+            String defecto, Boolean requerido,
+            String validacion,
+            Boolean defecto_previo,
+            String solo_lectura,
+            Boolean oculto,
+            String orden,
+            Boolean filtrar
+
+    )
+    {
 
         this.input_id = id;
         this.type = type;
@@ -78,6 +90,8 @@ public class Question extends RealmObject {
         this.solo_lectura = solo_lectura;
         this.oculto = oculto;
         this.orden = orden;
+
+        this.filtrar = filtrar;
 
     }
 
@@ -239,5 +253,13 @@ public class Question extends RealmObject {
 
     public void setAtributos(RealmList<ResponseAttribute> atributos) {
         this.atributos = atributos;
+    }
+
+    public Boolean getFiltrar() {
+        return filtrar;
+    }
+
+    public void setFiltrar(Boolean filtrar) {
+        this.filtrar = filtrar;
     }
 }

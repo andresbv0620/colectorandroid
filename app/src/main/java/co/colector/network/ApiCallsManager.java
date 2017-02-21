@@ -90,6 +90,9 @@ public class ApiCallsManager {
                 public void onFailure(Call<GetSurveysResponse> call, Throwable t) {
                     mBus.post(new ErrorResponse(0, ""));
                     Log.d(TAG, "Failure do surveys");
+
+                    t.printStackTrace();
+
                 }
             });
         }

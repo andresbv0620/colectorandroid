@@ -138,7 +138,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
 
-        if (surveys.getInstanceId() == null)
+        if (surveys == null || surveys.getInstanceId() == null)
         {
             PreferencesManager.getInstance().setCoordinates("", "");
         }
@@ -421,7 +421,8 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
             SectionItemView sectionItem = new SectionItemView(this);
             // sectionItem.bind(section.getName());
             // Added for binding an id to a section
-            sectionItem.bind(section.getName(), i);
+            sectionItem.setSection(section);
+            sectionItem.setSectionCount(i);
             sectionItem.setRepetible(section.isRepetible());
             buildSection(section, sectionItem.sectionItemsContainer, sectionItem);
             container.addView(sectionItem);
@@ -444,6 +445,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         Section section = surveys.getSections().get(pos);
         SectionItemView sectionItem = (SectionItemView) container.getChildAt(pos);
         sectionItem.increaseSectionCount();
+        sectionItem.increaseSectionIndex();
         buildSection(section, sectionItem.sectionItemsContainer, sectionItem);
     }
 
@@ -466,6 +468,7 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                 EditTextItemView editItemView = new EditTextItemView(this, sectionItemView);
                 editItemView.bind(question, surveys.getAnswer(question.getId()));
                 editItemView.setSectionCount(sectionItemView.getSectionCount());
+                editItemView.setSectionIndex(sectionItemView.getSectionIndex());
                 linear.addView(editItemView);
                 break;
             // Option Spinner
@@ -616,7 +619,16 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     }
 
     @Override
-    public void callDialog(String title, List<IdOptionValue> response, final Object parent, int type, final SectionItemView sectionItemView, String defaultValue) {
+    public void callDialog(
+            String title,
+            List<IdOptionValue> response,
+            final Object parent,
+            int type,
+            final SectionItemView sectionItemView,
+            String defaultValue
+    )
+    {
+
         DialogList dialog = DialogList.newInstance(SurveyActivity.this, title,
                 new ArrayList<>(response), type, defaultValue);
         dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
@@ -631,10 +643,12 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
                     validateVisibilityRules(item, parentRule.getIdentifier(), sectionItemView);
                     if (!item.isEmpty())
                         ((EditTextItemView) parent).setIsShow();
+                    propagate_change(parent);
                 }
             });
         }
-        else if (parent instanceof MultipleItemViewContainer) {
+        else if (parent instanceof MultipleItemViewContainer)
+        {
 //            final LinearLayout container = ((MultipleItemViewContainer) parent).getContainer();
             final MultipleItemViewContainer view = ((MultipleItemViewContainer) parent);
             dialog.setListener_multiple(new DialogList.ListMultipleSelectorListener() {
@@ -648,14 +662,19 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
         dialog.show(getFragmentManager(), title);
     }
 
+    /**
+     * Call Dialog to obtain information about a dynamic question
+     * @param title Dialog's title
+     * @param question Question related
+     * @param parent Parent object
+     */
     @Override
     public void callDynamicDialog(String title, final Question question, final Object parent) {
+
         AlertDialog.Builder myDialog = new AlertDialog.Builder(SurveyActivity.this);
         myDialog.setTitle(title);
 
         options = question.getOptions();
-
-
 
 //        final ArrayList<String> arrayAdapter = getCopyArrayAdapter(question);
         copyArrayAdapter = getCopyArrayAdapter(question);
@@ -709,6 +728,97 @@ public class SurveyActivity extends AppCompatActivity implements OnDataBaseSave,
     @Override
     public void callDynamicVisibilityRules(String value, Long idParentRule, SectionItemView sectionItemView) {
         validateVisibilityRules(value,idParentRule,sectionItemView);
+    }
+
+
+    /**
+     * Propagate an event in all Question views
+     * @param view View that make the change
+     */
+    private void propagate_change(Object view)
+    {
+        long id_question = 0;
+        String answer = "";
+        // Check for the viewAnswer that changes and store the answer and question id
+        if (view instanceof EditTextItemView)
+        {
+            EditTextItemView editTextItemView = (EditTextItemView)view;
+            Question question = editTextItemView.getQuestion();
+            id_question = question.getId();
+            answer = editTextItemView.getInputText();
+        }
+        // TODO: Implement all other Views
+
+        for (int child = 0; child < container.getChildCount(); child++) {
+            View sectionItem = container.getChildAt(child);
+            if (sectionItem instanceof SectionItemView)
+            {
+                SectionItemView sectionItemView = (SectionItemView) sectionItem;
+                // If section is repeatable clean the section and refill with right values
+                if (sectionItemView.isRepetible())
+                {
+                    sectionItemView.sectionItemsContainer.removeAllViews();
+                    // At least we going to show 1 section
+                    buildSection(sectionItemView.getSection(), sectionItemView.sectionItemsContainer, sectionItemView);
+                    sectionItemView.setSectionIndex(0);
+
+                    // Find how many sections we're going to show
+                    int longest_value = -1;
+                    for(Question question: sectionItemView.getSection().getInputs())
+                    {
+                        int local_max_value = -1;
+                        for(IdOptionValue idOptionValue: question.getResponses())
+                        {
+                            if(idOptionValue.getAnswer() != null && answer!=null)
+                            {
+                                if(idOptionValue.getAnswer().compareTo(answer) == 0)
+                                {
+                                    Log.i("Repeatable", idOptionValue.getValue());
+                                    local_max_value += 1;
+                                }
+                            }
+                        }
+                        if (local_max_value > longest_value)
+                        {
+                            longest_value = local_max_value;
+                        }
+                    }
+
+                    // Append the new sections
+                    for(int i=0; i< longest_value; i++)
+                    {
+                        sectionItemView.increaseSectionCount();
+                        sectionItemView.increaseSectionIndex();
+                        buildSection(
+                                sectionItemView.getSection(),
+                                sectionItemView.sectionItemsContainer,
+                                sectionItemView
+                        );
+                    }
+
+
+                }
+                ViewGroup sectionItemContainer = sectionItemView.sectionItemsContainer;
+                for (int sectionItemIndex = 0; sectionItemIndex < sectionItemContainer.getChildCount(); sectionItemIndex++)
+                {
+                    View sectionView = sectionItemContainer.getChildAt(sectionItemIndex);
+                    // Text
+                    if (sectionView instanceof EditTextItemView)
+                    {
+                        EditTextItemView editTextItemView = (EditTextItemView) sectionView;
+                        editTextItemView.adaptAnswersToChange(id_question, answer);
+
+                    }
+                    // Date
+                    else if (sectionView instanceof EditTextDatePickerItemView)
+                    {
+                        EditTextDatePickerItemView editTextItemView = (EditTextDatePickerItemView) sectionView;
+                        editTextItemView.adaptAnswersToChange(id_question, answer);
+
+                    }
+                }
+            }
+        }
     }
 
     private void setLocationForMaps(int selectedOption, ArrayList<String> pivotAdapter){

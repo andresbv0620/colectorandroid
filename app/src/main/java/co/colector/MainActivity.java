@@ -243,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
     @Subscribe
     public void onErrorLoginResponse(ErrorResponse response)
     {
+        // progressDialog
         if (progressDialog!=null)
         {
             if (progressDialog.isShowing())
@@ -251,6 +252,13 @@ public class MainActivity extends AppCompatActivity implements OnDataBaseSave, O
                 Toast.makeText(this, getString(R.string.error_connecting_server), Toast.LENGTH_SHORT).show();
             }
         }
+        // Upload Surveys Dialog
+        if(uploadSurveysDialog!=null && uploadSurveysDialog.isVisible())
+        {
+            uploadSurveysDialog.dismiss();
+            Toast.makeText(this, getString(R.string.error_connecting_server), Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     /**

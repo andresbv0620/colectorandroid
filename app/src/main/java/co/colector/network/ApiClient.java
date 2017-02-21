@@ -5,6 +5,8 @@ import android.content.Context;
 import com.squareup.otto.Bus;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.util.concurrent.TimeUnit;
 
 import co.colector.model.ImageRequest;
 import co.colector.model.ImageResponse;
@@ -31,11 +33,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     // Servidor de producción
 //     private static final String BASE_URL = "http://web.colector.co/";
-
+    //Servidor de pruebas
+     private static final String BASE_URL = "http://54.149.86.10/";
     // Servidor Local
-//     private static final String BASE_URL = "http://192.168.0.101:8000/";
+//     private static final String BASE_URL = "http://192.168.0.100:8000/";
 //     private static final String BASE_URL = "http://192.168.1.6:8000/";
-    private static final String BASE_URL = "http://192.168.1.31:8000/";
+//    private static final String BASE_URL = "http://192.168.1.31:8000/";
     private static ApiClient mApiClient;
     private static Retrofit retrofitAdapter;
     private static HttpLoggingInterceptor interceptor;
@@ -69,7 +72,13 @@ public class ApiClient {
         };
 
         clientBuilder.addInterceptor(agentInterceptor);
+        // Added Connection Timeout and ReadTimeout to manage long responses
+        clientBuilder.connectTimeout(60, TimeUnit.SECONDS);
+        clientBuilder.readTimeout(60, TimeUnit.SECONDS);
+//        TimeUnit.SECONDS.toMillis(10);
         client = clientBuilder.build();
+
+
         retrofitAdapter = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)

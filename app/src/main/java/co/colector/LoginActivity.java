@@ -156,7 +156,16 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
             else {
                 offlineWorkVal(etUsername.getText().toString(), etPassword.getText().toString());
             }
-        } else {
+        } else
+        {
+            if (progressDialogLogin!=null)
+            {
+                if (progressDialogLogin.isShowing())
+                {
+                    progressDialogLogin.dismiss();
+                    Toast.makeText(this, getString(R.string.error_connecting_server), Toast.LENGTH_SHORT).show();
+                }
+            }
             Toast.makeText(this, getString(R.string.login_error_empty), Toast.LENGTH_SHORT).show();
         }
     }
@@ -178,6 +187,7 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
 
     @Subscribe
     public void onSuccessLoginResponse(LoginResponse response){
+        // TODO Implementar los codigos de error 'response_code' que pueden ser 200, 400 o 404
         if (!response.getResponseData().isEmpty()){
                 PreferencesManager.getInstance().storeResponseData(response.getResponseData().get(0));
                 AppSession.getInstance().setUser(response.getResponseData().get(0));
@@ -199,28 +209,35 @@ public class LoginActivity extends AppCompatActivity implements OnDataBaseSave {
             if (progressDialogLogin.isShowing())
             {
                 progressDialogLogin.dismiss();
-                Toast.makeText(this, getString(R.string.error_connecting_server), Toast.LENGTH_SHORT).show();
             }
         }
+        Toast.makeText(this, getString(R.string.error_connecting_server), Toast.LENGTH_SHORT).show();
     }
 
     @Subscribe
     public void onSuccessSurveysResponse(GetSurveysResponse response){
-        AppSession.getInstance().setSurveyAvailable(response.getResponseData());
-        List<User> users = PrefsUtils.getInstance().getUserList();
-        users.add(
-                new User(
-                        etUsername.getText().toString(),
-                        etPassword.getText().toString(),
-                        AppSession.getInstance().getUser(),
-                        response.getResponseData()
-                )
-        );
-        PrefsUtils.getInstance().updateList(users);
-        DatabaseHelper.getInstance().addSurveyAvailable(
-                response.getResponseData(),
-                LoginActivity.this
-        ); //Save on Realm
+        if(response.getResponseCode()==200)
+        {
+            AppSession.getInstance().setSurveyAvailable(response.getResponseData());
+            List<User> users = PrefsUtils.getInstance().getUserList();
+            users.add(
+                    new User(
+                            etUsername.getText().toString(),
+                            etPassword.getText().toString(),
+                            AppSession.getInstance().getUser(),
+                            response.getResponseData()
+                    )
+            );
+            PrefsUtils.getInstance().updateList(users);
+            DatabaseHelper.getInstance().addSurveyAvailable(
+                    response.getResponseData(),
+                    LoginActivity.this
+            ); //Save on Realm
+        }
+        else
+        {
+            Toast.makeText(this, response.getResponseDescription(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void checkPermissions()

@@ -17,6 +17,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -53,12 +54,14 @@ public class EditTextItemView extends FrameLayout {
     private boolean required;
     private int mType;
     private List<IdOptionValue> response;
+    private List<IdOptionValue> filtered_responses;
     private boolean alreadyShow;
     private boolean isGoneByRules;
     private Question question;
     private SectionItemView sectionItemView;
     private String defaultValue;
     private int sectionCount;
+    private int sectionIndex;
 
     public Question getQuestion(){
         return question;
@@ -127,13 +130,12 @@ public class EditTextItemView extends FrameLayout {
     }
 
     /**
-     * Bind the question info to the view
+     * Bind the question info to the view, Called on Text Questions
      *
      * @param question       to inflate
      * @param previewDefault information
      */
     public void bind(Question question, @Nullable String previewDefault) {
-        this.sectionCount = sectionCount;
         initValues(question);
         if (Boolean.parseBoolean(question.getSoloLectura()))
             label.setEnabled(false);
@@ -171,14 +173,31 @@ public class EditTextItemView extends FrameLayout {
                 }
                 break;
         }
+        label.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i("Click Sec Index", sectionIndex+"");
+            }
+        });
     }
 
-    public void bind(final Question question, final List<IdOptionValue> response,
-                     @Nullable String previewDefault) {
+    /**
+     * Called on Spinner Questions
+     * @param question Question to bind
+     * @param response List of Responses
+     * @param previewDefault Text to preview
+     */
+    public void bind(
+            final Question question,
+            final List<IdOptionValue> response,
+            @Nullable String previewDefault
+    )
+    {
         initValues(question);
         if (Boolean.parseBoolean(question.getSoloLectura()))
             label.setEnabled(false);
         this.response = response;
+        this.filtered_responses = response;
         if (previewDefault != null)
             if (mType != 4) {
                 label.setText(previewDefault);
@@ -199,7 +218,7 @@ public class EditTextItemView extends FrameLayout {
         label.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView, defaultValue);
+                listener.callDialog(question.getName(), EditTextItemView.this.filtered_responses, EditTextItemView.this, 0, sectionItemView, defaultValue);
             }
         });
         label.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -207,12 +226,16 @@ public class EditTextItemView extends FrameLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && !alreadyShow) {
                     alreadyShow = true;
-                    listener.callDialog(question.getName(), response, EditTextItemView.this, 0, sectionItemView, defaultValue);
+                    listener.callDialog(question.getName(), EditTextItemView.this.filtered_responses, EditTextItemView.this, 0, sectionItemView, defaultValue);
                 }
             }
         });
     }
 
+    /**
+     * Called on dynamic Questions
+     * @param question
+     */
     public void bind(final Question question){
         this.question = question;
         this.validation = question.getValidacion();
@@ -322,6 +345,7 @@ public class EditTextItemView extends FrameLayout {
 
     public IdValue getResponse() {
         // Closed Question one answer
+        Log.i("Response", "Getting the response of the question id: "+getQuestion().getId() + "and name" + getQuestion().getName());
         if (mType == 4)
         {
             IdValue idValue = new IdValue(id, new RealmList<>(getResponseId()), validation, mType);
@@ -430,5 +454,87 @@ public class EditTextItemView extends FrameLayout {
     public void addTextListenerToInput(TextWatcher tw)
     {
         label.addTextChangedListener(tw);
+    }
+
+    public void adaptAnswersToChange(long idQuestion, String text)
+    {
+        Log.i("Adapting Change", "On Question: "+ this.question.getId()+ "Comparing: " + idQuestion);
+        if(mType == 4)
+        {
+            // Adapt list to the change
+            Log.i("Adapting Change", "Option 4, Len Response:" + this.response.size());
+            ArrayList<IdOptionValue> newResponse = new ArrayList<>();
+            ArrayList<IdOptionValue> notAsignedAnswers = new ArrayList<>();
+            for (IdOptionValue optionValue: this.response)
+            {
+                // Not assigned values are default answers
+                if(optionValue.getQuestion_id() == 0)
+                {
+                    notAsignedAnswers.add(optionValue);
+                }
+                if(optionValue.getQuestion_id() == idQuestion)
+                {
+                    Log.i("Comparing", optionValue.getAnswer()+ " with "+ text);
+                    Log.i("Comparing", optionValue.getQuestion_id()+ " with "+ idQuestion);
+                    if(optionValue.getAnswer().trim().compareTo(text.trim())==0)
+                    {
+                        Log.i("Is Equal", optionValue.getAnswer());
+                        newResponse.add(optionValue);
+                    }
+                }
+            }
+            Log.i("Size of new Response:", newResponse.size()+"");
+            if(!newResponse.isEmpty())
+            {
+                Log.i("Size of new Response:", "Changing the response");
+                if(question.getFiltrar())
+                {
+                    this.filtered_responses = newResponse;
+                }
+                else
+                {
+                    this.filtered_responses = notAsignedAnswers;
+                    if(!newResponse.isEmpty())
+                    {
+                        label.setText(newResponse.get(0).getValue());
+                    }
+                }
+            }
+        }
+        else
+        {
+            int i = 0;
+            for (IdOptionValue optionValue: this.question.getResponses())
+            {
+                if(optionValue.getQuestion_id() == idQuestion)
+                {
+                    Log.i("Comparing", optionValue.getAnswer()+ " with "+ text);
+                    Log.i("Comparing", optionValue.getQuestion_id()+ " with "+ idQuestion);
+                    Log.i("I", i+"");
+                    if(optionValue.getAnswer().trim().compareTo(text.trim())==0)
+                    {
+                        Log.i("Is Equal", optionValue.getAnswer());
+                        if(this.question.getResponses().size()>1)
+                        {
+                            if (i==sectionIndex)
+                            {
+                                label.setText(optionValue.getValue());
+                            }
+                        }
+                        else
+                        {
+                            label.setText(optionValue.getValue());
+                        }
+//                        label.setText(optionValue.getValue());
+                        i += 1;
+                    }
+                }
+            }
+        }
+    }
+
+    public void setSectionIndex(int sectionIndex) {
+        this.sectionIndex = sectionIndex;
+        Log.i("Setting secindex", sectionIndex+"");
     }
 }

@@ -7,6 +7,7 @@ import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -15,12 +16,17 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.colector.R;
 import co.colector.listeners.OnEditTextClickedOrFocused;
+import co.colector.model.IdOptionValue;
 import co.colector.model.IdValue;
 import co.colector.model.Question;
 import co.colector.model.AnswerValue;
@@ -44,6 +50,7 @@ public class EditTextDatePickerItemView extends FrameLayout {
     private Long id;
     private boolean required;
     private int mType;
+    private Question question;
     @BindView(R.id.container)
     RelativeLayout container;
     private boolean isGoneByRules;
@@ -76,6 +83,7 @@ public class EditTextDatePickerItemView extends FrameLayout {
         this.id = question.getId();
         this.required = question.getRequerido();
         this.mType = question.getType();
+        this.question = question;
         input.setHint(question.getName());
         container.setVisibility(!question.getValorVisibility().isEmpty() ? View.GONE : View.VISIBLE);
         isGoneByRules = question.getValorVisibility().isEmpty();
@@ -176,5 +184,39 @@ public class EditTextDatePickerItemView extends FrameLayout {
             this.setBackgroundColor(getContext().getResources().getColor(R.color.odd_option));
         }
     }
+
+    public void adaptAnswersToChange(long idQuestion, String text)
+    {
+        Log.i("Adapting Change", "On Question: "+ this.question.getId()+ "Comparing: " + idQuestion);
+
+        for (IdOptionValue optionValue: this.question.getResponses())
+        {
+            if(optionValue.getQuestion_id() == idQuestion)
+            {
+                Log.i("Comparing", optionValue.getAnswer()+ " with "+ text);
+                Log.i("Comparing", optionValue.getQuestion_id()+ " with "+ idQuestion);
+                if(optionValue.getAnswer().trim().compareTo(text.trim())==0)
+                {
+                    Log.i("Is Equal", optionValue.getAnswer());
+                    String stringDate = "";
+                    try {
+
+                        String fecha = optionValue.getValue();
+                        SimpleDateFormat dt = new SimpleDateFormat("d/M/y h:mm");
+                        Date date = dt.parse(fecha);
+
+                        SimpleDateFormat dt1 = new SimpleDateFormat("dd/MM/yyyy");
+                        stringDate = dt1.format(date);
+                    }
+                    catch (ParseException pe)
+                    {
+                        pe.printStackTrace();
+                    }
+                    label.setText(stringDate);
+                }
+            }
+        }
+    }
+
 }
 
